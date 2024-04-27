@@ -1,0 +1,70 @@
+# Ref: https://github.com/argoproj/argo-helm/blob/main/charts/argocd-apps/values.yaml 
+argo-apps:
+  applications: 
+    argocd:
+      namespace: infra-argocd
+      destination:
+        namespace: infra-argocd
+        server: https://kubernetes.default.svc
+      project: argocd
+      source:
+        helm:
+          version: v3
+          valueFiles:
+            - values.yaml
+        path: argocd-install/argo-cd
+        repoURL: https://github.com/justcloudnative/argocd-manages-itself.git
+        targetRevision: main 
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+#    - name: argocd-apps
+#      namespace: argocd
+#      destination:
+#        namespace: argocd
+#        server: https://kubernetes.default.svc
+#      project: argocd
+#      source:
+#        path: argocd-apps
+#        repoURL: https://github.com/justcloudnative/argocd-manages-itself.git
+#        targetRevision: main
+#        directory:
+#          recurse: true
+#          jsonnet: {}
+#      syncPolicy:
+#        automated:
+#          selfHeal: true
+#          prune: true
+#    - name: argocd-appprojects
+#      namespace: argocd
+#      destination:
+#        namespace: argocd
+#        server: https://kubernetes.default.svc
+#      project: argocd
+#      source:
+#        path: argocd-appprojects
+#        repoURL: https://github.com/justcloudnative/argocd-manages-itself.git
+#        targetRevision: main
+#        directory:
+#          recurse: true
+#          jsonnet: {}
+#      syncPolicy:
+#        automated:
+#          selfHeal: true
+#          prune: true
+  projects: 
+    argocd:
+      namespace: infra-argocd
+      additionalLabels: {}
+      additionalAnnotations: {}
+      description: Argocd Project
+      sourceRepos:
+        - '*'
+      destinations:
+        - namespace: argocd
+          server: https://kubernetes.default.svc
+      clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+      orphanedResources:
+        warn: false
