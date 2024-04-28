@@ -12,9 +12,9 @@ argo-apps:
           version: v3
           valueFiles:
             - values.yaml
-        path: argocd-install/argo-cd
-        repoURL: https://github.com/justcloudnative/argocd-manages-itself.git
-        targetRevision: main 
+        path: bootstrap/01-argocd-install
+        repoURL: https://gitlab.com/juulun/gitops.git
+        targetRevision: test 
       syncPolicy:
         syncOptions:
           - CreateNamespace=true

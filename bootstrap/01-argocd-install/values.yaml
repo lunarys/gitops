@@ -1,8 +1,20 @@
+global:
+  domain: argocd.k8s-test-1.local
+
 # Ref: https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
 argo-cd:
   crds:
     install: true
     keep: false
+
+  server:
+    ingress:
+      enabled: true
+      ingressClassName: "" 
+
+  configs:
+    params:
+      server.insecure: true
 
   #redis-ha:
   #  enabled: true
