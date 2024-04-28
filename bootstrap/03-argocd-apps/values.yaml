@@ -16,6 +16,9 @@ argo-apps:
         repoURL: https://gitlab.com/juulun/gitops.git
         targetRevision: test 
       syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
         syncOptions:
           - CreateNamespace=true
 #    - name: argocd-apps
@@ -61,7 +64,7 @@ argo-apps:
       sourceRepos:
         - '*'
       destinations:
-        - namespace: argocd
+        - namespace: infra-argocd
           server: https://kubernetes.default.svc
       clusterResourceWhitelist:
         - group: '*'

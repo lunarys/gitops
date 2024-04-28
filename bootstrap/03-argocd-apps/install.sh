@@ -1,1 +1,1 @@
-helm install argocd . --namespace infra-argocd --create-namespace
+helm install argocd-apps . --namespace infra-argocd-apps --create-namespace
