@@ -71,3 +71,18 @@ argo-apps:
           kind: '*'
       orphanedResources:
         warn: false
+    argocd-apps:
+      namespace: infra-argocd-apps
+      additionalLabels: {}
+      additionalAnnotations: {}
+      description: Argocd Apps Project
+      sourceRepos:
+        - '*'
+      destinations:
+        - namespace: infra-argocd-apps
+      clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+      orphanedResources:
+        warn: false
+
