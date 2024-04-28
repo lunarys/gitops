@@ -5,7 +5,7 @@ argo-apps:
       namespace: infra-argocd
       destination:
         namespace: infra-argocd
-        #server: https://kubernetes.default.svc
+        server: https://kubernetes.default.svc
       project: argocd
       source:
         helm:
@@ -25,7 +25,7 @@ argo-apps:
       namespace: infra-argocd-apps
       destination:
         namespace: infra-argocd-apps
-        #server: https://kubernetes.default.svc
+        server: https://kubernetes.default.svc
       project: argocd
       source:
         path: bootstrap/03-argocd-apps
