@@ -15,6 +15,7 @@ argo-cd:
   configs:
     params:
       server.insecure: true
+      application.namespaces: "infra-argocd-apps"
 
   #redis-ha:
   #  enabled: true
