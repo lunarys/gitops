@@ -2,7 +2,7 @@
 argo-apps:
   applications: 
     argocd:
-      namespace: infra-argocd
+      namespace: infra-argocd-apps
       destination:
         namespace: infra-argocd
         server: https://kubernetes.default.svc
@@ -28,6 +28,10 @@ argo-apps:
         server: https://kubernetes.default.svc
       project: argocd-apps
       source:
+        helm:
+          version: v3
+          valueFiles:
+            - values.yaml
         path: bootstrap/03-argocd-apps
         repoURL: https://gitlab.com/juulun/gitops.git 
         targetRevision: test
@@ -38,6 +42,8 @@ argo-apps:
         automated:
           selfHeal: true
           prune: true
+        syncOptions:
+          - CreateNamespace=true
 #    - name: argocd-appprojects
 #      namespace: argocd
 #      destination:
@@ -57,7 +63,7 @@ argo-apps:
 #          prune: true
   projects: 
     argocd:
-      namespace: infra-argocd
+      namespace: infra-argocd-apps
       additionalLabels: {}
       additionalAnnotations: {}
       description: Argocd Project
