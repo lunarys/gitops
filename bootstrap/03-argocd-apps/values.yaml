@@ -26,7 +26,7 @@ argo-apps:
       destination:
         namespace: infra-argocd-apps
         server: https://kubernetes.default.svc
-      project: argocd
+      project: argocd-apps
       source:
         path: bootstrap/03-argocd-apps
         repoURL: https://gitlab.com/juulun/gitops.git 
