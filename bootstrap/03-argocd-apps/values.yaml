@@ -2,7 +2,7 @@
 argo-apps:
   applications: 
     argocd:
-      namespace: infra-argocd-apps
+      namespace: infra-argocd
       destination:
         namespace: infra-argocd
         server: https://kubernetes.default.svc
@@ -22,11 +22,11 @@ argo-apps:
         syncOptions:
           - CreateNamespace=true
     argocd-apps:
-      namespace: infra-argocd-apps
+      namespace: infra-argocd
       destination:
-        namespace: infra-argocd-apps
+        namespace: infra-argocd
         server: https://kubernetes.default.svc
-      project: argocd-apps
+      project: argocd
       source:
         helm:
           version: v3
@@ -63,7 +63,7 @@ argo-apps:
 #          prune: true
   projects: 
     argocd:
-      namespace: infra-argocd-apps
+      namespace: infra-argocd
       additionalLabels: {}
       additionalAnnotations: {}
       description: Argocd Project
@@ -77,19 +77,19 @@ argo-apps:
           kind: '*'
       orphanedResources:
         warn: false
-    argocd-apps:
-      namespace: infra-argocd-apps
-      additionalLabels: {}
-      additionalAnnotations: {}
-      description: Argocd Apps Project
-      sourceRepos:
-        - '*'
-      destinations:
-        - namespace: infra-argocd-apps
-          server: https://kubernetes.default.svc
-      clusterResourceWhitelist:
-        - group: '*'
-          kind: '*'
-      orphanedResources:
-        warn: false
+#    argocd-apps:
+#      namespace: infra-argocd-apps
+#      additionalLabels: {}
+#      additionalAnnotations: {}
+#      description: Argocd Apps Project
+#      sourceRepos:
+#        - '*'
+#      destinations:
+#        - namespace: infra-argocd-apps
+#          server: https://kubernetes.default.svc
+#      clusterResourceWhitelist:
+#        - group: '*'
+#          kind: '*'
+#      orphanedResources:
+#        warn: false
 
