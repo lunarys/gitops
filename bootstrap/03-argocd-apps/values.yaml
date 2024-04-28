@@ -65,7 +65,7 @@ argo-apps:
         - '*'
       destinations:
         - namespace: infra-argocd
-          #server: https://kubernetes.default.svc
+          server: https://kubernetes.default.svc
       clusterResourceWhitelist:
         - group: '*'
           kind: '*'
@@ -80,6 +80,7 @@ argo-apps:
         - '*'
       destinations:
         - namespace: infra-argocd-apps
+          server: https://kubernetes.default.svc
       clusterResourceWhitelist:
         - group: '*'
           kind: '*'
