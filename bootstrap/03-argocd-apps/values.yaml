@@ -21,23 +21,23 @@ argo-apps:
           prune: true
         syncOptions:
           - CreateNamespace=true
-#    - name: argocd-apps
-#      namespace: argocd
-#      destination:
-#        namespace: argocd
-#        server: https://kubernetes.default.svc
-#      project: argocd
-#      source:
-#        path: argocd-apps
-#        repoURL: https://github.com/justcloudnative/argocd-manages-itself.git
-#        targetRevision: main
-#        directory:
-#          recurse: true
-#          jsonnet: {}
-#      syncPolicy:
-#        automated:
-#          selfHeal: true
-#          prune: true
+    argocd-apps:
+      namespace: infra-argocd-apps
+      destination:
+        namespace: infra-argocd-apps
+        #server: https://kubernetes.default.svc
+      project: argocd
+      source:
+        path: bootstrap/03-argocd-apps
+        repoURL: https://gitlab.com/juulun/gitops.git 
+        targetRevision: test
+        #directory:
+          #recurse: true
+          #jsonnet: {}
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
 #    - name: argocd-appprojects
 #      namespace: argocd
 #      destination:
@@ -66,6 +66,7 @@ argo-apps:
       destinations:
         - namespace: infra-argocd
           server: https://kubernetes.default.svc
+        - namespace: infra-argocd-apps
       clusterResourceWhitelist:
         - group: '*'
           kind: '*'
