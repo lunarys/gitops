@@ -130,6 +130,11 @@ argo-apps:
           name: '{{ .path.basename }}'
         spec:
           project: 'services'
+          syncPolicy:
+            automated:
+              selfHeal: true
+            syncOptions:
+              - CreateNamespace=true
           source:
             repoURL: https://gitlab.com/juulun/gitops.git
             targetRevision: test
