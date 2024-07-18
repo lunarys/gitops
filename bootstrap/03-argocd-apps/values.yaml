@@ -45,7 +45,7 @@ argo-apps:
         syncOptions:
           - CreateNamespace=true
     config:
-      namespace: config
+      namespace: infra-argocd
       destination:
         namespace: infra-config
         server: https://kubernetes.default.svc
