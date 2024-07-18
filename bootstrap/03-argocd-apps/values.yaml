@@ -138,6 +138,7 @@ argo-apps:
           project: 'services'
           syncPolicy:
             automated:
+              prune: true
               selfHeal: true
             syncOptions:
               - CreateNamespace=true
@@ -147,5 +148,44 @@ argo-apps:
             path: '{{ .path.path }}'
           destination:
             server: https://kubernetes.default.svc
+            namespace: 'service-{{ .path.basename }}'
+    services-simple:
+      goTemplate: true
+      goTemplateOptions: ["missingkey=error"]
+      namespace: infra-argocd
+      additionalLabels: {}
+      additionalAnnotations: {}
+      generators:
+        - git:
+            repoURL: https://gitlab.com/juulun/gitops.git
+            revision: test
+            directories:
+              - path: 'services/*'
+                path: 'services/*.disabled'
+                exclude: true
+            files:
+              - path: 'services/*/app.yaml'
+      template:
+        metadata:
+          name: '{{ .path.basename }}'
+        spec:
+          project: 'services'
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+            syncOptions:
+              - CreateNamespace=true
+          source:
+            repoURL: '{{ .helm.repo }}'
+            chart: '{{ .helm.chart }}'
+            targetRevision: '{{ .helm.version }}'
+            helm:
+              #releaseName: ''
+              skipCrds: true
+              #valueFiles:
+              #  - ....
+          destination:
+            service: https://kubernetes.default.svc
             namespace: 'service-{{ .path.basename }}'
 

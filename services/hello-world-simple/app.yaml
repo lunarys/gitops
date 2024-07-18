@@ -1,0 +1,5 @@
+helm:
+  chart: hello-world
+  version: 0.1.0 
+  repo: https://helm.github.io/examples
+
