@@ -82,6 +82,8 @@ argo-apps:
       description: Service Deployments
       sourceRepos:
         - https://gitlab.com/juulun/gitops.git
+        # required for appset services-simple to deploy from different helm repos
+	- '*'
       destinations:
         - namespace: 'service-*'
           server: https://kubernetes.default.svc
@@ -196,6 +198,6 @@ argo-apps:
               #valueFiles:
               #  - ....
           destination:
-            service: https://kubernetes.default.svc
+            server: https://kubernetes.default.svc
             namespace: 'service-{{ .path.basename }}'
 
