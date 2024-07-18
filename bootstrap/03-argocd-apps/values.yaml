@@ -68,7 +68,7 @@ argo-apps:
       additionalAnnotations: {}
       description: Argocd Project
       sourceRepos:
-        - '*'
+        - https://gitlab.com/juulun/gitops.git
       destinations:
         - namespace: infra-argocd
           server: https://kubernetes.default.svc
@@ -77,6 +77,17 @@ argo-apps:
           kind: '*'
       orphanedResources:
         warn: false
+    services:
+      namespace: infra-argocd
+      description: Service Deployments
+      sourceRepos:
+        - https://gitlab.com/juulun/gitops.git
+      destinations:
+        - namespace: 'service-*'
+          server: https://kubernetes.default.svc
+      clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
 #    argocd-apps:
 #      namespace: infra-argocd-apps
 #      additionalLabels: {}
@@ -92,4 +103,38 @@ argo-apps:
 #          kind: '*'
 #      orphanedResources:
 #        warn: false
+
+  applicationsets:
+    #infra:
+    #  namespace:
+    #  additionalLabels: {}
+    #  additionalAnnotations: {}
+    #  generators:
+    #    - git
+    #  template:
+    #  syncPolicy:
+    services:
+      goTemplate: true
+      goTemplateOptions: ["missingkey=error"]
+      namespace: infra-argocd
+      additionalLabels: {}
+      additionalAnnotations: {}
+      generators:
+        - git:
+            repoURL: https://gitlab.com/juulun/gitops.git
+            revision: test
+            directories:
+              - path: services/*
+      template:
+        metadata: 
+          name: '{{ .path.basename }}'
+        spec:
+          project: 'services'
+          source:
+            repoURL: https://gitlab.com/juulun/gitops.git
+            targetRevision: test
+            path: '{{ .path.path }}'
+          destination:
+            server: https://kubernetes.default.svc
+            namespace: 'service-{{ .path.basename }}'
 
