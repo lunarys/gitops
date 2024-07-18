@@ -154,43 +154,48 @@ argo-apps:
           destination:
             server: https://kubernetes.default.svc
             namespace: 'service-{{ .path.basename }}'
-#    services-simple:
-#      goTemplate: true
-#      goTemplateOptions: ["missingkey=error"]
-#      namespace: infra-argocd
-#      additionalLabels: {}
-#      additionalAnnotations: {}
-#      generators:
-#        - git:
-#            repoURL: https://gitlab.com/juulun/gitops.git
-#            revision: test
-#            directories:
-#              - path: 'services/*'
-#                path: 'services/*.disabled'
-#                exclude: true
-#            files:
-#              - path: 'services/*/app.yaml'
-#      template:
-#        metadata:
-#          name: '{{ .path.basename }}'
-#        spec:
-#          project: 'services'
-#          syncPolicy:
-#            automated:
-#              prune: true
-#              selfHeal: true
-#            syncOptions:
-#              - CreateNamespace=true
-#          source:
-#            repoURL: '{{ .helm.repo }}'
-#            chart: '{{ .helm.chart }}'
-#            targetRevision: '{{ .helm.version }}'
-#            helm:
-#              #releaseName: ''
-#              skipCrds: true
-#              #valueFiles:
-#              #  - ....
-#          destination:
-#            service: https://kubernetes.default.svc
-#            namespace: 'service-{{ .path.basename }}'
+    services-simple:
+      goTemplate: true
+      goTemplateOptions: ["missingkey=error"]
+      namespace: infra-argocd
+      additionalLabels: {}
+      additionalAnnotations: {}
+      generators:
+        - matrix:
+            generators:
+              - git:
+                  repoURL: https://gitlab.com/juulun/gitops.git
+                  revision: test
+                  directories:
+                    - path: 'services/*'
+                    - path: 'services/*.disabled'
+                      exclude: true
+              - git:
+                  repoURL: https://gitlab.com/juulun/gitops.git
+                  revision: test
+                  files:
+                    - path: '{{ .path.path }}/app.yaml'
+      template:
+        metadata:
+          name: '{{ .path.basename }}'
+        spec:
+          project: 'services'
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+            syncOptions:
+              - CreateNamespace=true
+          source:
+            repoURL: '{{ .helm.repo }}'
+            chart: '{{ .helm.chart }}'
+            targetRevision: '{{ .helm.version }}'
+            helm:
+              #releaseName: ''
+              skipCrds: true
+              #valueFiles:
+              #  - ....
+          destination:
+            service: https://kubernetes.default.svc
+            namespace: 'service-{{ .path.basename }}'
 
