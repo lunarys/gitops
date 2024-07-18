@@ -94,6 +94,19 @@ argo-apps:
           kind: '*'
       orphanedResources:
         warn: false
+    infra:
+      namespace: infra-argocd
+      description: Infrastrcutre Component Deployments
+      sourceRepos:
+        #- https://gitlab.com/juulun/gitops.git
+        # required for appset infra-simple to deploy from different helm repos
+        - '*'
+      destinations:
+        - namespace: 'infra-*'
+          server: https://kubernetes.default.svc
+      clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
     services:
       namespace: infra-argocd
       description: Service Deployments
@@ -137,14 +150,89 @@ argo-apps:
 
   # generator reference: https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators-Git/
   applicationsets:
-    #infra:
-    #  namespace:
-    #  additionalLabels: {}
-    #  additionalAnnotations: {}
-    #  generators:
-    #    - git
-    #  template:
-    #  syncPolicy:
+    infra:
+      goTemplate: true
+      goTemplateOptions: ["missingkey=error"]
+      namespace: infra-argocd
+      additionalLabels: {}
+      additionalAnnotations: {}
+      generators:
+        - matrix:
+            generators:
+              - git:
+                  repoURL: https://gitlab.com/juulun/gitops.git
+                  revision: test
+                  directories:
+                    - path: 'infra/*'
+                    - path: 'infra/*.disabled'
+                      exclude: true
+              - git:
+                  repoURL: https://gitlab.com/juulun/gitops.git
+                  revision: test
+                  files:
+                    - path: '{{ .path.path }}/Chart.yaml'
+      template:
+        metadata: 
+          name: '{{ .path.basename }}'
+        spec:
+          project: 'infra'
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+            syncOptions:
+              - CreateNamespace=true
+          source:
+            repoURL: https://gitlab.com/juulun/gitops.git
+            targetRevision: test
+            path: '{{ .path.path }}'
+          destination:
+            server: https://kubernetes.default.svc
+            namespace: 'infra-{{ .path.basename }}'
+    infra-simple:
+      goTemplate: true
+      goTemplateOptions: ["missingkey=error"]
+      namespace: infra-argocd
+      additionalLabels: {}
+      additionalAnnotations: {}
+      generators:
+        - matrix:
+            generators:
+              - git:
+                  repoURL: https://gitlab.com/juulun/gitops.git
+                  revision: test
+                  directories:
+                    - path: 'infra/*'
+                    - path: 'infra/*.disabled'
+                      exclude: true
+              - git:
+                  repoURL: https://gitlab.com/juulun/gitops.git
+                  revision: test
+                  files:
+                    - path: '{{ .path.path }}/app.yaml'
+      template:
+        metadata:
+          name: '{{ .path.basename }}'
+        spec:
+          project: 'infra'
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+            syncOptions:
+              - CreateNamespace=true
+          source:
+            repoURL: '{{ .helm.repo }}'
+            chart: '{{ .helm.chart }}'
+            targetRevision: '{{ .helm.version }}'
+            helm:
+              #releaseName: ''
+              skipCrds: true
+              #valueFiles:
+              #  - ....
+          destination:
+            server: https://kubernetes.default.svc
+            namespace: 'service-{{ .path.basename }}'
     services:
       goTemplate: true
       goTemplateOptions: ["missingkey=error"]
