@@ -124,7 +124,9 @@ argo-apps:
             repoURL: https://gitlab.com/juulun/gitops.git
             revision: test
             directories:
-              - path: services/*
+              - path: 'services/*'
+              - path: '*.disabled'
+                exclude: true
       template:
         metadata: 
           name: '{{ .path.basename }}'
