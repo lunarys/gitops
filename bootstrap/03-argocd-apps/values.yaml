@@ -130,7 +130,7 @@ argo-apps:
               - path: 'services/*.disabled'
                 exclude: true
             files:
-              - 'services/*/Chart.yaml'
+              - path: 'services/*/Chart.yaml'
       template:
         metadata: 
           name: '{{ .path.basename }}'
