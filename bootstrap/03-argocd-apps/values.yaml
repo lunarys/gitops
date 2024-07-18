@@ -104,6 +104,8 @@ argo-apps:
 #      orphanedResources:
 #        warn: false
 
+
+  # generator reference: https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators-Git/
   applicationsets:
     #infra:
     #  namespace:
@@ -125,7 +127,7 @@ argo-apps:
             revision: test
             directories:
               - path: 'services/*'
-              - path: '*.disabled'
+              - path: '**.disabled'
                 exclude: true
       template:
         metadata: 
