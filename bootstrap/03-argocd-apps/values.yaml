@@ -44,6 +44,23 @@ argo-apps:
           prune: true
         syncOptions:
           - CreateNamespace=true
+    config:
+      namespace: config
+      destination:
+        namespace: infra-config
+        server: https://kubernetes.default.svc
+      project: config
+      source:
+        repoURL: https://gitlab.com/juulun/gitops.git
+        path: config
+        targetRevision: test
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+        syncOptions:
+          - CreateNamespace=true
+
 #    - name: argocd-appprojects
 #      namespace: argocd
 #      destination:
@@ -86,6 +103,17 @@ argo-apps:
         - '*'
       destinations:
         - namespace: 'service-*'
+          server: https://kubernetes.default.svc
+      clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+    config:
+      namespace: infra-argocd
+      description: Misc config
+      sourceRepos:
+        - https://gitlab.com/juulun/gitops.git
+      destinations:
+        - namespace: 'infra-config'
           server: https://kubernetes.default.svc
       clusterResourceWhitelist:
         - group: '*'
