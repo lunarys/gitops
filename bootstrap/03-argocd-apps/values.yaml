@@ -82,9 +82,7 @@ argo-apps:
       namespace: infra-argocd
       description: Infrastrcutre Component Deployments
       sourceRepos:
-        #- https://gitlab.com/juulun/gitops.git
-        # required for appset infra-simple to deploy from different helm repos
-        - '*'
+        - https://gitlab.com/juulun/gitops.git
       destinations:
         - namespace: 'infra-*'
           server: https://kubernetes.default.svc
@@ -95,9 +93,8 @@ argo-apps:
       namespace: infra-argocd
       description: Service Deployments
       sourceRepos:
-        #- https://gitlab.com/juulun/gitops.git
-        # required for appset services-simple to deploy from different helm repos
-        - '*'
+        - https://gitlab.com/juulun/gitops.git
+        - https://helm.github.io/examples
       destinations:
         - namespace: 'service-*'
           server: https://kubernetes.default.svc
