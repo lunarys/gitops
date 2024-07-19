@@ -83,6 +83,7 @@ argo-apps:
       description: Infrastrcutre Component Deployments
       sourceRepos:
         - https://gitlab.com/juulun/gitops.git
+        - oci://registry-1.docker.io/bitnamicharts
       destinations:
         - namespace: 'infra-*'
           server: https://kubernetes.default.svc
@@ -293,8 +294,8 @@ argo-apps:
             helm:
               #releaseName: ''
               skipCrds: true
-              #valueFiles:
-              #  - ....
+              valueFiles:
+                - '{{ .path.path }}/values.yaml'
           destination:
             server: https://kubernetes.default.svc
             namespace: 'service-{{ .path.basename }}'
