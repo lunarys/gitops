@@ -1,0 +1,5 @@
+helm:
+  chart: metallb
+  version: 6.3.8
+  repo: oci://registry-1.docker.io/bitnamicharts
+
