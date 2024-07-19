@@ -44,41 +44,24 @@ argo-apps:
           prune: true
         syncOptions:
           - CreateNamespace=true
-    config:
-      namespace: infra-argocd
-      destination:
-        # TODO: quick and dirty for metallb to work
-        namespace: infra-metallb
-        server: https://kubernetes.default.svc
-      project: config
-      source:
-        repoURL: https://gitlab.com/juulun/gitops.git
-        path: config
-        targetRevision: test
-      syncPolicy:
-        automated:
-          selfHeal: true
-          prune: true
-        syncOptions:
-          - CreateNamespace=true
+    # config:
+      # namespace: infra-argocd
+      # destination:
+        # # TODO: quick and dirty for metallb to work
+        # namespace: infra-metallb
+        # server: https://kubernetes.default.svc
+      # project: config
+      # source:
+        # repoURL: https://gitlab.com/juulun/gitops.git
+        # path: config
+        # targetRevision: test
+      # syncPolicy:
+        # automated:
+          # selfHeal: true
+          # prune: true
+        # syncOptions:
+          # - CreateNamespace=true
 
-#    - name: argocd-appprojects
-#      namespace: argocd
-#      destination:
-#        namespace: argocd
-#        server: https://kubernetes.default.svc
-#      project: argocd
-#      source:
-#        path: argocd-appprojects
-#        repoURL: https://github.com/justcloudnative/argocd-manages-itself.git
-#        targetRevision: main
-#        directory:
-#          recurse: true
-#          jsonnet: {}
-#      syncPolicy:
-#        automated:
-#          selfHeal: true
-#          prune: true
   projects: 
     argocd:
       namespace: infra-argocd
