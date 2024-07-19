@@ -234,7 +234,7 @@ argo-apps:
               #  - ....
           destination:
             server: https://kubernetes.default.svc
-            namespace: 'service-{{ .path.basename }}'
+            namespace: 'infra-{{ .path.basename }}'
     services:
       goTemplate: true
       goTemplateOptions: ["missingkey=error"]
@@ -318,4 +318,41 @@ argo-apps:
           destination:
             server: https://kubernetes.default.svc
             namespace: 'service-{{ .path.basename }}'
-
+    infra-config:
+      goTemplate: true
+      goTemplateOptions: ["missingkey=error"]
+      namespace: infra-argocd
+      additionalLabels: {}
+      additionalAnnotations: {}
+      generators:
+        - matrix:
+            generators:
+              - git:
+                  repoURL: https://gitlab.com/juulun/gitops.git
+                  revision: test
+                  directories:
+                    - path: 'infra/*'
+                    - path: 'infra/*.disabled'
+                      exclude: true
+              - git:
+                  repoURL: https://gitlab.com/juulun/gitops.git
+                  revision: test
+                  files:
+                    - path: '{{ .path.path }}/config.yaml'
+      template:
+        metadata:
+          name: '{{ .path.basename }}'
+        spec:
+          project: 'infra'
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+            syncOptions:
+              - CreateNamespace=false
+          source:
+            repoURL: https://gitlab.com/juulun/gitops.git
+            targetRevision: test
+          destination:
+            server: https://kubernetes.default.svc
+            namespace: 'infra-{{ .parent }}'
