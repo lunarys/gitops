@@ -2,4 +2,3 @@ helm:
   chart: metallb
   version: 6.3.8
   repo: registry-1.docker.io/bitnamicharts
-
