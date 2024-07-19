@@ -1,29 +1,28 @@
-traefik:
-  ports:
-    traefik:
-      expose: 
-        default: false  # TODO: turn off in production
+ports:
+  traefik:
+    expose: 
+      default: false  # TODO: turn off in production
 
-  ingressRoute:
-    dashboard:
-      enabled: true
+ingressRoute:
+  dashboard:
+    enabled: true
 
-  providers:
-    kubernetesCRD:
-      # -- Load Kubernetes IngressRoute provider
-      enabled: true
+providers:
+  kubernetesCRD:
+    # -- Load Kubernetes IngressRoute provider
+    enabled: true
 
-    kubernetesIngress:
-      enabled: true
-      publishedService:
-        enabled: true  # required for argo to not show ingresses as progressing
+  kubernetesIngress:
+    enabled: true
+    publishedService:
+      enabled: true  # required for argo to not show ingresses as progressing
 
-  logs:
-    access:
-      enabled: true
-    general:
-      level: INFO
+logs:
+  access:
+    enabled: true
+  general:
+    level: INFO
 
-  # https://community.traefik.io/t/traefik-ingress-not-getting-loadbalancer-ip/17445/3
-  #additionalArguments:
-  #  - "--providers.kubernetesingress.ingressendpoint.publishedservice=default/traefik"
+# https://community.traefik.io/t/traefik-ingress-not-getting-loadbalancer-ip/17445/3
+#additionalArguments:
+#  - "--providers.kubernetesingress.ingressendpoint.publishedservice=default/traefik"
