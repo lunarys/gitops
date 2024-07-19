@@ -296,6 +296,7 @@ argo-apps:
               skipCrds: true
               valueFiles:
                 - '{{ .path.path }}/values.yaml'
+              ignoreMissingValueFiles: true
           destination:
             server: https://kubernetes.default.svc
             namespace: 'service-{{ .path.basename }}'
