@@ -207,17 +207,20 @@ argo-apps:
               selfHeal: true
             syncOptions:
               - CreateNamespace=true
-          source:
-            repoURL: '{{ .helm.repo }}'
-            chart: '{{ .helm.chart }}'
-            targetRevision: '{{ .helm.version }}'
-            path: '{{ .path.path }}'
-            helm:
-              #releaseName: ''
-              skipCrds: true
-              valueFiles:
-                - 'values.yaml'
-              ignoreMissingValueFiles: false
+          sources:
+            - repoURL: '{{ .helm.repo }}'
+              chart: '{{ .helm.chart }}'
+              targetRevision: '{{ .helm.version }}'
+              path: '{{ .path.path }}'
+              helm:
+                #releaseName: ''
+                skipCrds: true
+                valueFiles:
+                  - '$values/{{ .path.path }}/values.yaml'
+                ignoreMissingValueFiles: false
+            - repoURL: https://gitlab.com/juulun/gitops.git
+              targetRevision: test
+              ref: values
           destination:
             server: https://kubernetes.default.svc
             namespace: 'infra-{{ .path.basename }}'
