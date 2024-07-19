@@ -1,4 +1,3 @@
-metallb:
-  speaker:
-    frr:
-      enabled: false
+speaker:
+  frr:
+    enabled: false
