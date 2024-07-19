@@ -87,6 +87,7 @@ argo-apps:
         #- oci://registry-1.docker.io/bitnamicharts
         - registry-1.docker.io/bitnamicharts
         - https://traefik.github.io/charts
+        - https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts
       destinations:
         - namespace: 'infra-*'
           server: https://kubernetes.default.svc
