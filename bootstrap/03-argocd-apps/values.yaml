@@ -105,18 +105,18 @@ argo-apps:
       clusterResourceWhitelist:
         - group: '*'
           kind: '*'
-    config:
-      namespace: infra-argocd
-      description: Misc config
-      sourceRepos:
-        - https://gitlab.com/juulun/gitops.git
-      destinations:
-        # TODO: quick and dirty for metallb to work
-        - namespace: 'infra-metallb'
-          server: https://kubernetes.default.svc
-      clusterResourceWhitelist:
-        - group: '*'
-          kind: '*'
+    # config:
+      # namespace: infra-argocd
+      # description: Misc config
+      # sourceRepos:
+        # - https://gitlab.com/juulun/gitops.git
+      # destinations:
+        # # TODO: quick and dirty for metallb to work
+        # - namespace: 'infra-metallb'
+          # server: https://kubernetes.default.svc
+      # clusterResourceWhitelist:
+        # - group: '*'
+          # kind: '*'
 #    argocd-apps:
 #      namespace: infra-argocd-apps
 #      additionalLabels: {}
@@ -211,12 +211,13 @@ argo-apps:
             repoURL: '{{ .helm.repo }}'
             chart: '{{ .helm.chart }}'
             targetRevision: '{{ .helm.version }}'
+            path: '{{ .path.path }}'
             helm:
               #releaseName: ''
               skipCrds: true
               valueFiles:
-                - '{{ .path.path }}/values.yaml'
-              ignoreMissingValueFiles: true
+                - 'values.yaml'
+              ignoreMissingValueFiles: false
           destination:
             server: https://kubernetes.default.svc
             namespace: 'infra-{{ .path.basename }}'
