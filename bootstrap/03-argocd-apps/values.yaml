@@ -211,8 +211,9 @@ argo-apps:
             helm:
               #releaseName: ''
               skipCrds: true
-              #valueFiles:
-              #  - ....
+              valueFiles:
+                - '{{ .path.path }}/values.yaml'
+              ignoreMissingValueFiles: true
           destination:
             server: https://kubernetes.default.svc
             namespace: 'infra-{{ .path.basename }}'
