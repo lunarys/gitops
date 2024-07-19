@@ -336,6 +336,7 @@ argo-apps:
           source:
             repoURL: https://gitlab.com/juulun/gitops.git
             targetRevision: test
+            path: '{{ .path.path }}'
           destination:
             server: https://kubernetes.default.svc
             namespace: 'infra-{{ .parent }}'
