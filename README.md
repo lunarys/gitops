@@ -1,6 +1,14 @@
 # GitOps
 
+## Road to production
 
+- [ ] cert-manager
+- [ ] replicated storage
+- [ ] node local storage
+- [ ] backup
+- [ ] network security
+- [ ] k8s resource permissions
+- [ ] external secrets
 
 ## Potential components
 
