@@ -5,10 +5,12 @@
 - [ ] cert-manager
 - [ ] replicated storage
 - [ ] node local storage
+- [ ] replicated database
 - [ ] backup
 - [ ] network security
 - [ ] k8s resource permissions
 - [ ] external secrets
+- [ ] base settings / owasp
 
 ## Potential components
 
