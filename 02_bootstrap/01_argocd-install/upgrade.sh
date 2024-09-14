@@ -1,1 +1,1 @@
-helm upgrade argocd . --namespace infra-argocd
+helm upgrade argocd . --namespace infra-argocd --create-namespace

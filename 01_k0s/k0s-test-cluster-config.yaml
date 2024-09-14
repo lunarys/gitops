@@ -11,7 +11,8 @@ spec:
       #  user: ju
       #  port: 22
       #  keyPath: null
-      role: controller+worker
+      role: single
+      #role: controller+worker
   k0s:
     config:
       apiVersion: k0s.k0sproject.io/v1beta1
