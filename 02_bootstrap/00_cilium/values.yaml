@@ -1,9 +1,7 @@
 # https://github.com/cilium/cilium/tree/main/install/kubernetes/cilium
 cilium:
-  # TODO: otherwise uses cluster-internal ip that does not work?
-  k8sServiceHost: "10.0.1.190"
-  k8sServicePort: "6443"
-
+  nodeIPAM:
+    enabled: false  # replacement for metallb??
   operator:
     replicas: 1
   ipam:
