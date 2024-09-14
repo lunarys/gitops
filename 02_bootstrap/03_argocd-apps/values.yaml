@@ -138,9 +138,9 @@ argo-apps:
   # generator reference: https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators-Git/
   applicationsets:
     infra:
+      namespace: infra-argocd
       goTemplate: true
       goTemplateOptions: ["missingkey=error"]
-      namespace: infra-argocd
       additionalLabels: {}
       additionalAnnotations: {}
       generators:
@@ -177,9 +177,9 @@ argo-apps:
             server: https://kubernetes.default.svc
             namespace: 'infra-{{ .path.basename }}'
     infra-simple:
+      namespace: infra-argocd
       goTemplate: true
       goTemplateOptions: ["missingkey=error"]
-      namespace: infra-argocd
       additionalLabels: {}
       additionalAnnotations: {}
       generators:
@@ -225,9 +225,9 @@ argo-apps:
             server: https://kubernetes.default.svc
             namespace: 'infra-{{ .path.basename }}'
     services:
+      namespace: infra-argocd
       goTemplate: true
       goTemplateOptions: ["missingkey=error"]
-      namespace: infra-argocd
       additionalLabels: {}
       additionalAnnotations: {}
       generators:
@@ -264,9 +264,9 @@ argo-apps:
             server: https://kubernetes.default.svc
             namespace: 'service-{{ .path.basename }}'
     services-simple:
+      namespace: infra-argocd
       goTemplate: true
       goTemplateOptions: ["missingkey=error"]
-      namespace: infra-argocd
       additionalLabels: {}
       additionalAnnotations: {}
       generators:
@@ -312,9 +312,9 @@ argo-apps:
             server: https://kubernetes.default.svc
             namespace: 'service-{{ .path.basename }}'
     infra-config:
+      namespace: infra-argocd
       goTemplate: true
       goTemplateOptions: ["missingkey=error"]
-      namespace: infra-argocd
       additionalLabels: {}
       additionalAnnotations: {}
       generators:

@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: infra-argocd
+spec:
+  destination:
+    namespace: infra-argocd
+    server: https://kubernetes.default.svc
+  project: argocd
+  source:
+    helm:
+      version: v3
+      valueFiles:
+        - values.yaml
+    path: 02_bootstrap/01_argocd-install
+    repoURL: https://gitlab.com/juulun/gitops.git
+    targetRevision: test
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: false
+    syncOptions:
+      - CreateNamespace=true

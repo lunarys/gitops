@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: infra-config
+  namespace: infra-argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: [ "missingkey=error" ]
+  additionalLabels: { }
+  additionalAnnotations: { }
+  generators:
+    - matrix:
+        generators:
+          - git:
+              repoURL: https://gitlab.com/juulun/gitops.git
+              revision: test
+              directories:
+                - path: '03_infra/*'
+                - path: '03_infra/*.disabled'
+                  exclude: true
+          - git:
+              repoURL: https://gitlab.com/juulun/gitops.git
+              revision: test
+              files:
+                - path: '{{ .path.path }}/config.yaml'
+  template:
+    metadata:
+      name: '{{ .path.basename }}'
+    spec:
+      project: 'infra'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=false
+      source:
+        repoURL: https://gitlab.com/juulun/gitops.git
+        targetRevision: test
+        path: '{{ .path.path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'infra-{{ .parent }}'

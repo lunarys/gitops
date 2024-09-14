@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: services
+  namespace: infra-argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: [ "missingkey=error" ]
+  additionalLabels: { }
+  additionalAnnotations: { }
+  generators:
+    - matrix:
+        generators:
+          - git:
+              repoURL: https://gitlab.com/juulun/gitops.git
+              revision: test
+              directories:
+                - path: '04_services/*'
+                - path: '04_services/*.disabled'
+                  exclude: true
+          - git:
+              repoURL: https://gitlab.com/juulun/gitops.git
+              revision: test
+              files:
+                - path: '{{ .path.path }}/Chart.yaml'
+  template:
+    metadata:
+      name: '{{ .path.basename }}'
+    spec:
+      project: 'services'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+      source:
+        repoURL: https://gitlab.com/juulun/gitops.git
+        targetRevision: test
+        path: '{{ .path.path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'service-{{ .path.basename }}'

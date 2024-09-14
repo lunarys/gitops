@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: argocd
+  namespace: infra-argocd
+spec:
+  additionalLabels: { }
+  additionalAnnotations: { }
+  description: Argocd Project
+  sourceRepos:
+    - https://gitlab.com/juulun/gitops.git
+  destinations:
+    - namespace: infra-argocd
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  orphanedResources:
+    warn: false
