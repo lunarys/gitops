@@ -18,7 +18,7 @@ argo-apps:
       syncPolicy:
         automated:
           selfHeal: true
-          prune: true
+          prune: false
         syncOptions:
           - CreateNamespace=true
     argocd-apps:
@@ -41,7 +41,7 @@ argo-apps:
       syncPolicy:
         automated:
           selfHeal: true
-          prune: true
+          prune: false
         syncOptions:
           - CreateNamespace=true
     # config:
