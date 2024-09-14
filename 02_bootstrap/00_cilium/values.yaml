@@ -1,0 +1,11 @@
+# https://github.com/cilium/cilium/tree/main/install/kubernetes/cilium
+cilium:
+  # TODO: otherwise uses cluster-internal ip that does not work?
+  k8sServiceHost: "10.0.1.190"
+  k8sServicePort: "6443"
+
+  operator:
+    replicas: 1
+  ipam:
+    operator:
+      clusterPoolIPv4PodCIDRList: ["10.242.0.0/16"]
