@@ -30,7 +30,7 @@ spec:
       project: 'infra'
       syncPolicy:
         automated:
-          prune: true
+          prune: false
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
