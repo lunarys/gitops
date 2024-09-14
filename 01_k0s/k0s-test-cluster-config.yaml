@@ -4,12 +4,14 @@ metadata:
   name: k0s-cluster
 spec:
   hosts:
-  - ssh:
-      address: 10.0.1.190
-      user: ju
-      port: 22
-      keyPath: null
-    role: controller+worker
+    - localhost:
+        enabled: true
+      #ssh:
+      #  address: 10.0.1.190
+      #  user: ju
+      #  port: 22
+      #  keyPath: null
+      role: controller+worker
   k0s:
     config:
       apiVersion: k0s.k0sproject.io/v1beta1
