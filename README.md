@@ -12,6 +12,14 @@
 - [ ] external secrets
 - [ ] base settings / owasp
 
+### Helm Chart features
+
+- [ ] internal / external access
+- [ ] host + cert
+- [ ] service kind / ip address
+- [ ] persistent storage
+- [ ] database
+
 ## Potential components
 
 ### Security
