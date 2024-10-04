@@ -2,4 +2,5 @@ helm:
   chart: traefik
   version: v27.0.2
   repo: https://traefik.github.io/charts
+  crds: true
 

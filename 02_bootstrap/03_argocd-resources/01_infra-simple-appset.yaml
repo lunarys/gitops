@@ -38,7 +38,7 @@ spec:
           targetRevision: '{{ .helm.version }}'
           helm:
             #releaseName: ''
-            skipCrds: true
+            skipCrds: {{ .helm.crds | default false | not }}
             valueFiles:
               - '$values/{{ .path.path }}/values.yaml'
             ignoreMissingValueFiles: true
