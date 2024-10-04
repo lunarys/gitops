@@ -10,7 +10,7 @@ ingressRoute:
 providers:
   kubernetesCRD:
     # -- Load Kubernetes IngressRoute provider
-    enabled: true
+    enabled: false
 
   kubernetesIngress:
     enabled: true
