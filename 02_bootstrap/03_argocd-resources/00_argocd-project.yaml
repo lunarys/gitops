@@ -4,8 +4,6 @@ metadata:
   name: argocd
   namespace: infra-argocd
 spec:
-  additionalLabels: { }
-  additionalAnnotations: { }
   description: Argocd Project
   sourceRepos:
     - https://gitlab.com/juulun/gitops.git

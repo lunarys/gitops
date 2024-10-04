@@ -6,8 +6,6 @@ metadata:
 spec:
   goTemplate: true
   goTemplateOptions: [ "missingkey=error" ]
-  additionalLabels: { }
-  additionalAnnotations: { }
   generators:
     - matrix:
         generators:
