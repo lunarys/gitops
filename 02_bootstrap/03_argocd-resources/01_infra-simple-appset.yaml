@@ -38,7 +38,7 @@ spec:
           targetRevision: '{{ .helm.version }}'
           helm:
             #releaseName: ''
-            skipCrds: false  # TODO: improve?
+            skipCrds: false  # TODO: improve? traefik requires crds
             valueFiles:
               - '$values/{{ .path.path }}/values.yaml'
             ignoreMissingValueFiles: true
