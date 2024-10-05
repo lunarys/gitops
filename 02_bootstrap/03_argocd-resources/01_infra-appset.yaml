@@ -36,8 +36,8 @@ spec:
         repoURL: https://gitlab.com/juulun/gitops.git
         targetRevision: test
         path: '{{ .path.path }}'
-        helm:
-          skipCrds: true
+        #helm:
+        #  skipCrds: true  # TODO: crds currently required for traefik
       destination:
         server: https://kubernetes.default.svc
         namespace: 'infra-{{ .path.basename }}'
