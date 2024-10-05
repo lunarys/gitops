@@ -17,7 +17,7 @@ traefik:
   providers:
     kubernetesCRD:
       # -- Load Kubernetes IngressRoute provider
-      enabled: false
+      enabled: true
 
     kubernetesIngress:
       enabled: true
