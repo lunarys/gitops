@@ -16,7 +16,7 @@ spec:
               service:
                 name: traefik 
                 port:
-                  number: 80
+                  number: {{ .Values.traefik.ports.traefik.port }}
             path: /
             pathType: Prefix
 {{- end }}

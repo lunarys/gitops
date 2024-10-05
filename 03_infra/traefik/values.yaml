@@ -6,7 +6,8 @@ traefik:
   ports:
     traefik:
       expose: 
-        default: false  # TODO: turn off in production
+        # use this to make traefik dashboard available via the service
+        default: true  # TODO: turn off in production
 
   ingressRoute:
     dashboard:
