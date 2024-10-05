@@ -5,13 +5,13 @@ ports:
 
 ingressRoute:
   dashboard:
-    enabled: true
+    enabled: false
     matchRule: "Host(`traefik.k8s-test-1.local`)"
 
 providers:
   kubernetesCRD:
     # -- Load Kubernetes IngressRoute provider
-    enabled: true
+    enabled: false
 
   kubernetesIngress:
     enabled: true
