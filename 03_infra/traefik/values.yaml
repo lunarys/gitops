@@ -1,29 +1,34 @@
-ports:
-  traefik:
-    expose: 
-      default: false  # TODO: turn off in production
+ingress:
+  enabled: true
+  host: traefik.k8s-test-1.local
 
-ingressRoute:
-  dashboard:
-    enabled: false
-    matchRule: "Host(`traefik.k8s-test-1.local`)"
+traefik:
+  ports:
+    traefik:
+      expose: 
+        default: false  # TODO: turn off in production
 
-providers:
-  kubernetesCRD:
-    # -- Load Kubernetes IngressRoute provider
-    enabled: false
+  ingressRoute:
+    dashboard:
+      enabled: false  # enabling this requires traefik crds and the IngressRoute is weird
+      matchRule: "Host(`traefik.k8s-test-1.local`)"
 
-  kubernetesIngress:
-    enabled: true
-    publishedService:
-      enabled: true  # required for argo to not show ingresses as progressing
+  providers:
+    kubernetesCRD:
+      # -- Load Kubernetes IngressRoute provider
+      enabled: false
 
-logs:
-  access:
-    enabled: true
-  general:
-    level: INFO
+    kubernetesIngress:
+      enabled: true
+      publishedService:
+        enabled: true  # required for argo to not show ingresses as progressing
 
-# https://community.traefik.io/t/traefik-ingress-not-getting-loadbalancer-ip/17445/3
-#additionalArguments:
-#  - "--providers.kubernetesingress.ingressendpoint.publishedservice=default/traefik"
+  logs:
+    access:
+      enabled: true
+    general:
+      level: INFO
+
+  # https://community.traefik.io/t/traefik-ingress-not-getting-loadbalancer-ip/17445/3
+  #additionalArguments:
+  #  - "--providers.kubernetesingress.ingressendpoint.publishedservice=default/traefik"
