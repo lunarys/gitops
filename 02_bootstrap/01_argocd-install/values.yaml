@@ -14,8 +14,14 @@ argo-cd:
 
   configs:
     params:
+      # TODO?
       server.insecure: true
       #application.namespaces: "infra-argocd-apps"
+
+      # beta feature, but without default values (e.g. cilium volume 'readonly: false') are stripped resulting in a sync loop
+      #  -> https://github.com/argoproj/argo-cd/issues/19038
+      #  -> https://argo-cd.readthedocs.io/en/stable/user-guide/diff-strategies/#server-side-diff
+      controller.diff.server.side: "true"
 
   #redis-ha:
   #  enabled: true
