@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cilium
+  namespace: infra-argocd
+spec:
+  destination:
+    namespace: kube-system
+    server: https://kubernetes.default.svc
+  project: cilium
+  sources:
+    - helm:
+        version: v3
+        valueFiles:
+          - values.yaml
+      path: 02_bootstrap/00_cilium
+      repoURL: https://gitlab.com/juulun/gitops.git
+      targetRevision: test
+    - path: 02_bootstrap/00_cilium/addon
+      repoURL: https://gitlab.com/juulun/gitops.git
+      targetRevision: test
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: false
+

@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: cilium
+  namespace: infra-argocd
+spec:
+  description: Cilium Project
+  sourceRepos:
+    - https://gitlab.com/juulun/gitops.git
+  destinations:
+    - namespace: kube-system
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  orphanedResources:
+    warn: false
+
