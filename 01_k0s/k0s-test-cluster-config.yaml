@@ -35,7 +35,7 @@ spec:
           agentPort: 8132
         network:
           kubeProxy:
-            disabled: false
+            disabled: true
             mode: iptables
           kuberouter:
             autoMTU: true

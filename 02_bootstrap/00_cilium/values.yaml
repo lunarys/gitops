@@ -1,7 +1,27 @@
 # https://github.com/cilium/cilium/tree/main/install/kubernetes/cilium
 cilium:
-  nodeIPAM:
-    enabled: false  # replacement for metallb??
+  # if kube-proxy is disabled and cilium should take over
+  kubeProxyReplacement: true
+
+  # TODO: needed as the default is a cluster internal ip that does not work without kube-proxy
+  #   https://docs.cilium.io/en/v1.12/gettingstarted/kubeproxy-free/#kubeproxy-free
+  #
+  #   open issue: https://github.com/cilium/cilium/issues/19038
+  #
+  #   possible workaround: kube-vip
+  k8sServiceHost: 10.0.1.190
+  k8sServicePort: 6443
+
+  # L2 announcements (https://docs.cilium.io/en/stable/network/l2-announcements/#l2-announcements)
+  l2announcements:
+    enabled: true
+  #k8sClientRateLimit:
+    #qps:
+    #burst:
+
+  #nodeIPAM:
+    #enabled: false  # replacement for metallb??
+
   operator:
     replicas: 1
   ipam:

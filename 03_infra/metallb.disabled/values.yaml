@@ -1,0 +1,6 @@
+speaker:
+  frr:
+    enabled: false
+
+# to not obscure real source IP address: https://stackoverflow.com/a/50601860
+#   currently, the hello-world service middleware blocks valid traffic from the local subnet

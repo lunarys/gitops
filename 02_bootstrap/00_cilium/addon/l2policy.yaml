@@ -1,0 +1,22 @@
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: default
+spec:
+  # https://docs.cilium.io/en/stable/network/l2-announcements/#service-selector
+  #serviceSelector:
+  #  matchLabels:
+  #    color: blue
+
+  # https://docs.cilium.io/en/stable/network/l2-announcements/#node-selector
+  #nodeSelector:
+  #  matchExpressions:
+  #    - key: node-role.kubernetes.io/control-plane
+  #      operator: DoesNotExist
+
+  # https://docs.cilium.io/en/stable/network/l2-announcements/#interfaces
+  #interfaces:
+  #- ^eth[0-9]+
+
+  externalIPs: false
+  loadBalancerIPs: true
