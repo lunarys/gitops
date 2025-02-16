@@ -1,11 +1,15 @@
 # Reference: https://longhorn.io/docs/1.8.0/references/helm-values/
 
+# TODO: anti-affinity
+# TODO: track csi pods in argo: https://github.com/zalando/postgres-operator/issues/1766
+
 defaultSettings:
   defaultReplicaCount: 2
 
 persistence:
   defaultClassReplicaCount: 2
   defaultClass: false
+  #reclaimPolicy: Retain
 
 csi:
   attacherReplicaCount: 2
