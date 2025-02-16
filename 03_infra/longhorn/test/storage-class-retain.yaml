@@ -1,0 +1,36 @@
+# https://longhorn.io/docs/1.5.1/references/storage-class-parameters/
+
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: longhorn-retain
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+# "Retain", "Recycle", and "Delete"
+reclaimPolicy: "Retain"
+volumeBindingMode: Immediate
+parameters:
+  numberOfReplicas: "1"
+#  staleReplicaTimeout: "2880"
+#  fromBackup: ""
+#  fsType: "ext4"
+#  mkfsParams: ""
+#  migratable: false
+#  encrypted: false
+#  dataLocality: "disabled"
+#  replicatAutoBalance: "ignored"
+#  diskSelector: "ssd,fast"
+#  nodeSelector: "storage,fast"
+#  recurringJobSelector: '[{"name":"snap-group", "isGroup":true},
+#                          {"name":"backup", "isGroup":false}]'
+#  backingImageName: ""
+#  backingImageChecksum: ""
+#  backingImageDataSourceType: ""
+#  backingImageDataSourceParameters: ""
+#  unmapMarkSnapChainRemoved: "ignored"
+#  disableRevisionCounter: false
+#  replicaSoftAntiAffinity: "ignored"
+#  replicaZoneSoftAntiAffinity: "ignored"
+#  nfsOptions: "soft,timeo=150,retrans=3"
+#  backendStoreDriver: ""
+

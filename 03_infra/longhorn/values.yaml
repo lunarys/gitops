@@ -1,0 +1,30 @@
+# Reference: https://longhorn.io/docs/1.8.0/references/helm-values/
+
+defaultSettings:
+  defaultReplicaCount: 2
+
+persistence:
+  defaultClassReplicaCount: 2
+
+csi:
+  attacherReplicaCount: 2
+  provisionerReplicaCount: 2
+  resizerReplicaCount: 2
+  snapshotterReplicaCount: 2
+
+# https://github.com/longhorn/longhorn/discussions/9613
+preUpgradeChecker:
+  jobEnabled: false
+
+ingress:
+  ## Set to true to enable ingress record generation
+  enabled: true
+
+  host: longhorn.k8s-test-1.local
+  #path: /longhorn
+
+# https://longhorn.io/docs/1.8.0/snapshots-and-backups/backup-and-restore/create-a-backup
+#defaultBackupStore:
+  #backupTarget: CIFS
+  #backupTargetCredentialSecret: todo-some-k8s-secret
+

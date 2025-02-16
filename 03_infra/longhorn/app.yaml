@@ -1,0 +1,5 @@
+helm:
+  chart: longhorn
+  version: 1.8.0
+  repository: https://charts.longhorn.io
+
