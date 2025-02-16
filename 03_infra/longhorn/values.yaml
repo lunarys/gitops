@@ -5,6 +5,7 @@ defaultSettings:
 
 persistence:
   defaultClassReplicaCount: 2
+  defaultClass: false
 
 csi:
   attacherReplicaCount: 2
