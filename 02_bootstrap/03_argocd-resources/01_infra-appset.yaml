@@ -16,6 +16,8 @@ spec:
                 - path: '03_infra/*'
                 - path: '03_infra/*.disabled'
                   exclude: true
+                - path: '03_infra/*.custom'
+                  exclude: true
           - git:
               repoURL: https://gitlab.com/juulun/gitops.git
               revision: test

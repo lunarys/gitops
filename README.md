@@ -6,7 +6,9 @@
 - [ ] replicated storage
 - [ ] node local storage
 - [ ] replicated database
+  - [Bitnami / MariaDB](https://github.com/bitnami/charts/tree/main/bitnami/mariadb-galera)?
 - [ ] backup
+  - [Velero](https://velero.io/)?
 - [ ] network security
 - [ ] k8s resource permissions
 - [ ] external secrets
@@ -35,7 +37,7 @@
 
 ### Network
 
-- [ ] [Cilium + Hubble](https://github.com/networkpolicy/tutorial?tab=readme-ov-file)
+- [x] [Cilium + Hubble](https://github.com/networkpolicy/tutorial?tab=readme-ov-file)
 
 ### Secrets
 

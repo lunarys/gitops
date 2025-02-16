@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: local-path-provisioner
+  namespace: infra-argocd
+spec:
+  destination:
+    namespace: infra-local-path-provisioner
+    server: https://kubernetes.default.svc
+  project: infra
+  sources:
+    - repoURL: https://gitlab.com/juulun/gitops.git
+      targetRevision: test
+      ref: values
+    - helm:
+        version: v3
+        valueFiles:
+          - $values/03_infra/local-path-provisioner.custom/values.yaml
+      path: deploy/chart/local-path-provisioner
+      repoURL: https://github.com/rancher/local-path-provisioner
+      targetRevision: v0.0.31
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+
