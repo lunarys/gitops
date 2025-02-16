@@ -12,6 +12,9 @@ csi:
   resizerReplicaCount: 2
   snapshotterReplicaCount: 2
 
+longhornUI:
+  replicas: 1
+
 # https://github.com/longhorn/longhorn/discussions/9613
 preUpgradeChecker:
   jobEnabled: false
