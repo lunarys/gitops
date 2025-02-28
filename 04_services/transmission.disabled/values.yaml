@@ -1,0 +1,112 @@
+# Reference: https://github.com/zebpalmer/kubernetes-transmission-openvpn
+ingress:
+  host: transmission.srv.elda
+
+image:
+  name: haugene/transmission-openvpn
+  tag: 5.3.0
+
+service:
+  targetPort: 9091
+
+livenessProbe: # TODO
+  enabled: true
+  path: 
+  port:
+  #failureThreshold: 3
+  #initialDelaySeconds: 10
+  #periodSeconds: 2
+  #successThreshold: 1
+  #tcpSocket:
+  #  port: 9091
+  #timeoutSeconds: 2
+
+  readinessProbe: # TODO: verify
+  enabled: true
+  path:
+  port:
+  #failureThreshold: 3
+  #initialDelaySeconds: 10
+  #periodSeconds: 2
+  #successThreshold: 2
+  #tcpSocket:
+  #  port: 9091
+  #timeoutSeconds: 2
+
+storage-smb:
+  volumes:
+    - /mnt/transmission:/data
+    - /services/transmission/settings:/settings
+    - /etc/localtime:/etc/localtime:ro
+
+securityContext: # TODO: add/how
+  # spec.securityContext vs. spec.containers[].securityContext
+  # https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  allowPrivilegeEscalation: false
+  fsGroup: 1333
+  capabilities:
+    add: ["NET_ADMIN"]
+
+external-secrets: # TODO: operator+add
+  secrets:
+    - name: vpn-credentials
+      template:
+        OPENVPN_USERNAME: ""
+        OPENVPN_PASSWORD: ""
+        TRANSMISSION_RPC_USERNAME: ""
+        TRANSMISSION_RPC_PASSWORD: ""
+        TRANSMISSION_RPC_AUTHENTICATION_REQUIRED: "true"
+
+extraConfig:
+  secrets:
+    - vpn-credentials
+  volumeMounts:
+    - mountPath: /dev/net/tun
+      name: tunnel
+    - mountPath: /etc/localtime
+      name: localtime
+      readOnly: true
+  volumes: # TODO: add
+    - hostPath:
+        path: /dev/net/tun
+        type: ""
+        name: tunnel
+    - hostPath:
+        path: /etc/localtime
+        type: ""
+        name: localtime
+  env: # TODO: as object
+    - name: PUID
+      value: "1333"
+    - name: PGID
+      value: "1333"
+    - name: "TRANSMISSION_UMASK"
+      value: "007"
+    - name: "TRANSMISSION_HOME"
+      value: /settings
+    - name: "TRANSMISSION_DOWNLOAD_DIR"
+      value: /data
+    - name: "TRANSMISSION_IMCOMPLETE_DIR"
+      value: /data/.incomplete
+    - name: "TRANSMISSION_INCOMPLETE_DIR_ENABLED"
+      value: "true"
+    - name: "TRANSMISSION_WATCH_DIR"
+      value: /data/.watch
+    - name: "TRANSMISSION_WATCH_DIR_ENABLED"
+      value: "true"
+    #- name: TRANSMISSION_WEB_UI
+    #  value: combustion
+    - name: "OPENVPN_PROVIDER"
+      value: PIA
+    - name: "OPENVPN_CONFIG"
+      value: ""
+    - name: "LOCAL_NETWORK"
+      value: 10.0.0.0/22
+    # mssfix: https://github.com/haugene/docker-transmission-openvpn/issues/257
+    - name: "OPENVPN_OPTS"
+      value: "--inactive 3600 --ping 10 --ping-exit 60 --mute-replay-warnings"
+    - name: "TRANSMISSION_SCRAPE_PAUSED_TORRENTS_ENABLED"
+      value: "false"
+    - name: "CREATE_TUN_DEVICE"
+      value: "false"
+

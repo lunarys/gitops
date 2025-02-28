@@ -1,0 +1,5 @@
+helm:
+  chart: generic-app
+  version: 0.1.0 
+  repo: https://gitlab.com/juulun/...
+
