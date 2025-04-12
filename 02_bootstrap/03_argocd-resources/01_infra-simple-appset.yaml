@@ -34,6 +34,11 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'infra-{{ .path.basename }}'
+  templatePatch: |
+    spec:
       sources:
         - repoURL: '{{ .helm.repo }}'
           chart: '{{ .helm.chart }}'
@@ -48,9 +53,8 @@ spec:
         - repoURL: https://gitlab.com/juulun/gitops.git
           targetRevision: test
           ref: values
+      {{- if .additionalResources }}
         - repoURL: https://gitlab.com/juulun/gitops.git
           targetRevision: test
           path: '{{ .path.path }}/resources'
-      destination:
-        server: https://kubernetes.default.svc
-        namespace: 'infra-{{ .path.basename }}'
+      {{- end }}
