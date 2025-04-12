@@ -11,6 +11,6 @@ spec:
     - from:
       - podSelector:
           matchLabels:
-            app.kubernetes.io/instance: external-secrets
+            app.kubernetes.io/instance: bitwarden  # set to helm release name
             app.kubernetes.io/name: external-secrets
 
