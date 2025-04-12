@@ -53,7 +53,7 @@ spec:
         - repoURL: https://gitlab.com/juulun/gitops.git
           targetRevision: test
           ref: values
-      {{- if and (hasKey . "additionalResources") (eq (get . "additionalResources") "true") }}
+      {{- if and (hasKey . "additionalResources") (get . "additionalResources") }}
         - repoURL: https://gitlab.com/juulun/gitops.git
           targetRevision: test
           path: '{{ .path.path }}/resources'
