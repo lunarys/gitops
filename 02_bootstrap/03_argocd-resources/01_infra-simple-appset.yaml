@@ -48,6 +48,9 @@ spec:
         - repoURL: https://gitlab.com/juulun/gitops.git
           targetRevision: test
           ref: values
+        - repoURL: https://gitlab.com/juulun/gitops.git
+          targetRevision: test
+          path: '{{ .path.path }}/resources'
       destination:
         server: https://kubernetes.default.svc
         namespace: 'infra-{{ .path.basename }}'
