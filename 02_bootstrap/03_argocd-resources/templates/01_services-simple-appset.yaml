@@ -2,7 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: services-simple
-  namespace: infra-argocd
 spec:
   goTemplate: true
   goTemplateOptions: [ "missingkey=error" ]
@@ -20,10 +19,10 @@ spec:
               repoURL: https://gitlab.com/juulun/gitops.git
               revision: test
               files:
-                - path: '{{ .path.path }}/app.yaml'
+                - path: '{{`{{ .path.path }}`}}/app.yaml'
   template:
     metadata:
-      name: '{{ .path.basename }}'
+      name: '{{`{{ .path.basename }}`}}'
     spec:
       project: 'services'
       syncPolicy:
@@ -33,18 +32,18 @@ spec:
         syncOptions:
           - CreateNamespace=true
       sources:
-        - repoURL: '{{ .helm.repo }}'
-          chart: '{{ .helm.chart }}'
-          targetRevision: '{{ .helm.version }}'
+        - repoURL: '{{`{{ .helm.repo }}`}}'
+          chart: '{{`{{ .helm.chart }}`}}'
+          targetRevision: '{{`{{ .helm.version }}`}}'
           helm:
             #releaseName: ''
             skipCrds: true
             valueFiles:
-              - '$values/{{ .path.path }}/values.yaml'
+              - '$values/{{`{{ .path.path }}`}}/values.yaml'
             ignoreMissingValueFiles: true
         - repoURL: https://gitlab.com/juulun/gitops.git
           targetRevision: test
           ref: values
       destination:
         server: https://kubernetes.default.svc
-        namespace: 'service-{{ .path.basename }}'
+        namespace: 'service-{{`{{ .path.basename }}`}}'

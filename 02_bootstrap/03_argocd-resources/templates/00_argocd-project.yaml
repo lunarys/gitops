@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: services
-  namespace: infra-argocd
+  name: argocd
 spec:
-  description: Service Deployments
+  description: Argocd Project
   sourceRepos:
     - https://gitlab.com/juulun/gitops.git
-    - https://helm.github.io/examples
   destinations:
-    - namespace: 'service-*'
+    - namespace: infra-argocd
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: '*'
       kind: '*'
+  orphanedResources:
+    warn: false

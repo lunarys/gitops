@@ -2,7 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: infra-simple
-  namespace: infra-argocd
 spec:
   goTemplate: true
   goTemplateOptions: [ "missingkey=error" ]
@@ -22,10 +21,10 @@ spec:
               repoURL: https://gitlab.com/juulun/gitops.git
               revision: test
               files:
-                - path: '{{ .path.path }}/app.yaml'
+                - path: '{{`{{ .path.path }}`}}/app.yaml'
   template:
     metadata:
-      name: '{{ .path.basename }}'
+      name: '{{`{{ .path.basename }}`}}'
     spec:
       project: 'infra'
       syncPolicy:
@@ -36,25 +35,25 @@ spec:
           - CreateNamespace=true
       destination:
         server: https://kubernetes.default.svc
-        namespace: 'infra-{{ .path.basename }}'
+        namespace: 'infra-{{`{{ .path.basename }}`}}'
   templatePatch: |
     spec:
       sources:
-        - repoURL: '{{ .helm.repo }}'
-          chart: '{{ .helm.chart }}'
-          targetRevision: '{{ .helm.version }}'
+        - repoURL: '{{`{{ .helm.repo }}`}}'
+          chart: '{{`{{ .helm.chart }}`}}'
+          targetRevision: '{{`{{ .helm.version }}`}}'
           helm:
             #releaseName: ''
             skipCrds: true
             #skipCrds: false  # TODO: improve? traefik requires crds
             valueFiles:
-              - '$values/{{ .path.path }}/values.yaml'
+              - '$values/{{`{{ .path.path }}`}}/values.yaml'
             ignoreMissingValueFiles: true
         - repoURL: https://gitlab.com/juulun/gitops.git
           targetRevision: test
           ref: values
-      {{- if and (hasKey . "additionalResources") (get . "additionalResources") }}
+      {{`{{- if and (hasKey . "additionalResources") (get . "additionalResources") }}`}}
         - repoURL: https://gitlab.com/juulun/gitops.git
           targetRevision: test
-          path: '{{ .path.path }}/resources'
-      {{- end }}
+          path: '{{`{{ .path.path }}`}}/resources'
+      {{`{{- end }}`}}

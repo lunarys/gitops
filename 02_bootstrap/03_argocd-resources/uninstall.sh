@@ -1,1 +1,1 @@
-kubectl delete -f *.yaml
+helm uninstall argocd-apps --namespace infra-argocd

@@ -1,3 +1,1 @@
-for file in *.yaml; do
-	kubectl apply -f "$file"
-done
+helm install argocd-apps . --namespace infra-argocd --create-namespace
