@@ -1,0 +1,5 @@
+# https://external-secrets.io/main/examples/bitwarden/
+helm:
+  chart: external-secrets
+  version: 0.15.1
+  repo: https://charts.external-secrets.io
