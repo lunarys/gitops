@@ -4,8 +4,8 @@ metadata:
   name: argocd
 spec:
   destination:
-    namespace: infra-argocd
-    server: https://kubernetes.default.svc
+    namespace: {{ .Values.namespace }}
+    server: {{ .Values.server }}
   project: argocd
   source:
     helm:
@@ -13,8 +13,8 @@ spec:
       valueFiles:
         - values.yaml
     path: 02_bootstrap/01_argocd-install
-    repoURL: https://gitlab.com/juulun/gitops.git
-    targetRevision: test
+    repoURL: {{ .Values.repoUrl }}
+    targetRevision: {{ .Values.targetRevision }}
   syncPolicy:
     automated:
       selfHeal: true

@@ -5,10 +5,10 @@ metadata:
 spec:
   description: Cilium Project
   sourceRepos:
-    - https://gitlab.com/juulun/gitops.git
+    - {{ .Values.repoUrl }}
   destinations:
     - namespace: kube-system
-      server: https://kubernetes.default.svc
+      server: {{ .Values.server }}
   clusterResourceWhitelist:
     - group: '*'
       kind: '*'

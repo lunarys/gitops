@@ -5,7 +5,7 @@ metadata:
 spec:
   description: Infrastructure Component Deployments
   sourceRepos:
-    - https://gitlab.com/juulun/gitops.git
+    - {{ .Values.repoUrl }}
     # Warning: Use the variant below (without oci://), as helm does not handle this properly. Requires a repository with enableOCI to be configured.
     #- oci://registry-1.docker.io/bitnamicharts
     - registry-1.docker.io/bitnamicharts
@@ -21,7 +21,7 @@ spec:
     - https://charts.external-secrets.io
   destinations:
     - namespace: 'infra-*'
-      server: https://kubernetes.default.svc
+      server: {{ .Values.server }}
   clusterResourceWhitelist:
     - group: '*'
       kind: '*'

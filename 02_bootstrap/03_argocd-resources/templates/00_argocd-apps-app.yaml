@@ -4,16 +4,18 @@ metadata:
   name: argocd-apps
 spec:
   destination:
-    namespace: infra-argocd
-    server: https://kubernetes.default.svc
+    namespace: {{ .Values.namespace }}
+    server: {{ .Values.server }}
   project: argocd
   source:
     path: 02_bootstrap/03_argocd-resources
-    repoURL: https://gitlab.com/juulun/gitops.git
-    targetRevision: test
-    #directory:
-    #recurse: true
-    #jsonnet: {}
+    repoURL: {{ .Values.repoUrl }}
+    targetRevision: {{ .Values.targetRevision }}
+    helm:
+      version: v3
+      valueFiles:
+        - values.yaml
+        - {{ .Values.targetValuesFile }}
   syncPolicy:
     automated:
       selfHeal: true

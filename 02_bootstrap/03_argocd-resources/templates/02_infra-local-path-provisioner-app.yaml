@@ -5,12 +5,12 @@ metadata:
 spec:
   destination:
     namespace: infra-local-path-provisioner
-    server: https://kubernetes.default.svc
+    server: {{ .Values.server }}
   # TODO: its own projects that allows just the github repository source?
   project: infra
   sources:
-    - repoURL: https://gitlab.com/juulun/gitops.git
-      targetRevision: test
+    - repoURL: {{ .Values.repoUrl }}
+      targetRevision: {{ .Values.targetRevision }}
       ref: values
     - helm:
         version: v3

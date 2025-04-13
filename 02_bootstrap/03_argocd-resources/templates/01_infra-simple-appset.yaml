@@ -9,8 +9,8 @@ spec:
     - matrix:
         generators:
           - git:
-              repoURL: https://gitlab.com/juulun/gitops.git
-              revision: test
+              repoURL: {{ .Values.repoUrl }}
+              revision: {{ .Values.targetRevision }}
               directories:
                 - path: '03_infra/*'
                 - path: '03_infra/*.disabled'
@@ -18,8 +18,8 @@ spec:
                 - path: '03_infra/*.custom'
                   exclude: true
           - git:
-              repoURL: https://gitlab.com/juulun/gitops.git
-              revision: test
+              repoURL: {{ .Values.repoUrl }}
+              revision: {{ .Values.targetRevision }}
               files:
                 - path: '{{`{{ .path.path }}`}}/app.yaml'
   template:
@@ -34,7 +34,7 @@ spec:
         syncOptions:
           - CreateNamespace=true
       destination:
-        server: https://kubernetes.default.svc
+        server: {{ .Values.server }}
         namespace: 'infra-{{`{{ .path.basename }}`}}'
   templatePatch: |
     spec:
@@ -49,11 +49,11 @@ spec:
             valueFiles:
               - '$values/{{`{{ .path.path }}`}}/values.yaml'
             ignoreMissingValueFiles: true
-        - repoURL: https://gitlab.com/juulun/gitops.git
-          targetRevision: test
+        - repoURL: {{ .Values.repoUrl }}
+          targetRevision: {{ .Values.targetRevision }}
           ref: values
       {{`{{- if and (hasKey . "additionalResources") (get . "additionalResources") }}`}}
-        - repoURL: https://gitlab.com/juulun/gitops.git
-          targetRevision: test
+        - repoURL: {{ .Values.repoUrl }}
+          targetRevision: {{ .Values.targetRevision }}
           path: '{{`{{ .path.path }}`}}/resources'
       {{`{{- end }}`}}
