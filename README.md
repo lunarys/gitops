@@ -4,11 +4,15 @@
 
 - [ ] cert-manager
 - [ ] replicated storage
-- [ ] node local storage
+- [ ] node local storage 
+  - [HwameiStor](https://hwameistor.io/)?
 - [ ] replicated database
   - [Bitnami / MariaDB](https://github.com/bitnami/charts/tree/main/bitnami/mariadb-galera)?
+  - cloudnative-pg?
 - [ ] backup
   - [Velero](https://velero.io/)?
+  - VolumeSnapshot?
+  - Longhorn internal?
 - [ ] network security
 - [ ] k8s resource permissions
 - [ ] external secrets
@@ -21,6 +25,7 @@
 - [ ] service kind / ip address
 - [ ] persistent storage
 - [ ] database
+- [ ] external secrets
 
 ## Potential components
 
@@ -41,4 +46,4 @@
 
 ### Secrets
 
-- [ ] [External secrets](https://external-secrets.io/latest/provider/bitwarden-secrets-manager/)
+- [x] [External secrets](https://external-secrets.io/latest/provider/bitwarden-secrets-manager/)
