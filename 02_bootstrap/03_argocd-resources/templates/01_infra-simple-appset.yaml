@@ -33,6 +33,7 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+          - ServerSideApply=true  # cloudnative-pg threw an error otherwise  # TODO: could be used everywhere?
       destination:
         server: {{ .Values.server }}
         namespace: 'infra-{{`{{ .path.basename }}`}}'
