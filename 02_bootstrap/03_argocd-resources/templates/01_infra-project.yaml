@@ -19,6 +19,8 @@ spec:
     - https://charts.longhorn.io
     # bitwarden / external-secrests
     - https://charts.external-secrets.io
+    # cloudnative-pg
+    - https://cloudnative-pg.github.io/charts
   destinations:
     - namespace: 'infra-*'
       server: {{ .Values.server }}
