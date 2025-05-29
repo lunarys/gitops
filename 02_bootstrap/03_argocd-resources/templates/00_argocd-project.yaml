@@ -5,10 +5,10 @@ metadata:
 spec:
   description: Argocd Project
   sourceRepos:
-    - https://gitlab.com/juulun/gitops.git
+    - {{ .Values.repoUrl }}
   destinations:
-    - namespace: infra-argocd
-      server: https://kubernetes.default.svc
+    - namespace: {{ .Values.namespace }}
+      server: {{ .Values.server }}
   clusterResourceWhitelist:
     - group: '*'
       kind: '*'

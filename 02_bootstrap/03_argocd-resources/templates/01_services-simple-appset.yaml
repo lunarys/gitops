@@ -9,15 +9,15 @@ spec:
     - matrix:
         generators:
           - git:
-              repoURL: https://gitlab.com/juulun/gitops.git
-              revision: test
+              repoURL: {{ .Values.repoUrl }}
+              revision: {{ .Values.targetRevision }}
               directories:
                 - path: '04_services/*'
                 - path: '04_services/*.disabled'
                   exclude: true
           - git:
-              repoURL: https://gitlab.com/juulun/gitops.git
-              revision: test
+              repoURL: {{ .Values.repoUrl }}
+              revision: {{ .Values.targetRevision }}
               files:
                 - path: '{{`{{ .path.path }}`}}/app.yaml'
   template:
@@ -41,9 +41,9 @@ spec:
             valueFiles:
               - '$values/{{`{{ .path.path }}`}}/values.yaml'
             ignoreMissingValueFiles: true
-        - repoURL: https://gitlab.com/juulun/gitops.git
-          targetRevision: test
+        - repoURL: {{ .Values.repoUrl }}
+          targetRevision: {{ .Values.targetRevision }}
           ref: values
       destination:
-        server: https://kubernetes.default.svc
+        server: {{ .Values.server }}
         namespace: 'service-{{`{{ .path.basename }}`}}'
