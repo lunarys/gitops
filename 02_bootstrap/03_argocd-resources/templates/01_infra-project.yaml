@@ -21,6 +21,8 @@ spec:
     - https://charts.external-secrets.io
     # cloudnative-pg
     - https://cloudnative-pg.github.io/charts
+    # minio
+    - https://charts.min.io/
   destinations:
     - namespace: 'infra-*'
       server: {{ .Values.server }}

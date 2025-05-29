@@ -7,7 +7,6 @@ spec:
   sourceRepos:
     - {{ .Values.repoUrl }}
     - https://helm.github.io/examples
-    - https://charts.min.io/
   destinations:
     - namespace: 'service-*'
       server: {{ .Values.server }}
