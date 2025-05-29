@@ -1,0 +1,24 @@
+mode: standalone
+
+persistence:
+  enabled: false
+
+replicas: 1
+
+#ingress:
+  #enabled: true
+  #hosts:
+  #  - test.k8s.local
+
+consoleIngress:
+  enabled: true
+  hosts:
+    - test.k8s.local
+
+rootUser: root
+rootPassword: password
+
+
+resources:
+  requests:
+    memory: 512Mi
