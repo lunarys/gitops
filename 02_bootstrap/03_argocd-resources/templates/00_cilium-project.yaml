@@ -9,6 +9,8 @@ spec:
   destinations:
     - namespace: kube-system
       server: {{ .Values.server }}
+    - namespace: cilium-secrets  # cilium tries to create secrets in this namespace...
+      server: {{ .Values.server }}
   clusterResourceWhitelist:
     - group: '*'
       kind: '*'
