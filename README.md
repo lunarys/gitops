@@ -17,6 +17,8 @@
 - [ ] k8s resource permissions
 - [ ] external secrets
 - [ ] base settings / owasp
+- [ ] ArgoCD source hydrator?
+- [ ] ArgoCD - App of apps as helm -> templating via values.yaml and all apps in /templates
 
 ### Helm Chart features
 
@@ -43,6 +45,7 @@
 ### Network
 
 - [x] [Cilium + Hubble](https://github.com/networkpolicy/tutorial?tab=readme-ov-file)
+- [ ] Default network policies
 
 ### Secrets
 
