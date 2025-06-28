@@ -21,5 +21,5 @@ else
 fi
 
 # --devel when beta chart
-helm install "$DIRNAME" --repo "${REPOSITORY%/}" "$CHART" --version "$VERSION" --create-namespace --namespace "$GROUPNAME-$DIRNAME" $values_file_option
+helm template "$DIRNAME" --debug --repo "${REPOSITORY%/}" "$CHART" --version "$VERSION" --create-namespace --namespace "$GROUPNAME-$DIRNAME" $values_file_option
 
