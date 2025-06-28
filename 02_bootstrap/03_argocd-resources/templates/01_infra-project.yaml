@@ -23,6 +23,8 @@ spec:
     - https://cloudnative-pg.github.io/charts
     # minio
     - https://charts.min.io/
+    # velero
+    - https://vmware-tanzu.github.io/helm-charts
   destinations:
     - namespace: 'infra-*'
       server: {{ .Values.server }}
