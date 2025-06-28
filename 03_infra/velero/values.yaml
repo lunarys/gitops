@@ -1,0 +1,22 @@
+# https://github.com/vmware-tanzu/helm-charts/blob/main/charts/velero/values.yaml
+# https://github.com/replicatedhq/local-volume-provider
+
+initContainers:
+  - name: velero-plugin-local
+    image: replicated/local-volume-provider:0.6.10
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+configuration:
+  backupStorageLocation:
+    - name: local
+      provider: replicated.com/hostpath
+      bucket: velero-hostpath
+      default: true
+      config:
+        path: /home/ju/velero-local-backups
+
+
+backupsEnabled: true
+snapshotsEnabled: false
