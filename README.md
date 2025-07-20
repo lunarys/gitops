@@ -11,14 +11,16 @@
   - cloudnative-pg?
 - [ ] backup
   - [Velero](https://velero.io/)?
+    - [Velero UI](https://github.com/otwld/velero-ui)?`
   - VolumeSnapshot?
   - Longhorn internal?
 - [ ] network security
 - [ ] k8s resource permissions
-- [ ] external secrets
+- [x] external secrets
 - [ ] base settings / owasp
 - [ ] ArgoCD source hydrator?
 - [ ] ArgoCD - App of apps as helm -> templating via values.yaml and all apps in /templates
+- [ ] Clean up PVCs: Retain leaves pvcs around, but Delete removes also the data (local-path-provisioner)
 
 ### Helm Chart features
 
