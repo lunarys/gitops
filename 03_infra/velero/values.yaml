@@ -6,6 +6,8 @@
 deployNodeAgent: true
 
 nodeAgent:
+  podVolumePath: "/var/lib/k0s/kubelet/pods"
+  pluginVolumePath: "/var/lib/k0s/kubelet/plugins"
   resources: {}
 
 initContainers:
