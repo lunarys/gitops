@@ -1,0 +1,9 @@
+apiVersion: v2
+name: velero-ui
+description: xxx
+type: application
+version: 0.1.0
+dependencies:
+  - name: velero-ui
+    version: 0.13.3
+    repository: https://helm.otwld.com/

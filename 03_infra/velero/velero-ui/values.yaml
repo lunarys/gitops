@@ -1,0 +1,12 @@
+velero-ui:
+  configuration:
+    general:
+      veleroNamespace: "infra-velero"
+
+  ingress:
+    enabled: true
+    hosts:
+      - host: test.k8s.local
+        paths: 
+          - path: "/"
+            pathType: "Prefix"

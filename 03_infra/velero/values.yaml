@@ -1,6 +1,13 @@
 # https://github.com/vmware-tanzu/helm-charts/blob/main/charts/velero/values.yaml
 # https://github.com/replicatedhq/local-volume-provider
 
+# daemonset required for file system backup modules when volume snapshots are not supported:
+# https://velero.io/docs/v1.16/file-system-backup/
+deployNodeAgent: true
+
+nodeAgent:
+  resources: {}
+
 initContainers:
   - name: velero-plugin-local
     image: replicated/local-volume-provider:0.6.10
