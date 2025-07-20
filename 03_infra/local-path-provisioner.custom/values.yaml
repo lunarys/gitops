@@ -8,12 +8,14 @@
 storageClassConfigs:
   local-path:
     storageClass:
+      create: true
       defaultClass: false
       pathPattern: "pv_{{ .PVC.Namespace }}_{{ .PVC.Name }}"
       reclaimPolicy: Retain
 
   local-path-auto-delete:
     storageClass:
+      create: true
       defaultClass: false
       pathPattern: "{{ .PVName }}_{{ .PVC.Namespace }}_{{ .PVC.Name }}"
       reclaimPolicy: Delete
