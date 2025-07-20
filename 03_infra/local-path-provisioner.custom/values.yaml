@@ -1,8 +1,20 @@
 # https://github.com/rancher/local-path-provisioner/tree/master/deploy/chart/local-path-provisioner
-storageClass:
-  defaultClass: false
-  pathPattern: "pvc-{{ .PVC.Namespace }}-{{ .PVC.Name }}"
+#storageClass:
+#  defaultClass: false
+#  pathPattern: "pvc-{{ .PVC.Namespace }}-{{ .PVC.Name }}"
+#  relaimPolicy: Delete
 
-  # Delete or Retain
-  reclaimPolicy: Delete
+# https://github.com/rancher/local-path-provisioner/blob/master/deploy/chart/local-path-provisioner/templates/storageclass.yaml
+storageClassConfigs:
+  local-path:
+    storageClass:
+      defaultClass: false
+      pathPattern: "pv_{{ .PVC.Namespace }}_{{ .PVC.Name }}"
+      reclaimPolicy: Retain
+
+  local-path-auto-delete:
+    storageClass:
+      defaultClass: false
+      pathPattern: "{{ .PVName }}_{{ .PVC.Namespace }}_{{ .PVC.Name }}"
+      reclaimPolicy: Delete
 
