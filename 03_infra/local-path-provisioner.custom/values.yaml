@@ -1,5 +1,8 @@
 # https://github.com/rancher/local-path-provisioner/tree/master/deploy/chart/local-path-provisioner
 storageClass:
   defaultClass: false
-  reclaimPolicy: Retain
   pathPattern: "pvc-{{ .PVC.Namespace }}-{{ .PVC.Name }}"
+
+  # Delete or Retain
+  reclaimPolicy: Delete
+
