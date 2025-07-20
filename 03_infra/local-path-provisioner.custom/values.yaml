@@ -7,6 +7,10 @@
 # https://github.com/rancher/local-path-provisioner/blob/master/deploy/chart/local-path-provisioner/templates/storageclass.yaml
 storageClassConfigs:
   local-path:
+    nodePathMap:
+      - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+        paths:
+          - /opt/local-path-provisioner
     storageClass:
       create: true
       defaultClass: false
@@ -16,6 +20,10 @@ storageClassConfigs:
       reclaimPolicy: Retain
 
   local-path-auto-delete:
+    nodePathMap:
+      - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+        paths:
+          - /opt/local-path-provisioner
     storageClass:
       create: true
       defaultClass: false
