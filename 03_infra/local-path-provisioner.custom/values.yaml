@@ -10,6 +10,8 @@ storageClassConfigs:
     storageClass:
       create: true
       defaultClass: false
+      defaultVolumeType: "hostPath"
+      volumeBindingMode: WaitForFirstConsumer  # vs. Immediate
       pathPattern: "pv_{{ .PVC.Namespace }}_{{ .PVC.Name }}"
       reclaimPolicy: Retain
 
@@ -17,6 +19,8 @@ storageClassConfigs:
     storageClass:
       create: true
       defaultClass: false
+      defaultVolumeType: "hostPath"
+      volumeBindingMode: WaitForFirstConsumer  # vs. Immediate
       pathPattern: "{{ .PVName }}_{{ .PVC.Namespace }}_{{ .PVC.Name }}"
       reclaimPolicy: Delete
 
