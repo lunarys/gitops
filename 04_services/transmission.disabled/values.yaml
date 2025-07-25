@@ -9,72 +9,88 @@ image:
 service:
   targetPort: 9091
 
-livenessProbe: # TODO
+livenessProbe:
   enabled: true
-  path: 
-  port:
-  #failureThreshold: 3
-  #initialDelaySeconds: 10
-  #periodSeconds: 2
-  #successThreshold: 1
-  #tcpSocket:
-  #  port: 9091
-  #timeoutSeconds: 2
+  override:
+    failureThreshold: 3
+    initialDelaySeconds: 10
+    periodSeconds: 2
+    successThreshold: 1
+    tcpSocket:
+      port: 9091
+    timeoutSeconds: 2
 
-  readinessProbe: # TODO: verify
+readinessProbe:
   enabled: true
-  path:
-  port:
-  #failureThreshold: 3
-  #initialDelaySeconds: 10
-  #periodSeconds: 2
-  #successThreshold: 2
-  #tcpSocket:
-  #  port: 9091
-  #timeoutSeconds: 2
+  override:
+    failureThreshold: 3
+    initialDelaySeconds: 10
+    periodSeconds: 2
+    successThreshold: 2
+    tcpSocket:
+      port: 9091
+    timeoutSeconds: 2
+
+resources:
+  limits:
+    memory: 1000Mi
 
 storage-smb:
-  volumes:
-    - /mnt/transmission:/data
-    - /services/transmission/settings:/settings
-    - /etc/localtime:/etc/localtime:ro
+  enabled: true
+  external-secrets:
+    enabled: true
+    commonRemoteKey: "f460fcfc-357e-4d1b-8f5e-b32500e5c6fc"
+  smb:
+    host: "erolas.elda"
+    share: "test"
+    capacity: "1000Gi"
+  mount:
+    dir_mode: "0770"
+    file_mode: "0660"
+    uid: 1333
+    gid: 1333
+    capacity: "1000Gi"
 
-securityContext: # TODO: add/how
-  # spec.securityContext vs. spec.containers[].securityContext
-  # https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+# TODO: should I add this as a volume??
+#volumes:
+#  - /services/transmission/settings:/settings
+
+containerSecurityContext:
   allowPrivilegeEscalation: false
   fsGroup: 1333
   capabilities:
     add: ["NET_ADMIN"]
 
-external-secrets: # TODO: operator+add
-  secrets:
-    - name: vpn-credentials
-      template:
-        OPENVPN_USERNAME: ""
-        OPENVPN_PASSWORD: ""
-        TRANSMISSION_RPC_USERNAME: ""
-        TRANSMISSION_RPC_PASSWORD: ""
-        TRANSMISSION_RPC_AUTHENTICATION_REQUIRED: "true"
+external-secrets:
+  enabled: true
+  name: vpn-credentials
+  commonRemoteKey: "9c1b1535-b2c4-411e-a60a-b32500e60cda"
+  fields:
+    OPENVPN_USERNAME:
+      storeRefName: bitwarden-login
+      remoteProperty: username
+    OPENVPN_PASSWORD:
+      storeRefName: bitwarden-login
+      remoteProperty: password
+    TRANSMISSION_RPC_USERNAME:
+      enabled: false
+      storeRefName: bitwarden-login
+      remoteProperty: TRANSMISSION_RPC_USERNAME
+    TRANSMISSION_RPC_PASSWORD:
+      enabled: false
+      storeRefName: bitwarden-login
+      remoteProperty: TRANSMISSION_RPC_PASSWORD
+
 
 extraConfig:
   secrets:
     - vpn-credentials
   volumeMounts:
-    - mountPath: /dev/net/tun
-      name: tunnel
-    - mountPath: /etc/localtime
-      name: localtime
-      readOnly: true
-  volumes: # TODO: add
     - hostPath:
         path: /dev/net/tun
         type: ""
-        name: tunnel
-    - hostPath:
-        path: /etc/localtime
-        type: ""
-        name: localtime
+      name: tunnel
+      mountPath: /dev/net/tun
   env: # TODO: as object
     - name: PUID
       value: "1333"
@@ -101,7 +117,7 @@ extraConfig:
     - name: "OPENVPN_CONFIG"
       value: ""
     - name: "LOCAL_NETWORK"
-      value: 10.0.0.0/22
+      value: 10.0.0.0/8  # TODO: should cover the whole cluster? 10.0.0.0/22 is the actual home subnet
     # mssfix: https://github.com/haugene/docker-transmission-openvpn/issues/257
     - name: "OPENVPN_OPTS"
       value: "--inactive 3600 --ping 10 --ping-exit 60 --mute-replay-warnings"
@@ -109,4 +125,30 @@ extraConfig:
       value: "false"
     - name: "CREATE_TUN_DEVICE"
       value: "false"
+    - name: TRANSMISSION_RPC_AUTHENTICATION_REQUIRED
+      value: "true"
 
+    # from https://github.com/zebpalmer/kubernetes-transmission-openvpn/blob/master/examples/transmission-config.yaml
+    - name: TRANSMISSION_DOWNLOAD_QUEUE_SIZE
+      value: "4"
+    - name: TRANSMISSION_RATIO_LIMIT
+      value: "2"
+    - name: TRANSMISSION_RATIO_LIMIT_ENABLED
+      value: "true"
+    - name: TRANSMISSION_SPEED_LIMIT_DOWN
+      value: "10000"
+    - name: TRANSMISSION_SPEED_LIMIT_DOWN_ENABLED
+      value: "true"
+    - name: TRANSMISSION_SPEED_LIMIT_UP
+      value: "1000"
+    - name: TRANSMISSION_SPEED_LIMIT_UP_ENABLED
+      value: "true"
+    - name: WEBPROXY_ENABLED
+      value: "false"
+
+# TODO: this should block egress traffic, but needs to be tested
+networkpolicy:
+  enabled: true
+  spec:
+    endpointSelector: {}
+    egress: {}
