@@ -59,7 +59,7 @@ podSecurityContext:
   fsGroup: 1333
 
 containerSecurityContext:
-  allowPrivilegeEscalation: false
+  allowPrivilegeEscalation: true  # needs to be true for privileged mode
   privileged: true  # required for TUN/TAP device access
   capabilities:
     add: ["NET_ADMIN"]
