@@ -1,6 +1,8 @@
 # Reference: https://github.com/zebpalmer/kubernetes-transmission-openvpn
 ingress:
   host: transmission.srv.elda
+  accessControl:
+    externalAccessAllowed: true  # TODO: temporary, as the middleware for internal access is not yet deployed
 
 image:
   name: haugene/transmission-openvpn
