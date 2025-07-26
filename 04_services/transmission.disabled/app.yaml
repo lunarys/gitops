@@ -1,5 +1,4 @@
 helm:
-  chart: generic-app
+  chart: generic-service
   version: 0.1.0 
-  repo: https://gitlab.com/juulun/...
-
+  repo: oci://registry.gitlab.com/juulun/helm-charts/charts
