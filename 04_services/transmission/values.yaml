@@ -134,7 +134,7 @@ extraConfig:
     - name: "CREATE_TUN_DEVICE"
       value: "false"
     - name: TRANSMISSION_RPC_AUTHENTICATION_REQUIRED
-      value: "true"
+      value: "false"  # TODO: disabled for now
 
     # from https://github.com/zebpalmer/kubernetes-transmission-openvpn/blob/master/examples/transmission-config.yaml
     - name: TRANSMISSION_DOWNLOAD_QUEUE_SIZE
