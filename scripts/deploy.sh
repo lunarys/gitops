@@ -2,7 +2,7 @@
 set -x
 PPD="$(pwd)"
 
-DIRECTORY="$1"
+DIRECTORY="${1:-"."}"
 APPFILE="app.yaml"
 
 cd "$DIRECTORY"
@@ -20,6 +20,12 @@ else
 	values_file_option=""
 fi
 
+if grep -q "^oci://" <<< "$REPOSITORY"; then
+  location="${REPOSITORY%/}/$CHART"
+else
+  location="--repo ${REPOSITORY%/} $CHART"
+fi
+
 # --devel when beta chart
-helm install "$DIRNAME" --repo "${REPOSITORY%/}" "$CHART" --version "$VERSION" --create-namespace --namespace "$GROUPNAME-$DIRNAME" $values_file_option
+helm install "$DIRNAME" $location --version "$VERSION" --create-namespace --namespace "$GROUPNAME-$DIRNAME" $values_file_option
 
