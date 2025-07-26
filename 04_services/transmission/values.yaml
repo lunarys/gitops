@@ -55,9 +55,11 @@ storage-smb:
 #volumes:
 #  - /services/transmission/settings:/settings
 
+podSecurityContext:
+  fsGroup: 1333
+
 containerSecurityContext:
   allowPrivilegeEscalation: false
-  fsGroup: 1333
   capabilities:
     add: ["NET_ADMIN"]
 
