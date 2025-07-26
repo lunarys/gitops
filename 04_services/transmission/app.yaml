@@ -1,4 +1,4 @@
 helm:
   chart: generic-service
-  version: 0.1.1
+  version: 0.1.2
   repo: registry.gitlab.com/juulun/helm-charts/charts  # TODO: OCI registry
