@@ -148,7 +148,7 @@ extraConfig:
 
 # TODO: this should block egress traffic, but needs to be tested
 networkpolicy:
-  enabled: true
+  enabled: false
   spec:
     endpointSelector: {}
     egress: {}
