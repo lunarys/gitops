@@ -60,6 +60,7 @@ podSecurityContext:
 
 containerSecurityContext:
   allowPrivilegeEscalation: false
+  privileged: true  # required for TUN/TAP device access
   capabilities:
     add: ["NET_ADMIN"]
 
