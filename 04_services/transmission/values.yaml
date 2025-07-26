@@ -50,6 +50,9 @@ storage-smb:
     uid: 1333
     gid: 1333
     capacity: "1000Gi"
+    path: /data
+    subPath: transmission-test
+
 
 # TODO: should I add this as a volume??
 #volumes:
