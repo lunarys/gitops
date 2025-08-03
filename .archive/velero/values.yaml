@@ -29,3 +29,13 @@ configuration:
 
 backupsEnabled: true
 snapshotsEnabled: false
+
+# TODO: kopia is default and restic won't be able to create backups with velero >1.16,
+#       but kopia is not supported by local-volume-provider
+# https://github.com/replicatedhq/local-volume-provider/issues/32
+# https://github.com/vmware-tanzu/velero/issues/6197
+uploaderType: "restic"
+
+# TODO: needs to be configured somewhere
+#data:
+#  repository-password: "changeme"
