@@ -1,0 +1,76 @@
+{{- define "apps-wrapper.application" -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ include "apps-wrapper.name" . }}-application
+spec:
+  destination:
+    namespace: {{ include "apps-wrapper.namespace" . }}
+    server: {{ include "apps-wrapper.server" . }}
+  project: {{ include "apps-wrapper.name" . }}-project
+  sources:
+  {{- if eq "chart" .settings.variant }}
+    # from Chart.yaml
+    - helm:
+        version: v3
+        valueFiles:
+          - values.yaml
+          {{- if .root.Values.targetValuesFile }}
+          - {{ .root.Values.targetValuesFile }}
+          {{- end }}
+        #ignoreMissingValueFiles: true
+      repoURL: {{ include "apps-wrapper.repoUrl" . }}
+      targetRevision: {{ include "apps-wrapper.targetRevision" . }}
+      path: {{ include "apps-wrapper.fullpath" . }}
+  {{- end }}
+  {{- if eq "app" .settings.variant }}
+    # from app.yaml
+    {{- with (index .settings.files "app.yaml") }}
+    - repoURL: {{ .helm.repo | quote }}
+      chart: {{ .helm.chart | quote }}
+      targetRevision: {{ .helm.version | quote }}
+    {{- end }}
+      helm:
+        #releaseName: ''
+        skipCrds: true
+        valueFiles:
+          - '$repo/{{ include "apps-wrapper.fullpath" . }}/values.yaml'
+          {{- if .root.Values.targetValuesFile }}
+          - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ .root.Values.targetValuesFile }}'
+          {{- end }}
+        ignoreMissingValueFiles: true
+  {{- end }}
+  {{- if index .settings.files "secrets.yaml" }}
+    # secrets
+    - repoURL: {{ .root.Values.mainHelmRepo }}
+      chart: {{ .root.Values.secretsChart }}
+      targetRevision: {{ index .settings.files "secrets.yaml" "version" | default .root.Values.secretsChartVersion }}
+      helm:
+        skipCrds: true
+        #ignoreMissingValueFiles: true
+        valuesFiles:
+          - '$repo/{{ include "apps-wrapper.fullpath" . }}/secrets.yaml'
+          {{- if .root.Values.targetSecretsFile }}
+          - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ .root.Values.targetSecretsFile }}'
+          {{- end }}
+  {{- end }}
+  {{- if or (eq "app" .settings.variant) (index .settings.files "secrets.yaml") }}
+    # repo reference for values.yaml for app.yaml or secrets.yaml for secrets
+    - repoURL: {{ include "apps-wrapper.repoUrl" . }}
+      targetRevision: {{ include "apps-wrapper.targetRevision" . }}
+      ref: repo
+  {{- end }}
+  {{- if include "apps-wrapper.hasAdditionalResources" . }}
+    # additional resources
+    - repoURL: {{ include "apps-wrapper.repoUrl" . }}
+      targetRevision: {{ include "apps-wrapper.targetRevision" . }}
+      path: '{{ include "apps-wrapper.fullpath" . }}/resources'
+  {{- end }}
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: false
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true  # cloudnative-pg threw an error otherwise  # TODO: could be used everywhere?
+{{- end -}}

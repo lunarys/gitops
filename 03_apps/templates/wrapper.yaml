@@ -1,0 +1,57 @@
+{{- $apps := dict -}}
+{{- $allfiles := .Files.Glob "apps/*/**" -}}
+{{- $appYamls := .Files.Glob "apps/*/app.yaml" }}
+{{- range $path, $_ := $appYamls }}
+  {{- $dir := dir $path }}
+  {{- $name := base $dir }}
+  {{- $files := dict }}
+  {{- range $filePath, $fileContent := $allfiles }}
+    {{- if hasPrefix $dir $filePath }}
+      {{- $filePathStripped := trimPrefix (printf "%s/" $dir) $filePath }}
+      {{- $_ := set $files $filePathStripped ($.Files.Get $filePath | fromYaml) }}
+    {{- end }}
+  {{- end }}
+  {{- $_ := set $apps $name (dict "name" $name "dir" $dir "files" $files "variant" "app") }}
+{{- end }}
+{{- $chartYamls := .Files.Glob "apps/*/Chart.yaml" }}
+{{- range $path, $_ := $chartYamls }}
+  {{- $dir := dir $path }}
+  {{- $name := base $dir }}
+  {{- $files := dict }}
+  {{- range $filePath, $fileContent := $allfiles }}
+    {{- if hasPrefix $dir $filePath }}
+      {{- $filePathStripped := trimPrefix (printf "%s/" $dir) $filePath }}
+      {{- $_ := set $files $filePathStripped ($.Files.Get $filePath | fromYaml) }}
+    {{- end }}
+  {{- end }}
+  {{- $_ := set $apps $name (dict "name" $name "dir" $dir "files" $files "variant" "chart") }}
+{{- end }}
+{{/*
+Structure of the apps dictionary:
+  {
+    "app1": {
+      "name": "app1",
+      "dir": "apps/app1",
+      "files": {
+        "file1.yaml": "<content as dict>",
+        "app.yaml": "<content as dict>"
+      },
+      "variant": "app"
+    },
+    "chart1": {
+      "name": "chart1",
+      "dir": "apps/chart1",
+      "files": {
+        "Chart.yaml": "<content as dict>",
+        "values.yaml": "<content as dict>"
+      },
+      "variant": "chart"
+    }
+  }
+*/}}
+{{- range $app, $settings := $apps }}
+---
+{{- include "apps-wrapper.application" (dict "settings" $settings "root" $) }}
+---
+{{- include "apps-wrapper.project" (dict "settings" $settings "root" $) }}
+{{- end }}

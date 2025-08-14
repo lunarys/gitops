@@ -1,0 +1,15 @@
+renderTest: false
+
+baseDir: 03_apps
+mainRepo: https://todo/gitops.git
+mainHelmRepo: registry.gitlab.com/juulun/helm-charts/charts
+
+secretsChart: ""
+secretsChartVersion: ""
+
+targetRevision: test
+targetValuesFile: ""
+targetSecretsFile: ""
+
+namespace: infra-argocd
+server: https://kubernetes.default.svc
