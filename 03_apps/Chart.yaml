@@ -1,5 +1,5 @@
 apiVersion: v2
 name: apps wrapper
-description: Network policy helper (cilium)
+description: Wraps ArgoCD applications and projects
 type: application
 version: 0.1.0
