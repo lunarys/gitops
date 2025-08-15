@@ -21,6 +21,9 @@
 - [ ] ArgoCD source hydrator?
 - [ ] ArgoCD - App of apps as helm -> templating via values.yaml and all apps in /templates
 - [ ] Clean up PVCs: Retain leaves pvcs around, but Delete removes also the data (local-path-provisioner)
+- [ ] Pod Security Standards?
+  - https://docs.k0sproject.io/stable/podsecurity/
+  - https://kubernetes.io/docs/concepts/security/pod-security-standards/
 
 ### Helm Chart features
 
