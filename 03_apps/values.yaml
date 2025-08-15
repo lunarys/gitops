@@ -4,7 +4,7 @@ renderTest: false
 # -- Path to the root of this helm chart within the git repository.
 baseDir: 03_apps
 # -- The main git repository where the apps are stored. (This repository.)
-mainRepo: https://todo/gitops.git
+mainRepo: https://gitlab.com/juulun/gitops.git
 # -- The helm repository where my base helm charts are stored.
 mainHelmRepo: registry.gitlab.com/juulun/helm-charts/charts
 
