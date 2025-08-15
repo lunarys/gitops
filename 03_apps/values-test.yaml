@@ -1,0 +1,3 @@
+targetRevision: main
+targetValuesFile: values-test.yaml
+targetSecretsFile: secrets-test.yaml

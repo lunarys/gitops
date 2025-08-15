@@ -9,12 +9,12 @@ mainRepo: https://todo/gitops.git
 mainHelmRepo: registry.gitlab.com/juulun/helm-charts/charts
 
 # -- The revision of the `mainRepo` to use.
-targetRevision: test
+targetRevision: main
 
 # - The helm chart within the `mainHelmRepo` that is used to render secrets.
-secretsChart: ""
+secretsChart: "external-secrets"
 # - The version of the `secretsChart` to use by default.
-secretsChartVersion: ""
+secretsChartVersion: "0.4.2"
 
 # -- The values file to use for the application in the respective cluster, e.g. `values-test.yaml`.
 # In addition to the default `values.yaml` file.

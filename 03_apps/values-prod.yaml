@@ -1,0 +1,3 @@
+targetRevision: main
+targetValuesFile: values-prod.yaml
+targetSecretsFile: secrets-prod.yaml
