@@ -38,7 +38,7 @@ spec:
           {{- if .root.Values.targetValuesFile }}
           - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ .root.Values.targetValuesFile }}'
           {{- end }}
-        ignoreMissingValueFiles: true
+        #ignoreMissingValueFiles: true
   {{- end }}
   {{- if index .settings.files "secrets.yaml" }}
     # secrets

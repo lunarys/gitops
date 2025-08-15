@@ -1,0 +1,10 @@
+cilium:
+  ipam:
+    operator:
+      clusterPoolIPv4PodCIDRList: ["10.243.0.0/16"]
+
+  hubble:
+    ui:
+      ingress:
+        hosts:
+          - hubble.k8s-test-1.local

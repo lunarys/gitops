@@ -1,0 +1,10 @@
+cilium:
+  ipam:
+    operator:
+      clusterPoolIPv4PodCIDRList: ["10.244.0.0/16"]
+
+  hubble:
+    ui:
+      ingress:
+        hosts:
+          - hubble.srv.elda

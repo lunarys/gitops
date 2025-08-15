@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cilium-application
+spec:
+  destination:
+    namespace: kube-system
+    server: {{ .Values.server }}
+  project: cilium-project
+  sources:
+    - helm:
+        version: v3
+        valueFiles:
+          - values.yaml
+          {{- if .Values.targetValuesFile }}
+          - {{ .Values.targetValuesFile }}
+          {{- end }}
+      path: 02_bootstrap/00_cilium
+      repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.targetRevision }}
+    - path: 02_bootstrap/00_cilium/resources
+      repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.targetRevision }}
+    {{- if .Values.targetResourcesDir }}
+    - path: 02_bootstrap/00_cilium/{{ .Values.targetResourcesDir }}
+      repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.targetRevision }}
+    {{- end }}
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: false
+

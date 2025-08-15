@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: bitnami-repo
-  namespace: infra-argocd
+  namespace: argocd
   labels:
     argocd.argoproj.io/secret-type: repository
 stringData:

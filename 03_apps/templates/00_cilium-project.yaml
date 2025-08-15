@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: cilium-project
+spec:
+  description: Cilium Project
+  sourceRepos:
+    - {{ .Values.mainRepo }}
+  destinations:
+    - namespace: kube-system
+      server: {{ .Values.server }}
+    - namespace: cilium-secrets  # cilium tries to create secrets in this namespace...
+      server: {{ .Values.server }}
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  orphanedResources:
+    warn: false
+

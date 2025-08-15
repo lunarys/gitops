@@ -1,1 +1,1 @@
-helm uninstall argocd --namespace infra-argocd
+helm uninstall argocd --namespace argocd

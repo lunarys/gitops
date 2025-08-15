@@ -22,9 +22,12 @@ targetValuesFile: ""
 # -- The secrets file to use for the application in the respective cluster, e.g. `secrets-test.yaml`.
 # In addition to the default `secrets.yaml` file.
 targetSecretsFile: ""
+# -- The directory to use for additional resources in the respective cluster, e.g. `resources-test`.
+# Currently only applies to `cilium`.
+targetResourcesDir: ""
 
-# -- TODO: The namespace the ArgoCD applications and projects are created in.
-namespace: infra-argocd
+# -- The namespace the ArgoCD applications and projects are created in. Must match the namespace of the ArgoCD instance.
+namespace: argocd
 # Destination kubernetes cluster.
 server: https://kubernetes.default.svc
 

@@ -21,9 +21,6 @@ cilium:
 
   operator:
     replicas: 1
-  ipam:
-    operator:
-      clusterPoolIPv4PodCIDRList: ["10.243.0.0/16"]
 
   hubble:
     enabled: true
@@ -33,6 +30,3 @@ cilium:
       enabled: true
       ingress:
         enabled: true
-        hosts:
-          - hubble.k8s-test-1.local
-
