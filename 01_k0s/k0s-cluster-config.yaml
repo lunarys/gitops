@@ -1,0 +1,39 @@
+# https://docs.k0sproject.io/stable/configuration/
+---
+apiVersion: k0sctl.k0sproject.io/v1beta1
+kind: ClusterConfig
+metadata:
+  name: k0s-cluster
+spec:
+  #api:
+  #  k0sApiPort: 9443
+  #  port: 6443
+  #installConfig:
+  #  users:
+  #    etcdUser: etcd
+  #    kineUser: kube-apiserver
+  #    konnectivityUser: konnectivity-server
+  #    kubeAPIserverUser: kube-apiserver
+  #    kubeSchedulerUser: kube-scheduler
+  #konnectivity:
+  #  adminPort: 8133
+  #  agentPort: 8132
+  network:
+    kubeProxy:
+      disabled: true
+      #mode: iptables
+    #kuberouter:
+    #  autoMTU: true
+    #  mtu: 0
+    #  peerRouterASNs: ""
+    #  peerRouterIPs: ""
+    #podCIDR: 10.244.0.0/16  # no effect due to cilium
+    provider: custom  # cilium - https://docs.cilium.io/en/latest/installation/k0s/
+    serviceCIDR: 10.96.0.0/12
+  # Removed and replaced with Pod Security Standards: https://docs.k0sproject.io/stable/podsecurity/
+  #podSecurityPolicy:
+  #  defaultPolicy: 00-k0s-privileged
+  storage:
+    type: etcd
+  telemetry:
+    enabled: false

@@ -1,0 +1,38 @@
+# https://github.com/k0sproject/k0sctl?tab=readme-ov-file#speck0sconfig-mapping-optional-default-auto-generated
+apiVersion: k0sctl.k0sproject.io/v1beta1
+kind: Cluster
+metadata:
+  name: k0s-cluster-test
+spec:
+  hosts:
+    - ssh:
+        address: 10.0.1.190
+        user: ju
+        port: 22
+        keyPath: ~/.ssh/id_ed25519
+      role: single
+      #role: controller+worker
+  k0s:
+    version: v1.33.3+k0s.0
+
+#  options:
+#    wait:
+#      enabled: true
+#    drain:
+#      enabled: true
+#      gracePeriod: 2m0s
+#      timeout: 5m0s
+#      force: true
+#      ignoreDaemonSets: true
+#      deleteEmptyDirData: true
+#      podSelector: ""
+#      skipWaitForDeleteTimeout: 0s
+#    concurrency:
+#      limit: 30
+#      workerDisruptionPercent: 10
+#      uploads: 5
+#    evictTaint:
+#      enabled: false
+#      taint: k0sctl.k0sproject.io/evict=true
+#      effect: NoExecute
+#      controllerWorkers: false
