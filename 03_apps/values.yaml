@@ -31,6 +31,5 @@ namespace: argocd
 # Destination kubernetes cluster.
 server: https://kubernetes.default.svc
 
-# -- Only apps listed here will be rendered.
-enabled:
-  - longhorn
+# -- Only apps listed here will be rendered. Set via `values-[env]-apps.yaml`.
+enabled: []

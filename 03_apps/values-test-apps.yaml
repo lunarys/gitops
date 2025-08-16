@@ -1,0 +1,3 @@
+# -- Only apps listed here will be rendered.
+enabled:
+  - longhorn

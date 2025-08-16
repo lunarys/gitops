@@ -18,6 +18,9 @@ spec:
         {{- if include "apps-wrapper.targetValuesFile" $ }}
         - {{ include "apps-wrapper.targetValuesFile" $ }}
         {{- end }}
+        {{- if .Values.environment }}
+        - values-{{ .Values.environment }}-apps.yaml
+        {{- end }}
   syncPolicy:
     automated:
       selfHeal: true
