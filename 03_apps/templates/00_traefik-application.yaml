@@ -9,8 +9,8 @@ spec:
   project: traefik-project
   sources:
     - helm:
-      version: v3
-      valueFiles:
+        version: v3
+        valueFiles:
           - values.yaml
           {{- if include "apps-wrapper.targetValuesFile" $ }}
           - {{ include "apps-wrapper.targetValuesFile" $ }}
