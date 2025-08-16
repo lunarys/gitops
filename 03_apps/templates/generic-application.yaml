@@ -48,7 +48,7 @@ spec:
       helm:
         skipCrds: true
         #ignoreMissingValueFiles: true
-        valuesFiles:
+        valueFiles:
           - '$repo/{{ include "apps-wrapper.fullpath" . }}/secrets.yaml'
           {{- if .root.Values.targetSecretsFile }}
           - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ .root.Values.targetSecretsFile }}'
