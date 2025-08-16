@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ include "apps-wrapper.name" . }}-application
+  name: {{ include "apps-wrapper.name" . }}
 spec:
   destination:
     namespace: {{ include "apps-wrapper.namespace" . }}
