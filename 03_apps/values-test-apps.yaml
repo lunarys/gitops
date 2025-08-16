@@ -3,3 +3,4 @@ enabled:
   - bitwarden
   - local-path-provisioner
   - longhorn
+  - smb-driver
