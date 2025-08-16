@@ -1,3 +1,4 @@
 # -- Only apps listed here will be rendered.
 enabled:
+  - bitwarden
   - longhorn

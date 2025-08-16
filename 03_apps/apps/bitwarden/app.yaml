@@ -3,4 +3,3 @@ helm:
   chart: external-secrets
   version: 0.18.2
   repo: https://charts.external-secrets.io
-additionalResources: true
