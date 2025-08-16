@@ -7,17 +7,20 @@ spec:
     namespace: traefik
     server: {{ .Values.server }}
   project: traefik-project
-  source:
-    helm:
+  sources:
+    - helm:
       version: v3
       valueFiles:
-        - values.yaml
-        {{- if include "apps-wrapper.targetValuesFile" $ }}
-        - {{ include "apps-wrapper.targetValuesFile" $ }}
-        {{- end }}
-    path: 02_bootstrap/03_traefik
-    repoURL: {{ .Values.mainRepo }}
-    targetRevision: {{ .Values.targetRevision }}
+          - values.yaml
+          {{- if include "apps-wrapper.targetValuesFile" $ }}
+          - {{ include "apps-wrapper.targetValuesFile" $ }}
+          {{- end }}
+      path: 02_bootstrap/03_traefik
+      repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.targetRevision }}
+    - path: 02_bootstrap/03_traefik/resources
+      repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.targetRevision }}
   syncPolicy:
     automated:
       selfHeal: true
