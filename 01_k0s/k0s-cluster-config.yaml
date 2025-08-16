@@ -1,6 +1,5 @@
 # https://docs.k0sproject.io/stable/configuration/
----
-apiVersion: k0sctl.k0sproject.io/v1beta1
+apiVersion: k0s.k0sproject.io/v1beta1
 kind: ClusterConfig
 metadata:
   name: k0s-cluster
