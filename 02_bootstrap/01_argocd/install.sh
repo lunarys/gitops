@@ -8,7 +8,7 @@ else
 fi
 
 helm dependency build
-helm update --install argocd . \
+helm upgrade --install argocd . \
   --namespace "$ARGOCD_NS" \
   --create-namespace \
   -f values.yaml \
