@@ -1,0 +1,18 @@
+# https://longhorn.io/docs/1.9.1/snapshots-and-backups/scheduling-backups-and-snapshots/
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: longhorn-recurring-backup
+spec:
+  cron: "5 4 * * *"  # Daily at 4:05 AM
+  task: "backup"
+  groups:
+  - default
+  #- group1
+  retain: 5
+  concurrency: 2
+  #labels:
+  #  label/1: a
+  #  label/2: b
+  parameters:
+    full-backup-interval: 7
