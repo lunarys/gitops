@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: services
+spec:
+  goTemplate: true
+  goTemplateOptions: [ "missingkey=error" ]
+  generators:
+    - matrix:
+        generators:
+          - git:
+              repoURL: {{ .Values.repoUrl }}
+              revision: {{ .Values.targetRevision }}
+              directories:
+                - path: '04_services/*'
+                - path: '04_services/*.disabled'
+                  exclude: true
+          - git:
+              repoURL: {{ .Values.repoUrl }}
+              revision: {{ .Values.targetRevision }}
+              files:
+                - path: '{{`{{ .path.path }}`}}/Chart.yaml'
+  template:
+    metadata:
+      name: '{{`{{ .path.basename }}`}}'
+    spec:
+      project: 'services'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+      source:
+        repoURL: {{ .Values.repoUrl }}
+        targetRevision: {{ .Values.targetRevision }}
+        path: '{{`{{ .path.path }}`}}'
+      destination:
+        server: {{ .Values.server }}
+        namespace: 'service-{{`{{ .path.basename }}`}}'

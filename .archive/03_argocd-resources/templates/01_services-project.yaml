@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: services
+spec:
+  description: Service Deployments
+  sourceRepos:
+    - {{ .Values.repoUrl }}
+    - https://helm.github.io/examples
+    - registry.gitlab.com/juulun/helm-charts/charts
+  destinations:
+    - namespace: 'service-*'
+      server: {{ .Values.server }}
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
