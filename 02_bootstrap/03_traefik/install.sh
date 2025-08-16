@@ -1,4 +1,4 @@
-ARGOCD_NS='argocd'
+NAMESPACE='traefik'
 
 if [ -z "$1" ]; then
     echo "ERROR: Enter environment for values file (test/prod)"
@@ -7,9 +7,9 @@ else
     VALUES_FILE="values-$1.yaml"
 fi
 
-
-helm install argocd . \
-  --namespace "$ARGOCD_NS" \
+helm dependency build
+helm upgrade --install traefik . \
+  --namespace "$NAMESPACE" \
   --create-namespace \
   -f values.yaml \
   -f "$VALUES_FILE" 

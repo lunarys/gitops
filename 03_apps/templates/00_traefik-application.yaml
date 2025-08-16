@@ -1,12 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-application
+  name: traefik-application
 spec:
   destination:
-    namespace: {{ .Values.namespace }}
+    namespace: traefik
     server: {{ .Values.server }}
-  project: argocd-project
+  project: traefik-project
   source:
     helm:
       version: v3
@@ -15,7 +15,7 @@ spec:
         {{- if .Values.targetValuesFile }}
         - {{ .Values.targetValuesFile }}
         {{- end }}
-    path: 02_bootstrap/01_argocd
+    path: 02_bootstrap/03_traefik
     repoURL: {{ .Values.mainRepo }}
     targetRevision: {{ .Values.targetRevision }}
   syncPolicy:

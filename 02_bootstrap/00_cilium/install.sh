@@ -5,8 +5,10 @@ else
     VALUES_FILE="values-$1.yaml"
 fi
 
-
-helm install cilium . \
+helm dependency build
+helm upgrade --install cilium . \
   --namespace kube-system \
   -f values.yaml \
   -f "$VALUES_FILE" 
+
+find resources/ resources-$1/ -name "*.yaml" -exec kubectl apply -n kube-system -f {} \;

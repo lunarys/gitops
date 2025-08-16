@@ -7,7 +7,9 @@ else
     VALUES_FILE="values-$1.yaml"
 fi
 
-
-helm upgrade argocd . --namespace argocd --create-namespace \
+helm dependency build
+helm update --install argocd . \
+  --namespace "$ARGOCD_NS" \
+  --create-namespace \
   -f values.yaml \
   -f "$VALUES_FILE" 

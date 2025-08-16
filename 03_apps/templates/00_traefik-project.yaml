@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: traefik-project
+spec:
+  description: Traefik Project
+  sourceRepos:
+    - {{ .Values.mainRepo }}
+  destinations:
+    - namespace: traefik
+      server: {{ .Values.server }}
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  orphanedResources:
+    warn: false

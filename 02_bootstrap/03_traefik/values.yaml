@@ -1,6 +1,6 @@
 ingress:
   enabled: true
-  host: traefik.k8s-test-1.local
+  host: ""
 
 traefik:
   ports:
