@@ -1,8 +1,7 @@
 # https://longhorn.io/docs/1.5.1/references/storage-class-parameters/
 # CREATED BY DEFAULT IN THE LONGHORN CHART
-
-kind: StorageClass
 apiVersion: storage.k8s.io/v1
+kind: StorageClass
 metadata:
   name: longhorn-retain
 provisioner: driver.longhorn.io
