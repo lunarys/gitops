@@ -15,4 +15,4 @@ spec:
   #  label/1: a
   #  label/2: b
   parameters:
-    full-backup-interval: 7
+    full-backup-interval: "7"
