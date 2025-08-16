@@ -3,3 +3,6 @@ ingress:
 
 persistence:
   defaultClassReplicaCount: 1
+
+defaultBackupStore:
+  backupTarget: "cifs://erolas.elda/test-longhorn"

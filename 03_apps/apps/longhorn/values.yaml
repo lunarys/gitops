@@ -42,7 +42,7 @@ ingress:
 
 # https://longhorn.io/docs/1.8.0/snapshots-and-backups/backup-and-restore/create-a-backup
 defaultBackupStore:
-  backupTarget: CIFS
+  backupTarget: "<overwrite>"
   backupTargetCredentialSecret: cifs-secret
 
 
