@@ -1,0 +1,6 @@
+helm:
+  repo: https://github.com/rancher/local-path-provisioner
+  path: deploy/chart/local-path-provisioner
+  version: v0.0.32
+
+# TODO: was: syncPolicy.automated.prune: true

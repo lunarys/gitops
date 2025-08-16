@@ -52,8 +52,8 @@ Structure of the apps dictionary:
 {{- range $app, $settings := $apps }}
 {{- if or (not (hasKey $.Values "enabled")) (has $app $.Values.enabled) }}
 ---
-{{- include "apps-wrapper.application" (dict "settings" $settings "root" $) }}
+{{ include "apps-wrapper.application" (dict "settings" $settings "root" $) }}
 ---
-{{- include "apps-wrapper.project" (dict "settings" $settings "root" $) }}
+{{ include "apps-wrapper.project" (dict "settings" $settings "root" $) }}
 {{- end }}
 {{- end }}

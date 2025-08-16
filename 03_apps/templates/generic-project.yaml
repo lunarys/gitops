@@ -27,4 +27,4 @@ spec:
       kind: '*'
   orphanedResources:
     warn: false
-{{- end -}}
+{{- end }}

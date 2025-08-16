@@ -27,7 +27,13 @@ spec:
     # from app.yaml
     {{- with (index .settings.files "app.yaml") }}
     - repoURL: {{ .helm.repo | quote }}
+      {{- if .helm.chart }}
       chart: {{ .helm.chart | quote }}
+      {{- else if .helm.path }}
+      path: {{ .helm.path | quote }}
+      {{- else }}
+        {{ fail "Either 'helm.chart' or 'helm.path' setting is required in app.yaml" }}
+      {{- end }}
       targetRevision: {{ .helm.version | quote }}
     {{- end }}
       helm:
@@ -73,4 +79,4 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true  # cloudnative-pg threw an error otherwise  # TODO: could be used everywhere?
-{{- end -}}
+{{- end }}
