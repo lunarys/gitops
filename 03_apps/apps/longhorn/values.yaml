@@ -41,10 +41,9 @@ ingress:
   #annotation:
 
 # https://longhorn.io/docs/1.8.0/snapshots-and-backups/backup-and-restore/create-a-backup
-#defaultBackupStore:
-#  backupTarget: CIFS
-#  backupTargetCredentialSecret: cifs-secret
-
+defaultBackupStore:
+  backupTarget: CIFS
+  backupTargetCredentialSecret: cifs-secret
 
 
 # TODO: longhorn system backup?
