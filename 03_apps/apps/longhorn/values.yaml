@@ -3,13 +3,20 @@
 # TODO: anti-affinity
 # TODO: track csi pods in argo: https://github.com/zalando/postgres-operator/issues/1766
 
+# https://github.com/longhorn/longhorn/blob/v1.9.1/chart/values.yaml
 defaultSettings:
   defaultReplicaCount: 2
+  defaultDataLocality: "best-effort"
+  #replicaSoftAntiAffinity
+  # https://longhorn.io/docs/archives/1.5.1/references/storage-class-parameters/#replica-auto-balance-field-parametersreplicaautobalance
+  replicaAutoBalance: ""
+  restoreVolumeRecurringJobs: ""
 
 persistence:
   defaultClassReplicaCount: 2
   defaultClass: false
-  #reclaimPolicy: Retain
+  reclaimPolicy: Retain
+  defaultDataLocality: "best-effort"
 
 csi:
   attacherReplicaCount: 2
@@ -28,11 +35,20 @@ ingress:
   ## Set to true to enable ingress record generation
   enabled: true
 
-  host: longhorn.k8s-test-1.local
+  host: "<overwrite>"
   #path: /longhorn
+
+  #annotation:
 
 # https://longhorn.io/docs/1.8.0/snapshots-and-backups/backup-and-restore/create-a-backup
 #defaultBackupStore:
-  #backupTarget: CIFS
-  #backupTargetCredentialSecret: todo-some-k8s-secret
+#  backupTarget: CIFS
+#  backupTargetCredentialSecret: cifs-secret
 
+
+
+# TODO: longhorn system backup?
+
+# TODO: restore-volume-recurring-jobs
+
+# TODO: encryption?
