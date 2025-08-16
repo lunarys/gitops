@@ -4,3 +4,7 @@ enabled:
   - local-path-provisioner
   - longhorn
   - smb-driver
+
+  # testing only
+  - hello-world
+  - hello-world-simple
