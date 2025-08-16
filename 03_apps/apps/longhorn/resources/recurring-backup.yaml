@@ -2,7 +2,7 @@
 apiVersion: longhorn.io/v1beta2
 kind: RecurringJob
 metadata:
-  name: longhorn-recurring-backup
+  name: default-backup
 spec:
   cron: "5 4 * * *"  # Daily at 4:05 AM
   task: "backup"
