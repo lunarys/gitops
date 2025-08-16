@@ -8,7 +8,7 @@ APPFILE="app.yaml"
 cd "$DIRECTORY"
 
 DIRNAME="$(basename "$(pwd)")"
-GROUPNAME="$(basename "$(dirname "$(pwd)")" | cut -d_ -f2)"
+#GROUPNAME="$(basename "$(dirname "$(pwd)")" | cut -d_ -f2)"
 
 REPOSITORY="$(yq ".helm.repo" "$APPFILE")"
 CHART="$(yq ".helm.chart" "$APPFILE")"
@@ -27,5 +27,5 @@ else
 fi
 
 # --devel when beta chart
-helm upgrade "$DIRNAME" $location --version "$VERSION" --create-namespace --namespace "$GROUPNAME-$DIRNAME" $values_file_option
+helm upgrade "$DIRNAME" $location --version "$VERSION" --create-namespace --namespace "$DIRNAME" $values_file_option
 

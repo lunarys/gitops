@@ -8,6 +8,6 @@ APPFILE="app.yaml"
 cd "$DIRECTORY"
 
 DIRNAME="$(basename "$(pwd)")"
-GROUPNAME="$(basename "$(dirname "$(pwd)")" | cut -d_ -f2)"
+#GROUPNAME="$(basename "$(dirname "$(pwd)")" | cut -d_ -f2)"
 
-helm uninstall "$DIRNAME" --namespace "$GROUPNAME-$DIRNAME"
+helm uninstall "$DIRNAME" --namespace "$DIRNAME"
