@@ -2,7 +2,7 @@
 ingress:
   host: transmission.srv.elda
   accessControl:
-    externalAccessAllowed: true  # TODO: temporary, as the middleware for internal access is not yet deployed
+    externalAccessAllowed: false
 
 image:
   name: haugene/transmission-openvpn
