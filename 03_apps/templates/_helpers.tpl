@@ -22,6 +22,30 @@
 {{ .root.Values.server }}
 {{- end }}
 
+{{- define "apps-wrapper.targetValuesFile" -}}
+{{- if .Values.targetValuesFile -}}
+{{ .Values.targetValuesFile }}
+{{- else if .Values.environment -}}
+values-{{ .Values.environment }}.yaml
+{{- end -}}
+{{- end }}
+
+{{- define "apps-wrapper.targetSecretsFile" -}}
+{{- if .Values.targetSecretsFile -}}
+{{ .Values.targetSecretsFile }}
+{{- else if .Values.environment -}}
+secrets-{{ .Values.environment }}.yaml
+{{- end -}}
+{{- end }}
+
+{{- define "apps-wrapper.targetResourcesDir" -}}
+{{- if .Values.targetResourcesDir -}}
+{{ .Values.targetResourcesDir }}
+{{- else if .Values.environment -}}
+resources-{{ .Values.environment }}
+{{- end -}}
+{{- end }}
+
 {{- define "apps-wrapper.hasAdditionalResources" -}}
 {{- range $filename, $_ := .settings.files }}
 {{- if hasPrefix "resources/" $filename }}

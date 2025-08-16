@@ -12,8 +12,8 @@ spec:
         version: v3
         valueFiles:
           - values.yaml
-          {{- if .Values.targetValuesFile }}
-          - {{ .Values.targetValuesFile }}
+          {{- if include "apps-wrapper.targetValuesFile" $ }}
+          - {{ include "apps-wrapper.targetValuesFile" $ }}
           {{- end }}
       path: 02_bootstrap/00_cilium
       repoURL: {{ .Values.mainRepo }}
@@ -21,8 +21,8 @@ spec:
     - path: 02_bootstrap/00_cilium/resources
       repoURL: {{ .Values.mainRepo }}
       targetRevision: {{ .Values.targetRevision }}
-    {{- if .Values.targetResourcesDir }}
-    - path: 02_bootstrap/00_cilium/{{ .Values.targetResourcesDir }}
+    {{- if include "apps-wrapper.targetResourcesDir" $ }}
+    - path: 02_bootstrap/00_cilium/{{ include "apps-wrapper.targetResourcesDir" $ }}
       repoURL: {{ .Values.mainRepo }}
       targetRevision: {{ .Values.targetRevision }}
     {{- end }}

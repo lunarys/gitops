@@ -15,8 +15,8 @@ spec:
       version: v3
       valueFiles:
         - values.yaml
-        {{- if .Values.targetValuesFile }}
-        - {{ .Values.targetValuesFile }}
+        {{- if include "apps-wrapper.targetValuesFile" $ }}
+        - {{ include "apps-wrapper.targetValuesFile" $ }}
         {{- end }}
   syncPolicy:
     automated:

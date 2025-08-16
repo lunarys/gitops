@@ -12,8 +12,8 @@ spec:
       version: v3
       valueFiles:
         - values.yaml
-        {{- if .Values.targetValuesFile }}
-        - {{ .Values.targetValuesFile }}
+        {{- if include "apps-wrapper.targetValuesFile" $ }}
+        - {{ include "apps-wrapper.targetValuesFile" $ }}
         {{- end }}
     path: 02_bootstrap/03_traefik
     repoURL: {{ .Values.mainRepo }}

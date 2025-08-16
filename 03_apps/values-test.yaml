@@ -1,4 +1,5 @@
 targetRevision: main
-targetValuesFile: values-test.yaml
-targetSecretsFile: secrets-test.yaml
-targetResourcesDir: resources-test
+#targetValuesFile: values-test.yaml
+#targetSecretsFile: secrets-test.yaml
+#targetResourcesDir: resources-test
+environment: test
