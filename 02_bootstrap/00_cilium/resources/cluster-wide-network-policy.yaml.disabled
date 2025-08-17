@@ -1,0 +1,57 @@
+# https://docs.cilium.io/en/stable/security/policy/intro/#policy-rule-evaluation
+# https://docs.cilium.io/en/stable/security/policy/language/
+# https://deepwiki.com/cilium/networkpolicy/1-overview
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: default-namespace-isolation
+spec:
+  description: "Default policy: allow same-namespace traffic + essential cluster services"
+  endpointSelector:
+  ingress:
+    - fromEntities:
+        - cluster
+    # Allow ingress traffic from the same namespace, ONLY SEEMS TO WORK for CiliumNetworkPolicy, not ClusterWide...
+    #- fromEndpoints:
+    #    - matchLabels: {}
+    # Allow ingress traffic from kube-system
+    #- fromEndpoints:
+    #    - matchLabels:
+    #        io.kubernetes.pod.namespace: kube-system
+    #- fromEndpoints:
+    #    - matchLabels:
+    #        io.kubernetes.pod.namespace: traefik
+      #toPorts:
+      #  - ports:
+      #      - port: "80"
+      #  - ports:
+      #      - port: "443"
+  egress:
+    # Allow egress traffic to the cluster
+    - toEntities:
+        - cluster
+    # Allow egress traffic to the same namespace - DOES NOT WORK for CCNP
+    #- toEndpoints:
+    #    - {}
+    # Allow access to kubernetes api
+    #- toEntities:
+    #    - kube-apiserver
+    # Allow HTTPS to internet (for package updates, external APIs)
+    - toEntities:
+        - world
+      #toPorts:
+      #  - ports:
+      #      - port: "443"
+      #        protocol: TCP
+    # Allow DNS to kube-dns in kube-system namespace
+    #- toEndpoints:
+    #    - matchLabels:
+    #        io.kubernetes.pod.namespace: kube-system
+    #        k8s-app: kube-dns
+    #  toPorts:
+    #    - ports:
+    #        - port: "53"
+    #          protocol: UDP
+    #      rules:
+    #        dns:
+    #          - matchPattern: "*"
