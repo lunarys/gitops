@@ -38,7 +38,8 @@ ingress:
   host: "<overwrite>"
   #path: /longhorn
 
-  #annotation:
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd"
 
 # https://longhorn.io/docs/1.8.0/snapshots-and-backups/backup-and-restore/create-a-backup
 defaultBackupStore:

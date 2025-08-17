@@ -35,3 +35,5 @@ cilium:
       enabled: true
       ingress:
         enabled: true
+        annotations:
+          traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd"

@@ -8,6 +8,8 @@ argo-cd:
     ingress:
       enabled: true
       ingressClassName: "" 
+      annotations:
+        traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd"
 
   configs:
     params:
