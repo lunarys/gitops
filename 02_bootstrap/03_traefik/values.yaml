@@ -38,3 +38,11 @@ traefik:
   # https://community.traefik.io/t/traefik-ingress-not-getting-loadbalancer-ip/17445/3
   #additionalArguments:
   #  - "--providers.kubernetesingress.ingressendpoint.publishedservice=default/traefik"
+
+networkpolicy:
+  preset:
+    namespaceIsolation: true
+    ingress:
+      fromLocalSubnet: true
+    egress:
+      toCluster: true
