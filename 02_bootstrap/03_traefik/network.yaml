@@ -4,3 +4,6 @@ preset:
     fromLocalSubnet: true
   egress:
     toCluster: true
+    # sometimes requests from traefik to my dev machine are blocked e.g. on ports 57273 or 57269
+    #  TODO: allow this for now
+    toLocalSubnet: true
