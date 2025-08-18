@@ -19,7 +19,7 @@ secretsChartVersion: "0.4.2"
 # -- The helm chart within the `mainHelmRepo` that is used to render network policies
 networkPolicyChart: "networkpolicy"
 # -- The version of the `networkPolicyChart` to use by default.
-networkPolicyChartVersion: "0.5.0"
+networkPolicyChartVersion: "0.5.1"
 
 # -- The values file to use for the application in the respective cluster, e.g. `values-test.yaml`.
 # In addition to the default `values.yaml` file.
