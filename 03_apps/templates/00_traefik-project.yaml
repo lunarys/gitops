@@ -7,6 +7,7 @@ spec:
   sourceRepos:
     - {{ .Values.mainRepo }}
     - {{ .Values.mainHelmRepo }}
+    - https://traefik.github.io/charts
   destinations:
     - namespace: traefik
       server: {{ .Values.server }}
