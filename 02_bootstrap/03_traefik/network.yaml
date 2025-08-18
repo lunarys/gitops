@@ -1,0 +1,6 @@
+preset:
+  namespaceIsolation: true
+  ingress:
+    fromLocalSubnet: true
+  egress:
+    toCluster: true

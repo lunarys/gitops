@@ -21,6 +21,17 @@ spec:
     - path: 02_bootstrap/03_traefik/resources
       repoURL: {{ .Values.mainRepo }}
       targetRevision: {{ .Values.targetRevision }}
+    # network policy
+    - repoURL: {{ .Values.mainHelmRepo }}
+      chart: {{ .Values.networkPolicyChart }}
+      targetRevision: {{ .Values.networkPolicyChartVersion }}
+      helm:
+        skipCrds: true
+        valueFiles:
+          - '$repo/02_bootstrap/03_traefik/network.yaml'
+    - repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.targetRevision }}
+      ref: repo
   syncPolicy:
     automated:
       selfHeal: true
