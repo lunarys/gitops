@@ -38,7 +38,7 @@ spec:
     {{- end }}
       helm:
         #releaseName: ''
-        skipCrds: true
+        skipCrds: true  # <-- TODO: not used everywhere
         valueFiles:
           - '$repo/{{ include "apps-wrapper.fullpath" . }}/values.yaml'
           {{- if include "apps-wrapper.targetValuesFile" .root }}
@@ -53,15 +53,24 @@ spec:
       targetRevision: {{ index .settings.files "secrets.yaml" "version" | default .root.Values.secretsChartVersion }}
       helm:
         skipCrds: true
-        #ignoreMissingValueFiles: true
         valueFiles:
           - '$repo/{{ include "apps-wrapper.fullpath" . }}/secrets.yaml'
           {{- if include "apps-wrapper.targetSecretsFile" .root }}
           - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ include "apps-wrapper.targetSecretsFile" .root }}'
           {{- end }}
   {{- end }}
-  {{- if or (eq "app" .settings.variant) (index .settings.files "secrets.yaml") }}
-    # repo reference for values.yaml for app.yaml or secrets.yaml for secrets
+  {{- if index .settings.files "network.yaml" }}
+    # network policy
+    - repoURL: {{ .root.Values.mainHelmRepo }}
+      chart: {{ .root.Values.networkPolicyChart }}
+      targetRevision: {{ index .settings.files "network.yaml" "version" | default .root.Values.networkPolicyChartVersion }}
+      helm:
+        skipCrds: true
+        valueFiles:
+          - '$repo/{{ include "apps-wrapper.fullpath" . }}/network.yaml'
+  {{- end }}
+  {{- if or (eq "app" .settings.variant) (index .settings.files "secrets.yaml") (index .settings.files "network.yaml") }}
+    # repo reference for values.yaml for app.yaml, network.yaml or secrets.yaml for secrets
     - repoURL: {{ include "apps-wrapper.repoUrl" . }}
       targetRevision: {{ include "apps-wrapper.targetRevision" . }}
       ref: repo
