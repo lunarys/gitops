@@ -6,6 +6,7 @@ spec:
   description: Traefik Project
   sourceRepos:
     - {{ .Values.mainRepo }}
+    - {{ .Values.mainHelmRepo }}
   destinations:
     - namespace: traefik
       server: {{ .Values.server }}
