@@ -74,6 +74,7 @@ external-secrets:
   name: vpn-credentials
   commonRemoteKey: "9c1b1535-b2c4-411e-a60a-b32500e60cda"
   fields:
+    OPENVPN_PROVIDER: PIA
     OPENVPN_USERNAME:
       storeRefName: bitwarden-login
       remoteProperty: username
@@ -88,75 +89,51 @@ external-secrets:
       enabled: false
       storeRefName: bitwarden-login
       remoteProperty: TRANSMISSION_RPC_PASSWORD
+  mount:
+    env: true
+
+
+env: # TODO: as object
+  PUID: "1333"
+  PGID: "1333"
+  TRANSMISSION_UMASK: "007"
+  TRANSMISSION_HOME: /settings
+  TRANSMISSION_DOWNLOAD_DIR: /data
+  TRANSMISSION_IMCOMPLETE_DIR: /data/.incomplete
+  TRANSMISSION_INCOMPLETE_DIR_ENABLED: "true"
+  TRANSMISSION_WATCH_DIR: /data/.watch
+  TRANSMISSION_WATCH_DIR_ENABLED: "true"
+  #TRANSMISSION_WEB_UI: combustion
+  OPENVPN_CONFIG: ""
+  LOCAL_NETWORK: 10.0.0.0/8  # TODO: should cover the whole cluster? 10.0.0.0/22 is the actual home subnet
+  # mssfix: https://github.com/haugene/docker-transmission-openvpn/issues/257
+  OPENVPN_OPTS: "--inactive 3600 --ping 10 --ping-exit 60 --mute-replay-warnings"
+  TRANSMISSION_SCRAPE_PAUSED_TORRENTS_ENABLED: "false"
+  CREATE_TUN_DEVICE: "false"
+  TRANSMISSION_RPC_AUTHENTICATION_REQUIRED: "false"  # TODO: disabled for now
+
+  # from https://github.com/zebpalmer/kubernetes-transmission-openvpn/blob/master/examples/transmission-config.yaml
+  TRANSMISSION_DOWNLOAD_QUEUE_SIZE: "4"
+  TRANSMISSION_RATIO_LIMIT: "2"
+  TRANSMISSION_RATIO_LIMIT_ENABLED: "true"
+  TRANSMISSION_SPEED_LIMIT_DOWN: "10000"
+  TRANSMISSION_SPEED_LIMIT_DOWN_ENABLED: "true"
+  TRANSMISSION_SPEED_LIMIT_UP: "1000"
+  TRANSMISSION_SPEED_LIMIT_UP_ENABLED: "true"
+  WEBPROXY_ENABLED: "false"
 
 
 extraConfig:
-  secrets:
-    - vpn-credentials
   volumeMounts:
     - hostPath:
         path: /dev/net/tun
         type: ""
       name: tunnel
       mountPath: /dev/net/tun
-  env: # TODO: as object
-    - name: PUID
-      value: "1333"
-    - name: PGID
-      value: "1333"
-    - name: "TRANSMISSION_UMASK"
-      value: "007"
-    - name: "TRANSMISSION_HOME"
-      value: /settings
-    - name: "TRANSMISSION_DOWNLOAD_DIR"
-      value: /data
-    - name: "TRANSMISSION_IMCOMPLETE_DIR"
-      value: /data/.incomplete
-    - name: "TRANSMISSION_INCOMPLETE_DIR_ENABLED"
-      value: "true"
-    - name: "TRANSMISSION_WATCH_DIR"
-      value: /data/.watch
-    - name: "TRANSMISSION_WATCH_DIR_ENABLED"
-      value: "true"
-    #- name: TRANSMISSION_WEB_UI
-    #  value: combustion
-    - name: "OPENVPN_PROVIDER"
-      value: PIA
-    - name: "OPENVPN_CONFIG"
-      value: ""
-    - name: "LOCAL_NETWORK"
-      value: 10.0.0.0/8  # TODO: should cover the whole cluster? 10.0.0.0/22 is the actual home subnet
-    # mssfix: https://github.com/haugene/docker-transmission-openvpn/issues/257
-    - name: "OPENVPN_OPTS"
-      value: "--inactive 3600 --ping 10 --ping-exit 60 --mute-replay-warnings"
-    - name: "TRANSMISSION_SCRAPE_PAUSED_TORRENTS_ENABLED"
-      value: "false"
-    - name: "CREATE_TUN_DEVICE"
-      value: "false"
-    - name: TRANSMISSION_RPC_AUTHENTICATION_REQUIRED
-      value: "false"  # TODO: disabled for now
 
-    # from https://github.com/zebpalmer/kubernetes-transmission-openvpn/blob/master/examples/transmission-config.yaml
-    - name: TRANSMISSION_DOWNLOAD_QUEUE_SIZE
-      value: "4"
-    - name: TRANSMISSION_RATIO_LIMIT
-      value: "2"
-    - name: TRANSMISSION_RATIO_LIMIT_ENABLED
-      value: "true"
-    - name: TRANSMISSION_SPEED_LIMIT_DOWN
-      value: "10000"
-    - name: TRANSMISSION_SPEED_LIMIT_DOWN_ENABLED
-      value: "true"
-    - name: TRANSMISSION_SPEED_LIMIT_UP
-      value: "1000"
-    - name: TRANSMISSION_SPEED_LIMIT_UP_ENABLED
-      value: "true"
-    - name: WEBPROXY_ENABLED
-      value: "false"
 
-# TODO: this should block egress traffic, but needs to be tested
 networkpolicy:
-  enabled: false
-  spec:
-    endpointSelector: {}
-    egress: {}
+  preset:
+    namespaceIsolation: true
+    egress:
+      toWorld: true  # TODO: could be limited to VPN provider?
