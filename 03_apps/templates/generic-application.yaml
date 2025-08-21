@@ -25,8 +25,9 @@ spec:
   {{- end }}
   {{- if eq "app" .settings.variant }}
     # from app.yaml
+    {{- $defaultHelmRepo := .root.Values.mainHelmRepo }}
     {{- with (index .settings.files "app.yaml") }}
-    - repoURL: {{ .helm.repo | quote }}
+    - repoURL: {{ .helm.repo | default $defaultHelmRepo | quote }}
       {{- if .helm.chart }}
       chart: {{ .helm.chart | quote }}
       {{- else if .helm.path }}

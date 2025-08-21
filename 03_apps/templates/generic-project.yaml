@@ -10,7 +10,7 @@ spec:
     - {{ .root.Values.mainHelmRepo }}
     # this repo, containing the wrapper chart or the values.yaml file 
     - {{ include "apps-wrapper.repoUrl" . }}
-    {{- if eq "app" .settings.variant }}
+    {{- if and (eq "app" .settings.variant) (index .settings.files "app.yaml" "helm" "repo") }}
     # repo from app.yaml
     - {{ index .settings.files "app.yaml" "helm" "repo" }}
     {{- end }}
