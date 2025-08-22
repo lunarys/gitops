@@ -18,5 +18,7 @@ spec:
   #interfaces:
   #- ^eth[0-9]+
 
-  externalIPs: false
+  # https://docs.cilium.io/en/latest/network/l2-announcements/#ip-types
+  # https://kubernetes.io/docs/concepts/services-networking/service/#external-ips
+  externalIPs: true
   loadBalancerIPs: true
