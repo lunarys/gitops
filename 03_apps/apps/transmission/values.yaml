@@ -37,7 +37,7 @@ resources:
   limits:
     memory: 1000Mi
 
-storage-smb:
+smbstorage:
   enabled: true
   external-secrets:
     enabled: true
@@ -69,7 +69,7 @@ containerSecurityContext:
   capabilities:
     add: ["NET_ADMIN"]
 
-external-secrets:
+externalsecrets:
   enabled: true
   name: vpn-credentials
   commonRemoteKey: "9c1b1535-b2c4-411e-a60a-b32500e60cda"
