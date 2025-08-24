@@ -6,6 +6,8 @@ PPD="$(pwd)"
 # Default values
 DIRECTORY="."
 ENVIRONMENT=""
+DRY_RUN=false
+TEMPLATE_ONLY=false
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -18,17 +20,29 @@ while [[ $# -gt 0 ]]; do
       ENVIRONMENT="$2"
       shift 2
       ;;
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --template)
+      TEMPLATE_ONLY=true
+      shift
+      ;;
     -h|--help)
       echo "Usage: $0 [OPTIONS]"
       echo "Options:"
       echo "  -d, --directory DIR     Directory containing app.yaml (default: current directory)"
       echo "  -e, --env ENVIRONMENT   Environment (test, prod, dev, etc.)"
+      echo "      --dry-run           Print the helm command that would be run (don't execute)"
+      echo "      --template          Render the Helm chart templates without installing"
       echo "  -h, --help              Show this help message"
       echo ""
       echo "Examples:"
       echo "  $0 --directory /path/to/app --env test"
       echo "  $0 -d ../myapp -e prod"
       echo "  $0 --env test"
+      echo "  $0 --dry-run --env test"
+      echo "  $0 --template --env test"
       exit 0
       ;;
     *)
@@ -67,9 +81,12 @@ DIRNAME="$(basename "$(pwd)")"
 APPNAME="$(echo "$DIRNAME" | sed 's/^[0-9][0-9]*_//')"
 #GROUPNAME="$(basename "$(dirname "$(pwd)")" | cut -d_ -f2)"
 
-REPOSITORY="$(yq ".helm.repo" "$APPFILE")"
 CHART="$(yq ".helm.chart" "$APPFILE")"
 VERSION="$(yq ".helm.version" "$APPFILE")"
+REPOSITORY="$(yq ".helm.repo" "$APPFILE")"
+if [ "$REPOSITORY" = "null" ] || [ -z "$REPOSITORY" ]; then
+  REPOSITORY="oci://registry.gitlab.com/juulun/helm-charts/charts"
+fi
 
 # Check for argo settings and use them if available
 ARGO_NAMESPACE="$(yq ".argo.namespace" "$APPFILE")"
@@ -108,5 +125,11 @@ else
 fi
 
 # --devel when beta chart
-helm install "$RELEASE_NAME" $location --version "$VERSION" --create-namespace --namespace "$NAMESPACE" $values_file_option
-
+if [ "$DRY_RUN" = true ]; then
+  echo "Dry run mode - would execute:"
+  echo "helm install \"$RELEASE_NAME\" $location --version \"$VERSION\" --create-namespace --namespace \"$NAMESPACE\" $values_file_option"
+elif [ "$TEMPLATE_ONLY" = true ]; then
+  helm template "$RELEASE_NAME" $location --version "$VERSION" --namespace "$NAMESPACE" $values_file_option
+else
+  helm install "$RELEASE_NAME" $location --version "$VERSION" --create-namespace --namespace "$NAMESPACE" $values_file_option
+fi
