@@ -1,8 +1,11 @@
-ingress:
-  host: longhorn.k8s-test-1.local
+longhorn:
+  ingress:
+    host: longhorn.k8s-test-1.local
 
-persistence:
-  defaultClassReplicaCount: 1
+  persistence:
+    defaultClassReplicaCount: 1
 
-defaultBackupStore:
-  backupTarget: "cifs://erolas.elda/test-longhorn"
+  defaultBackupStore:
+    backupTarget: "cifs://erolas.elda/test-longhorn"
+
+storageClassReplicas: 1

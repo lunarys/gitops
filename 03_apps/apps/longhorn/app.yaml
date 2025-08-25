@@ -1,4 +1,0 @@
-helm:
-  chart: longhorn
-  version: 1.9.1
-  repo: https://charts.longhorn.io
