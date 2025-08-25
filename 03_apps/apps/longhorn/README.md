@@ -12,3 +12,8 @@ http://k8s-test-191.srv.elda
 - https://kubernetes.io/docs/concepts/storage/persistent-volumes/#retain
 
 - https://kubernetes.io/docs/concepts/storage/persistent-volumes/#reserving-a-persistentvolume
+
+
+# Recurring Backup
+
+https://longhorn.io/docs/1.9.1/snapshots-and-backups/scheduling-backups-and-snapshots/#using-the-kubectl-command
