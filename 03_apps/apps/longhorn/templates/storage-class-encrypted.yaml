@@ -10,6 +10,10 @@ reclaimPolicy: "Retain"
 volumeBindingMode: Immediate
 parameters:
   numberOfReplicas: {{ .Values.storageClassReplicas | quote }}
+
+  # add volumes to this recurring job group to get automatic backups
+  recurringJobSelector: '[{"name":"defaultbackup","isGroup":true}]'
+
 #  staleReplicaTimeout: "2880"
 #  fromBackup: ""
 #  fsType: "ext4"

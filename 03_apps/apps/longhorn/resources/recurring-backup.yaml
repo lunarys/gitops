@@ -7,8 +7,8 @@ spec:
   cron: "5 4 * * *"  # Daily at 4:05 AM
   task: "backup"
   groups:
-  - default
-  #- group1
+    #- default  # <-- special group, all volumes without a group label
+    - defaultbackup
   retain: 5
   concurrency: 2
   #labels:
