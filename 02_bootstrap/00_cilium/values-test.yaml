@@ -2,6 +2,7 @@ cilium:
   ipam:
     operator:
       clusterPoolIPv4PodCIDRList: ["10.243.0.0/16"]
+      #clusterPoolIPv6PodCIDRList: ["fd00::/104"]
 
   hubble:
     ui:

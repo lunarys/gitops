@@ -1,4 +1,5 @@
 # https://github.com/cilium/cilium/tree/main/install/kubernetes/cilium
+# https://docs.cilium.io/en/stable/helm-reference/
 cilium:
   # if kube-proxy is disabled and cilium should take over
   kubeProxyReplacement: true
@@ -21,6 +22,9 @@ cilium:
 
   operator:
     replicas: 1
+
+  ipv6:
+    enabled: true
 
   hubble:
     enabled: true
