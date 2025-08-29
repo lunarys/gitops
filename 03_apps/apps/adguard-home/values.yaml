@@ -1,0 +1,78 @@
+# https://staging.artifacthub.io/packages/helm/k8s-at-home/adguard-home?modal=values
+# https://github.com/bjw-s-labs/helm-charts
+ingress:
+  host: <overwrite>
+  accessControl:
+    externalAccessAllowed: false
+
+
+image:
+  name: adguard/adguardhome
+  tag: v0.107.65
+
+
+service:
+  targetPort: 3000
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
+  runAsNonRoot: true
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:  # <-- drop ALL fails, exec not possible then
+      - CAP_NET_RAW
+      - CAP_SYS_ADMIN
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 3000
+  fsGroup: 2000
+  seccompProfile:
+    type: RuntimeDefault
+
+
+services:
+  dns:
+    enabled: true
+    externalIPs:
+      - 10.0.1.189
+    ports:
+      dns-tcp:
+        port: 53
+        protocol: TCP
+        targetPort: 8053
+      dns-udp:
+        port: 53
+        protocol: UDP
+        targetPort: 8053
+
+
+longhornstorage:
+  volumes:
+    confdir:
+      size: 20Mi
+      variant: retain
+      pvName: ""
+      mount:
+        path: /opt/adguardhome/conf
+    workdir:
+      size: 1Gi
+      variant: auto-delete
+      mount:
+        path: /opt/adguardhome/work
+
+
+env:
+  TZ: Europe/Berlin
+
+
+networkpolicy:
+  preset:
+    namespaceIsolation: true
+    ingress:
+      fromLocalSubnet: true
+      fromCluster: true
+    egress:
+      toWorld: true

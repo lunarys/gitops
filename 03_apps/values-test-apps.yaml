@@ -5,6 +5,8 @@ enabled:
   - longhorn
   - smb-driver
 
+  - adguard-home
+
   # testing only
   - hello-world
   - hello-world-simple

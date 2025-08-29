@@ -1,0 +1,7 @@
+ingress:
+  host: adguard.k8s-test-1.local
+
+longhornstorage:
+  volumes:
+    confdir:
+      pvName: "pvc-b9392617-9078-4eec-99a5-bb7a6a298cb9"
