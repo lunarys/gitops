@@ -131,5 +131,5 @@ if [ "$DRY_RUN" = true ]; then
 elif [ "$TEMPLATE_ONLY" = true ]; then
   helm template "$RELEASE_NAME" $location --version "$VERSION" --namespace "$NAMESPACE" $values_file_option
 else
-  helm install "$RELEASE_NAME" $location --version "$VERSION" --create-namespace --namespace "$NAMESPACE" $values_file_option
+  helm upgrade --install "$RELEASE_NAME" $location --version "$VERSION" --create-namespace --namespace "$NAMESPACE" $values_file_option
 fi
