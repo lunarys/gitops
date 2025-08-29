@@ -24,7 +24,7 @@ cilium:
     replicas: 1
 
   ipv6:
-    enabled: true
+    enabled: false  # <-- TODO: enable for dual-stack
 
   hubble:
     enabled: true
