@@ -39,7 +39,7 @@ resources:
 
 smbstorage:
   enabled: true
-  external-secrets:
+  externalsecrets:
     enabled: true
     commonRemoteKey: "f460fcfc-357e-4d1b-8f5e-b32500e5c6fc"
   smb:
