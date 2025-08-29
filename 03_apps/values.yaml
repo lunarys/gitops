@@ -5,6 +5,7 @@ renderTest: false
 baseDir: 03_apps
 # -- The main git repository where the apps are stored. (This repository.)
 mainRepo: https://gitlab.com/juulun/gitops.git
+privateRepo: https://gitlab.com/juulun/gitops-private.git
 # -- The helm repository where my base helm charts are stored.
 mainHelmRepo: registry.gitlab.com/juulun/helm-charts/charts
 
@@ -14,12 +15,12 @@ targetRevision: main
 # - The helm chart within the `mainHelmRepo` that is used to render secrets.
 secretsChart: "externalsecrets"
 # - The version of the `secretsChart` to use by default.
-secretsChartVersion: "1.0.0"
+secretsChartVersion: "1.0.4"
 
 # -- The helm chart within the `mainHelmRepo` that is used to render network policies
 networkPolicyChart: "networkpolicy"
 # -- The version of the `networkPolicyChart` to use by default.
-networkPolicyChartVersion: "1.0.0"
+networkPolicyChartVersion: "1.0.4"
 
 # -- The values file to use for the application in the respective cluster, e.g. `values-test.yaml`.
 # In addition to the default `values.yaml` file.
