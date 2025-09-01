@@ -1,0 +1,22 @@
+module.exports = {
+  branches: ['main'],
+  tagFormat: 'application-wrapper-${version}',
+  plugins: [
+    ['@semantic-release/commit-analyzer', {
+      preset: 'conventionalcommits',
+      releaseRules: [
+        { type: 'feat', scope: 'app(s|lication)-wrapper**', release: 'minor' },
+        { type: 'fix', scope: 'app(s|lication)-wrapper**', release: 'patch' },
+        { type: 'perf', scope: 'app(s|lication)-wrapper**', release: 'patch' },
+        { scope: '!(app(s|lication)-wrapper**)', release: false },
+        { type: 'docs', release: false },
+        { type: 'style', release: false },
+        { type: 'test', release: false }
+      ]
+    }],
+    ['@semantic-release/release-notes-generator', {
+      preset: 'conventionalcommits'
+    }],
+    '@semantic-release/gitlab'
+  ]
+}

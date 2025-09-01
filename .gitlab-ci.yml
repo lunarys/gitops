@@ -1,0 +1,14 @@
+include:
+  - component: $CI_SERVER_FQDN/to-be-continuous/helm/gitlab-ci-helm@8.2.0
+    inputs:
+      repos: ""
+      #publish-on: protected
+      publish-on: tag
+      publish-strategy: none
+      chart-dir: "03_apps/charts/wrapper"
+  - component: $CI_SERVER_FQDN/to-be-continuous/semantic-release/gitlab-ci-semrel@3.15.0
+    inputs:
+      commit-spec: "conventionalcommits"
+      info-on: all
+      #auto-release-enabled: true
+      auto-release-enabled: false
