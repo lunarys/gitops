@@ -3,3 +3,6 @@ name: apps wrapper
 description: Wraps ArgoCD applications and projects
 type: application
 version: 0.1.0
+dependencies:
+  - name: application-wrapper
+    version: 0.1.0

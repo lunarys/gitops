@@ -1,3 +1,4 @@
+{{- define "apps-wrapper.wrapper" }}
 {{- $apps := dict -}}
 {{- $allfiles := .Files.Glob "apps/*/**" -}}
 {{- $appYamls := .Files.Glob "apps/*/app.yaml" }}
@@ -55,5 +56,6 @@ Structure of the apps dictionary:
 {{ include "apps-wrapper.application" (dict "settings" $settings "root" $) }}
 ---
 {{ include "apps-wrapper.project" (dict "settings" $settings "root" $) }}
+{{- end }}
 {{- end }}
 {{- end }}

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: application-wrapper
+description: Wraps ArgoCD applications and projects
+type: library
+version: 0.1.0
