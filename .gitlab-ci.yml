@@ -5,3 +5,40 @@ include:
       publish-on: protected
       publish-strategy: manual
       chart-dir: "03_apps/charts/application-wrapper"
+
+
+helm-lint:
+  rules:
+    - if: '$HELM_LINT_DISABLED == "true"'
+      when: never
+    - exists:
+        - "$HELM_CHART_DIR/Chart.yaml"
+      changes:
+        - "$HELM_CHART_DIR/**/*"
+
+helm-package:
+  rules:
+    - exists:
+        - "$HELM_CHART_DIR/Chart.yaml"
+      changes:
+        - "$HELM_CHART_DIR/**/*"
+
+
+helm-publish:
+  rules:
+    - if: '$HELM_PUBLISH_URL == null || $HELM_PUBLISH_URL == "" || $HELM_PUBLISH_METHOD == "disabled"'
+      when: never
+    - if: '$HELM_PUBLISH_ON == "protected" && $CI_COMMIT_REF_PROTECTED != "true"'
+      when: never
+    - if: '$HELM_PUBLISH_STRATEGY == "manual"'
+      changes:
+        - "$HELM_CHART_DIR/Chart.yaml"
+      exists:
+        - "$HELM_CHART_DIR/Chart.yaml"
+      when: manual
+    - if: '$HELM_PUBLISH_STRATEGY == "auto"'
+      changes:
+        - "$HELM_CHART_DIR/Chart.yaml"
+      exists:
+        - "$HELM_CHART_DIR/Chart.yaml"
+
