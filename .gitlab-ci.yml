@@ -3,5 +3,5 @@ include:
     inputs:
       repos: ""
       publish-on: protected
-      publish-strategy: none
-      chart-dir: "03_apps/charts/wrapper"
+      publish-strategy: manual
+      chart-dir: "03_apps/charts/application-wrapper"
