@@ -6,6 +6,7 @@ metadata:
   labels:
     argocd.argoproj.io/secret-type: repository
 stringData:
+  name: gitlab-helm-registry-gitops
   url: "https://gitlab.com/api/v4/projects/55959441/packages/helm/release"
   enableOCI: "false" 
   type: "helm"

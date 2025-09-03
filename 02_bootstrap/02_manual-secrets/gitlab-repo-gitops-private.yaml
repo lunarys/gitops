@@ -6,6 +6,7 @@ metadata:
   labels:
     argocd.argoproj.io/secret-type: repository
 stringData:
+  name: gitlab-repo-gitops-private
   url: https://gitlab.com/juulun/gitops-private.git
   username: juulun
   password: ""
