@@ -7,20 +7,42 @@ spec:
     namespace: {{ .Values.namespace }}
     server: {{ .Values.server }}
   project: argocd-project
-  source:
-    path: {{ .Values.baseDir}}
-    repoURL: {{ .Values.mainRepo }}
-    targetRevision: {{ .Values.targetRevision }}
-    helm:
-      version: v3
-      valueFiles:
-        - values.yaml
-        {{- if include "apps-wrapper.targetValuesFile" $ }}
-        - {{ include "apps-wrapper.targetValuesFile" $ }}
-        {{- end }}
-        {{- if .Values.environment }}
-        - values-{{ .Values.environment }}-apps.yaml
-        {{- end }}
+  sources:
+    - path: {{ .Values.baseDir}}
+      repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.targetRevision }}
+      helm:
+        version: v3
+        valueFiles:
+          - values.yaml
+          {{- if include "apps-wrapper.targetValuesFile" $ }}
+          - {{ include "apps-wrapper.targetValuesFile" $ }}
+          {{- end }}
+          {{- if .Values.environment }}
+          - values-{{ .Values.environment }}-apps.yaml
+          {{- end }}
+    {{- if and .Values.privateRepoEnabled .Values.privateRepo }}
+    - repoUrl: {{ .Values.privateRepo }}
+      #path: ""
+      targetRevision: {{ .Values.targetRevision }}
+      helm:
+        version: v3
+        valueFiles:
+          - $mainrepo/{{ .Values.baseDir }}/values.yaml
+          {{- if include "apps-wrapper.targetValuesFile" $ }}
+          - $mainrepo/{{ .Values.baseDir }}/{{ include "apps-wrapper.targetValuesFile" $ }}
+          {{- end }}
+          - values.yaml
+          {{- if include "apps-wrapper.targetValuesFile" $ }}
+          - {{ include "apps-wrapper.targetValuesFile" $ }}
+          {{- end }}
+          {{- if .Values.environment }}
+          - values-{{ .Values.environment }}-apps.yaml
+          {{- end }}
+    - repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.targetRevision }}
+      ref: mainrepo
+    {{- end }}
   syncPolicy:
     automated:
       selfHeal: true

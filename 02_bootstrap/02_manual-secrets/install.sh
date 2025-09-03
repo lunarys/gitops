@@ -3,7 +3,7 @@ SCRIPT_DIR="$(dirname "$0")"
 if [ -z "$1" ]; then
 	files="$SCRIPT_DIR/"*.yaml
 else
-	files="$1"
+	files="$@"
 fi
 
 for file in $files; do

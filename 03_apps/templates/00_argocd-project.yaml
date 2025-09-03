@@ -6,6 +6,9 @@ spec:
   description: Argocd Project
   sourceRepos:
     - {{ .Values.mainRepo }}
+    {{- if and .Values.privateRepoEnabled .Values.privateRepo }}
+    - {{ .Values.privateRepo }}
+    {{- end }}
   destinations:
     - namespace: {{ .Values.namespace }}
       server: {{ .Values.server }}

@@ -6,6 +6,7 @@ baseDir: 03_apps
 # -- The main git repository where the apps are stored. (This repository.)
 mainRepo: https://gitlab.com/juulun/gitops.git
 privateRepo: https://gitlab.com/juulun/gitops-private.git
+privateRepoEnabled: true
 # -- The helm repository where my base helm charts are stored.
 mainHelmRepo: registry.gitlab.com/juulun/helm-charts/charts
 
