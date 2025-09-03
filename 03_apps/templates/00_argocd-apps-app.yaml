@@ -23,7 +23,7 @@ spec:
           {{- end }}
     {{- if and .Values.privateRepoEnabled .Values.privateRepo }}
     - repoURL: {{ .Values.privateRepo }}
-      #path: ""
+      path: ""
       targetRevision: {{ .Values.targetRevision }}
       helm:
         version: v3
