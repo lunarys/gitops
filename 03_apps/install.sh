@@ -8,4 +8,4 @@ if [ "$1" != "test" ] && [ "$1" != "prod" ]; then
   exit 1
 fi
 
-helm install argocd-apps . --namespace argocd --create-namespace --values values.yaml --values values-"$1".yaml
+helm upgrade --install argocd-apps . --namespace argocd --create-namespace --values values.yaml --values values-"$1".yaml

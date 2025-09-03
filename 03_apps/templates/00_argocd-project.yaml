@@ -8,6 +8,7 @@ spec:
     - {{ .Values.mainRepo }}
     {{- if and .Values.privateRepoEnabled .Values.privateRepo }}
     - {{ .Values.privateRepo }}
+    - {{ .Values.wrapperHelmRepo }}
     {{- end }}
   destinations:
     - namespace: {{ .Values.namespace }}
