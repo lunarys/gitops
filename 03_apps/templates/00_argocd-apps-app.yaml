@@ -22,7 +22,7 @@ spec:
           - values-{{ .Values.environment }}-apps.yaml
           {{- end }}
     {{- if and .Values.privateRepoEnabled .Values.privateRepo }}
-    - repoUrl: {{ .Values.privateRepo }}
+    - repoURL: {{ .Values.privateRepo }}
       #path: ""
       targetRevision: {{ .Values.targetRevision }}
       helm:
