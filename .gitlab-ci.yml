@@ -5,7 +5,7 @@ include:
       publish-on: protected
       publish-strategy: manual
       chart-dir: "03_apps/charts/application-wrapper"
-      publish-url: "oci://$CI_REGISTRY/$CI_PROJECT_PATH"
+      publish-url: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/release"
 
 
 helm-lint:
