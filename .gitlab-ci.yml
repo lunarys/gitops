@@ -12,7 +12,7 @@ helm-lint:
   rules:
     - if: '$HELM_LINT_DISABLED == "true"'
       when: never
-    - if: $CI_COMMIT_MESSAGE =~ /[helm:publish]/
+    - if: $CI_COMMIT_MESSAGE =~ /helm:publish/
     - exists:
         - "$HELM_CHART_DIR/Chart.yaml"
       changes:
@@ -20,7 +20,7 @@ helm-lint:
 
 helm-package:
   rules:
-    - if: $CI_COMMIT_MESSAGE =~ /[helm:publish]/
+    - if: $CI_COMMIT_MESSAGE =~ /helm:publish/
     - exists:
         - "$HELM_CHART_DIR/Chart.yaml"
       changes:
@@ -33,7 +33,7 @@ helm-publish:
       when: never
     - if: '$HELM_PUBLISH_ON == "protected" && $CI_COMMIT_REF_PROTECTED != "true"'
       when: never
-    - if: $CI_COMMIT_MESSAGE =~ /[helm:publish]/
+    - if: $CI_COMMIT_MESSAGE =~ /helm:publish/
     - if: '$HELM_PUBLISH_STRATEGY == "manual"'
       changes:
         - "$HELM_CHART_DIR/Chart.yaml"
