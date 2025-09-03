@@ -1,19 +1,24 @@
+{{- if and .Values.privateRepoEnabled .Values.privateRepo }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-apps
+  name: argocd-apps-private
 spec:
   destination:
     namespace: {{ .Values.namespace }}
     server: {{ .Values.server }}
   project: argocd-project
   sources:
-    - path: {{ .Values.baseDir}}
-      repoURL: {{ .Values.mainRepo }}
+    - repoURL: {{ .Values.privateRepo }}
+      path: "."
       targetRevision: {{ .Values.targetRevision }}
       helm:
         version: v3
         valueFiles:
+          - $mainrepo/{{ .Values.baseDir }}/values.yaml
+          {{- if include "apps-wrapper.targetValuesFile" $ }}
+          - $mainrepo/{{ .Values.baseDir }}/{{ include "apps-wrapper.targetValuesFile" $ }}
+          {{- end }}
           - values.yaml
           {{- if include "apps-wrapper.targetValuesFile" $ }}
           - {{ include "apps-wrapper.targetValuesFile" $ }}
@@ -21,6 +26,9 @@ spec:
           {{- if .Values.environment }}
           - values-{{ .Values.environment }}-apps.yaml
           {{- end }}
+    - repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.targetRevision }}
+      ref: mainrepo
   syncPolicy:
     automated:
       selfHeal: true
@@ -28,3 +36,4 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+{{- end }}
