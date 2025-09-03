@@ -9,7 +9,7 @@ privateRepo: https://gitlab.com/juulun/gitops-private.git
 privateRepoEnabled: true
 # -- The helm repository where my base helm charts are stored.
 mainHelmRepo: registry.gitlab.com/juulun/helm-charts/charts
-wrapperHelmRepo: registry.gitlab.com/juulun/gitops/charts
+wrapperHelmRepo: registry.gitlab.com/juulun/gitops
 
 # -- The revision of the `mainRepo` to use.
 targetRevision: main
