@@ -8,7 +8,7 @@ spec:
     server: {{ .Values.server }}
   project: argocd-project
   sources:
-    - path: {{ .Values.baseDir}}
+    - path: {{ .Values.baseDir }}
       repoURL: {{ .Values.mainRepo }}
       targetRevision: {{ .Values.targetRevision }}
       helm:
@@ -23,6 +23,7 @@ spec:
           {{- end }}
   syncPolicy:
     automated:
+      enabled: true
       selfHeal: true
       prune: false
     syncOptions:

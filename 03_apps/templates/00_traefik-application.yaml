@@ -34,5 +34,6 @@ spec:
       ref: repo
   syncPolicy:
     automated:
+      enabled: false
       selfHeal: true
       prune: false

@@ -84,6 +84,7 @@ spec:
   {{- end }}
   syncPolicy:
     automated:
+      enabled: {{ include "apps-wrapper.autoSyncEnabled" . }}
       selfHeal: true
       prune: false
     syncOptions:

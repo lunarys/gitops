@@ -28,6 +28,7 @@ spec:
     {{- end }}
   syncPolicy:
     automated:
+      enabled: false
       selfHeal: true
       prune: false
 
