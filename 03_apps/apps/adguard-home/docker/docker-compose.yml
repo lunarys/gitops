@@ -1,0 +1,64 @@
+services:
+  adguard-home:
+    image: adguard/adguardhome:v0.107.65
+    container_name: adguard-home
+    restart: unless-stopped
+
+    # Security context similar to your Kubernetes config
+    user: "2000:3000"
+
+    # Environment variables
+    environment:
+      - TZ=Europe/Berlin
+
+    # Port mappings for DNS (direct access needed)
+    ports:
+      # DNS over TCP
+      - "53:8053/tcp"
+      # DNS over UDP
+      - "53:8053/udp"
+
+    # Volume mappings (persistent storage)
+    volumes:
+      - ./.adguard/conf:/opt/adguardhome/conf
+      - ./.adguard/work:/opt/adguardhome/work
+
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    networks:
+      - traefik
+
+  traefik:
+    image: traefik:v3.5.1
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - "--providers.file.filename=/etc/traefik/config.yml"
+      #- "--providers.file.watch=true"
+      - "--entrypoints.web.address=:80"
+      # - "--entrypoints.websecure.address=:443"
+      # - "--certificatesresolvers.default.acme.tlschallenge=true"
+      # - "--certificatesresolvers.default.acme.email=${ACME_EMAIL:-admin@example.com}"
+      # - "--certificatesresolvers.default.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      # - "443:443"
+    volumes:
+      # - ./traefik/letsencrypt:/letsencrypt
+      - ./traefik/config.yml:/etc/traefik/config.yml:ro
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: false

@@ -1,0 +1,29 @@
+http:
+  routers:
+    adguard:
+      rule: "Host(`10.0.0.5`)"
+      entryPoints:
+        - web
+      # tls:
+      #   certResolver: default
+      service: adguard
+
+    # adguard-redirect:
+    #   rule: "Host(`adguard.${DOMAIN:-localhost}`)"
+    #   entryPoints:
+    #     - web
+    #   middlewares:
+    #     - redirect-to-https
+    #   service: adguard
+
+  services:
+    adguard:
+      loadBalancer:
+        servers:
+          - url: "http://adguard-home:3000"
+
+  # middlewares:
+  #   redirect-to-https:
+  #     redirectScheme:
+  #       scheme: https
+  #       permanent: true
