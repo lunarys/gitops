@@ -5,7 +5,7 @@ else
     VALUES_FILE="values-$1.yaml"
 fi
 
-helm dependency build
+helm dependency update
 helm upgrade --install cilium . \
   --namespace kube-system \
   -f values.yaml \

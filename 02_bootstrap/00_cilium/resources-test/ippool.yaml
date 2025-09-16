@@ -6,4 +6,5 @@ spec:
   blocks:
     - start: "10.0.1.191"
       stop: "10.0.1.199"
-    #- cidr: "fda0:f54f:5876:0:1::/104"
+    - start: "fda0:f54f:5876::6:200"
+      stop: "fda0:f54f:5876::6:250"

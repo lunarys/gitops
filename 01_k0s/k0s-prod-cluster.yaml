@@ -1,0 +1,27 @@
+apiVersion: k0sctl.k0sproject.io/v1beta1
+kind: Cluster
+metadata:
+  name: k0s-cluster-prod
+spec:
+  hosts:
+    - ssh:
+        address: 10.0.1.40
+        user: ju
+        port: 22
+        keyPath: ~/.ssh/id_ed25519
+      role: controller+worker
+      noTaints: true
+      installFlags:
+        - "--kubelet-extra-args=--node-ip=10.0.1.40,fda0:f54f:5876::1:40"
+    - ssh:
+        address: 10.0.1.41
+        user: ju
+        port: 22
+        keyPath: ~/.ssh/id_ed25519
+      role: controller+worker
+      noTaints: true
+      installFlags:
+        - "--kubelet-extra-args=--node-ip=10.0.1.41,fda0:f54f:5876::1:41"
+  k0s:
+    version: v1.33.3+k0s.0
+    config: {} # <-- merged from ClusterConfig

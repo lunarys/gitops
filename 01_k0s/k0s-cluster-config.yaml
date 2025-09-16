@@ -29,6 +29,11 @@ spec:
     #podCIDR: 10.244.0.0/16  # no effect due to cilium
     provider: custom  # cilium - https://docs.cilium.io/en/latest/installation/k0s/
     serviceCIDR: 10.96.0.0/12
+    dualStack:
+      enabled: true
+      IPv6podCIDR: fd00::/108  # <-- set via cilium settings, but not allowed to be empty (?)
+      IPv6serviceCIDR: fd01::/108
+    primaryAddressFamily: IPv4
   # Removed and replaced with Pod Security Standards: https://docs.k0sproject.io/stable/podsecurity/
   #podSecurityPolicy:
   #  defaultPolicy: 00-k0s-privileged
