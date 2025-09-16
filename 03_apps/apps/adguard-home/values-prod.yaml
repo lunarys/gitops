@@ -1,2 +1,2 @@
 ingress:
-  host: adguard.srv.elda
+  host: adguard.svc.elda

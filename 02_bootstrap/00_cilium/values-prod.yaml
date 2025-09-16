@@ -8,4 +8,4 @@ cilium:
     ui:
       ingress:
         hosts:
-          - hubble.srv.elda
+          - hubble.svc.elda

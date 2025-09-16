@@ -1,2 +1,2 @@
 global:
-  domain: argocd.srv.elda
+  domain: argocd.svc.elda
