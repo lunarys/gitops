@@ -18,6 +18,9 @@ spec:
           {{- if include "apps-wrapper.targetValuesFile" .root }}
           - {{ include "apps-wrapper.targetValuesFile" .root }}
           {{- end }}
+          {{- if and .root.Values.privateRepoEnabled .root.Values.privateRepo (hasKey .settings.files ".external") (include "apps-wrapper.targetValuesFile" .root) }}
+          - $privateRepo/config/{{ .settings.name }}/{{ include "apps-wrapper.targetValuesFile" .root }}
+          {{- end }}
         ignoreMissingValueFiles: true
       repoURL: {{ include "apps-wrapper.repoUrl" . }}
       targetRevision: {{ include "apps-wrapper.targetRevision" . }}
@@ -44,6 +47,9 @@ spec:
           - '$repo/{{ include "apps-wrapper.fullpath" . }}/values.yaml'
           {{- if include "apps-wrapper.targetValuesFile" .root }}
           - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ include "apps-wrapper.targetValuesFile" .root }}'
+          {{- end }}
+          {{- if and .root.Values.privateRepoEnabled .root.Values.privateRepo (hasKey .settings.files ".external") (include "apps-wrapper.targetValuesFile" .root) }}
+          - $privateRepo/config/{{ .settings.name }}/{{ include "apps-wrapper.targetValuesFile" .root }}
           {{- end }}
         ignoreMissingValueFiles: true
   {{- end }}
@@ -75,6 +81,12 @@ spec:
     - repoURL: {{ include "apps-wrapper.repoUrl" . }}
       targetRevision: {{ include "apps-wrapper.targetRevision" . }}
       ref: repo
+  {{- end }}
+  {{- if and .root.Values.privateRepoEnabled .root.Values.privateRepo (hasKey .settings.files ".external") (include "apps-wrapper.targetValuesFile" .root) }}
+    # private repo for values.yaml
+    - repoURL: {{ .root.Values.privateRepo }}
+      targetRevision: {{ include "apps-wrapper.targetRevision" . }}
+      ref: privateRepo
   {{- end }}
   {{- if include "apps-wrapper.hasAdditionalResources" . }}
     # additional resources
