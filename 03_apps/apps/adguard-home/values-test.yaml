@@ -1,5 +1,5 @@
 ingress:
-  host: adguard.k8s-test-1.local
+  host: adguard.test.svc.elda
 
 longhornstorage:
   volumes:

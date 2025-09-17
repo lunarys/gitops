@@ -4,7 +4,7 @@ metadata:
   name: "default-lb-pool"
 spec:
   blocks:
-    - start: "10.0.1.191"
-      stop: "10.0.1.199"
+    - start: "10.0.6.200"
+      stop: "10.0.6.210"
     - start: "fda0:f54f:5876::6:200"
-      stop: "fda0:f54f:5876::6:250"
+      stop: "fda0:f54f:5876::6:210"

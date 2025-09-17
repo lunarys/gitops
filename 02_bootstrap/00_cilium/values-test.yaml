@@ -8,4 +8,4 @@ cilium:
     ui:
       ingress:
         hosts:
-          - hubble.k8s-test-1.local
+          - hubble.test.svc.elda

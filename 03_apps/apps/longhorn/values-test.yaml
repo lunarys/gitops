@@ -1,6 +1,6 @@
 longhorn:
   ingress:
-    host: longhorn.k8s-test-1.local
+    host: longhorn.test.svc.elda
 
   persistence:
     defaultClassReplicaCount: 1

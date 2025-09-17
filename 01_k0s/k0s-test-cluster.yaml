@@ -6,12 +6,14 @@ metadata:
 spec:
   hosts:
     - ssh:
-        address: 10.0.1.190
+        address: 10.0.1.60
         user: ju
         port: 22
         keyPath: ~/.ssh/id_ed25519
       role: single
       #role: controller+worker
+      installFlags:
+        - "--kubelet-extra-args=--node-ip=10.0.1.60,fda0:f54f:5876::1:60"
   k0s:
     version: v1.33.3+k0s.0
     config: {} # <-- merged from ClusterConfig

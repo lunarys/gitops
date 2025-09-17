@@ -1,2 +1,2 @@
 global:
-  domain: argocd.k8s-test-1.local
+  domain: argocd.test.svc.elda
