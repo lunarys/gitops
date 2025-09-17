@@ -21,9 +21,7 @@ spec:
     spec:
       containers:
         - name: bitwarden-cli
-
-          # TODO: own image? use api key - https://github.com/charlesthomas/bitwarden-cli
-          image: ghcr.io/charlesthomas/bitwarden-cli:2025.6.1
+          image: ghcr.io/lunarys/bitwarden-cli:2025.8.0
           imagePullPolicy: IfNotPresent
           env:
             - name: BW_HOST
