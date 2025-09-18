@@ -5,5 +5,5 @@ metadata:
 spec:
   ipAllowList:
     sourceRange:
-      - 10.0.0.0/22
+      - 10.0.0.0/20
       - 192.168.178.0/23

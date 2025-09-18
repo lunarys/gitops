@@ -12,7 +12,7 @@ traefik:
   ingressRoute:
     dashboard:
       enabled: false  # enabling this requires traefik crds and the IngressRoute is weird
-      matchRule: "Host(`traefik.k8s-test-1.local`)"
+      #matchRule: "Host(`traefik.test.svc.elda`)"
 
   providers:
     kubernetesCRD:
