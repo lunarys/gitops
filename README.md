@@ -3,13 +3,13 @@
 ## Road to production
 
 - [ ] cert-manager
-- [ ] replicated storage
-- [ ] node local storage 
+- [x] replicated storage -> Longhorn
+- [x] node local storage -> local-path-provisioner
   - [HwameiStor](https://hwameistor.io/)?
 - [ ] replicated database
   - [Bitnami / MariaDB](https://github.com/bitnami/charts/tree/main/bitnami/mariadb-galera)?
   - cloudnative-pg?
-- [ ] backup
+- [x] backup -> Longhorn backup mechanism
   - [Velero](https://velero.io/)?
     - [Velero UI](https://github.com/otwld/velero-ui)?`
   - VolumeSnapshot?
@@ -19,20 +19,20 @@
 - [x] external secrets
 - [ ] base settings / owasp
 - [ ] ArgoCD source hydrator?
-- [ ] ArgoCD - App of apps as helm -> templating via values.yaml and all apps in /templates
-- [ ] Clean up PVCs: Retain leaves pvcs around, but Delete removes also the data (local-path-provisioner)
+- [x] ArgoCD - App of apps as helm -> templating via values.yaml and all apps in /templates -> `03_apps/apps`
+- [x] Clean up PVCs: Retain leaves pvcs around, but Delete removes also the data (local-path-provisioner)
 - [ ] Pod Security Standards?
   - https://docs.k0sproject.io/stable/podsecurity/
   - https://kubernetes.io/docs/concepts/security/pod-security-standards/
 
 ### Helm Chart features
 
-- [ ] internal / external access
+- [x] internal / external access
 - [ ] host + cert
-- [ ] service kind / ip address
-- [ ] persistent storage
+- [x] service kind / ip address
+- [x] persistent storage
 - [ ] database
-- [ ] external secrets
+- [x] external secrets
 
 ## Potential components
 
@@ -50,7 +50,7 @@
 ### Network
 
 - [x] [Cilium + Hubble](https://github.com/networkpolicy/tutorial?tab=readme-ov-file)
-- [ ] Default network policies
+- [ ] Default network policies 
 
 ### Secrets
 
