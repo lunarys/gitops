@@ -1,2 +1,4 @@
 preset:
   namespaceIsolation: true
+  egress:
+    toKubeApi: true
