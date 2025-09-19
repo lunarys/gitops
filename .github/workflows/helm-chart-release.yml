@@ -97,8 +97,8 @@ jobs:
       github.ref == 'refs/heads/main' && 
       (needs.helm-package.outputs.chart-exists == 'false' || github.event.inputs.force_publish == 'true')
     permissions:
-      contents: read
-      packages: write
+      contents: write  # For creating git tags and releases
+      packages: write  # For publishing to GitHub Container Registry
     steps:
       - name: Checkout
         uses: actions/checkout@v4
