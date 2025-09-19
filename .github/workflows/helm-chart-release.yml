@@ -136,7 +136,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.CHART_NAME }}-${{ needs.helm-package.outputs.chart-version }}
-          name: "Helm Chart ${{ env.CHART_NAME }} v${{ needs.helm-package.outputs.chart-version }}"
+          name: "${{ env.CHART_NAME }}-${{ needs.helm-package.outputs.chart-version }}"
           body: |
             ## Helm Chart Release: ${{ env.CHART_NAME }} v${{ needs.helm-package.outputs.chart-version }}
             
@@ -152,7 +152,7 @@ jobs:
             
             ### 🔗 Links
             - **Chart**: `oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.CHART_NAME }}:${{ needs.helm-package.outputs.chart-version }}`
-            - **Registry**: https://github.com/${{ github.repository_owner }}/packages
+            - **Registry**: https://github.com/${{ github.repository_owner }}/gitops/pkgs/container/application-wrapper
             
             ### 📋 Changes
             This release includes updates to the application-wrapper Helm chart.
