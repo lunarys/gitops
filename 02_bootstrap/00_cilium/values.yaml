@@ -14,6 +14,8 @@ cilium:
   k8sServicePort: 6443
 
   # L2 announcements (https://docs.cilium.io/en/stable/network/l2-announcements/#l2-announcements)
+  #l2NeighDiscovery:
+  #  enabled: true
   l2announcements:
     enabled: true
   #k8sClientRateLimit:
