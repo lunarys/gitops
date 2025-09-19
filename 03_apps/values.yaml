@@ -20,12 +20,12 @@ targetRevision: main
 # - The helm chart within the `mainHelmRepo` that is used to render secrets.
 secretsChart: "externalsecrets"
 # - The version of the `secretsChart` to use by default.
-secretsChartVersion: "1.0.5"
+secretsChartVersion: "1.0.6"
 
 # -- The helm chart within the `mainHelmRepo` that is used to render network policies
 networkPolicyChart: "networkpolicy"
 # -- The version of the `networkPolicyChart` to use by default.
-networkPolicyChartVersion: "1.0.5"
+networkPolicyChartVersion: "1.0.6"
 
 # -- The values file to use for the application in the respective cluster, e.g. `values-test.yaml`.
 # In addition to the default `values.yaml` file.
