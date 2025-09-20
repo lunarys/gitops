@@ -1,0 +1,11 @@
+longhorn:
+  ingress:
+    host: longhorn.svc.elda
+
+  persistence:
+    defaultClassReplicaCount: 2
+
+  defaultBackupStore:
+    backupTarget: "cifs://erolas.elda/k8s-prod-longhorn-backup"
+
+storageClassReplicas: 2

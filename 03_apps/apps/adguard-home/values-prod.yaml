@@ -1,2 +1,7 @@
 ingress:
   host: adguard.svc.elda
+
+longhornstorage:
+  volumes:
+    confdir:
+      pvName: "" # <-- TODO

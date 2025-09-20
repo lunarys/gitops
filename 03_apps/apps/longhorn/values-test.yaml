@@ -6,6 +6,6 @@ longhorn:
     defaultClassReplicaCount: 1
 
   defaultBackupStore:
-    backupTarget: "cifs://erolas.elda/test-longhorn"
+    backupTarget: "cifs://erolas.elda/k8s-test-longhorn-backup"
 
 storageClassReplicas: 1
