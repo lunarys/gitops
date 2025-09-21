@@ -1,5 +1,7 @@
 preset:
   namespaceIsolation: true
+  ingress:
+    fromNamespace: kube-system  # apparently the konnectivity agent from the kube-system namespace needs access
   egress:
     toKubeApi: true
     toLocalSubnet: true
