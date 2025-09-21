@@ -1,0 +1,3 @@
+helm:
+  chart: generic-service
+  version: 2.1.0

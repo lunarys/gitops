@@ -1,0 +1,53 @@
+ingress:
+  enabled: false
+
+image:
+  name: docker.io/teamspeak
+  tag: 3.13.7
+
+service:
+  port: 9987
+  targetPort: 9987
+  protocol: UDP
+  externalIPs:
+    - 10.0.4.10
+
+networkpolicy:
+  preset:
+    ingress:
+      fromWorld: true
+
+longhornstorage:
+  volumes:
+    ts3-server-data:
+      size: 50Mi
+      variant: retain
+      pvName: ""  # TODO
+      mount:
+        path: "/var/ts3server"
+
+env:
+  TS3SERVER_LICENSE: "accept"
+
+initCopy:
+  enabled: true
+  toVolume: longhorn-ts3-server-data
+
+smbstorage:
+  volumes:
+    init-default:
+      enabled: true
+
+podSecurityContextPreset:
+  # user used in the official container image. required for correct file access. 
+  runAsUser: 9987
+
+livenessProbe:
+  enabled: true
+  tcp:
+    port: 10011 # TeamSpeak provides a TCP admin interface on port 10011 by default
+
+readinessProbe:
+  enabled: true
+  tcp:
+    port: 10011 # TeamSpeak provides a TCP admin interface on port 10011 by default
