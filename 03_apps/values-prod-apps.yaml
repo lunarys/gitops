@@ -1,2 +1,9 @@
 # -- Only apps listed here will be rendered.
-enabled: []
+enabled:
+  - bitwarden
+  - longhorn
+  - smb-driver
+
+  #- adguard-home
+
+  - teamspeak
