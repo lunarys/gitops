@@ -22,6 +22,7 @@ longhorn:
     provisionerReplicaCount: 2
     resizerReplicaCount: 2
     snapshotterReplicaCount: 2
+    kubeletRootDir: "/var/lib/k0s/kubelet"
 
   longhornUI:
     replicas: 1
