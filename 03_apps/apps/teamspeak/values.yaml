@@ -13,6 +13,7 @@ service:
     - 10.0.4.10
 
 networkpolicy:
+  enabled: true
   preset:
     ingress:
       fromWorld: true
@@ -22,21 +23,12 @@ longhornstorage:
     ts3-server-data:
       size: 50Mi
       variant: retain
-      pvName: ""  # TODO
+      pvName: "pvc-35928dca-0da6-4366-a46e-f8b491b448d0"
       mount:
         path: "/var/ts3server"
 
 env:
   TS3SERVER_LICENSE: "accept"
-
-initCopy:
-  enabled: true
-  toVolume: longhorn-ts3-server-data
-
-smbstorage:
-  volumes:
-    init-default:
-      enabled: true
 
 podSecurityContextPreset:
   # user used in the official container image. required for correct file access. 
