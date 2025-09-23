@@ -34,6 +34,9 @@ spec:
       IPv6podCIDR: fd00::/108  # <-- set via cilium settings, but not allowed to be empty (?)
       IPv6serviceCIDR: fd01::/108
     primaryAddressFamily: IPv4
+    nodeLocalLoadBalancing:  # <-- does not work with "single" node cluster, but works with a single controller+worker node 
+      enabled: true
+      type: EnvoyProxy
   # Removed and replaced with Pod Security Standards: https://docs.k0sproject.io/stable/podsecurity/
   #podSecurityPolicy:
   #  defaultPolicy: 00-k0s-privileged
