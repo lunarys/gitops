@@ -26,7 +26,8 @@ cilium:
     #burst:
 
   # Required for L2 announcements to work when accessing services via nodes that don't run the target pod
-  enableMasqueradeRouteSource: true
+  bpf:
+    masquerade: true
 
   #nodeIPAM:
     #enabled: false  # replacement for metallb??
