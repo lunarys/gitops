@@ -18,13 +18,15 @@ cilium:
   l2announcements:
     enabled: true
   # Enable neighbor discovery to allow Cilium to learn MAC addresses of nodes for L2 announcements
-  # Required for L2 announcements to work when accessing services via nodes that don't run the target pod
   l2NeighDiscovery:
     enabled: true
   # TODO?
   #k8sClientRateLimit:
     #qps:
     #burst:
+
+  # Required for L2 announcements to work when accessing services via nodes that don't run the target pod
+  enableMasqueradeRouteSource: true
 
   #nodeIPAM:
     #enabled: false  # replacement for metallb??
