@@ -14,10 +14,14 @@ cilium:
   k8sServicePort: 6443
 
   # L2 announcements (https://docs.cilium.io/en/stable/network/l2-announcements/#l2-announcements)
-  #l2NeighDiscovery:
-  #  enabled: true
+  # Enable L2 announcements to have Cilium announce external or load balancer IPs via ARP/ND
   l2announcements:
     enabled: true
+  # Enable neighbor discovery to allow Cilium to learn MAC addresses of nodes for L2 announcements
+  # Required for L2 announcements to work when accessing services via nodes that don't run the target pod
+  l2NeighDiscovery:
+    enabled: true
+  # TODO?
   #k8sClientRateLimit:
     #qps:
     #burst:
