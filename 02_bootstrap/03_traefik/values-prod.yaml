@@ -1,3 +1,9 @@
 ingress:
   enabled: true
   host: traefik.svc.elda
+
+traefik:
+  service:
+    type: ClusterIP
+    externalIPs:
+      - 10.0.4.9
