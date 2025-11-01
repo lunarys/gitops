@@ -25,12 +25,18 @@ cilium:
     #qps:
     #burst:
 
-  # Required for L2 announcements to work when accessing services via nodes that don't run the target pod
   bpf:
     masquerade: true
 
-  #nodeIPAM:
-    #enabled: false  # replacement for metallb??
+  # Required for L2 announcements to work when accessing services via nodes that don't run the target pod,
+  # as with geneve the source IP is preserved also when requests are forward. This is required for networkpolicies
+  # to work properly.
+  # -> https://github.com/cilium/cilium/issues/27800
+  tunnelProtocol: geneve
+  routingMode: tunnel
+  loadBalancer:
+    mode: dsr  # direct server return -> https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#dsr-mode-with-geneve
+    dsrDispatch: geneve             
 
   operator:
     replicas: 1
