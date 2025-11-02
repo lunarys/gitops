@@ -2,6 +2,14 @@ preset:
   namespaceIsolation: true
   ingress:
     fromNamespace: kube-system  # apparently the konnectivity agent from the kube-system namespace needs access
+    # the kube-apiserver needs to call the webhook endpoint
+    rules:
+      - fromEntities:
+          - kube-apiserver
+        toPorts:
+          - ports:
+              - port: "9502"
+                protocol: TCP
   egress:
     toKubeApi: true
     toLocalSubnet: true
