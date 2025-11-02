@@ -18,10 +18,10 @@ preset:
           - ports:
               - port: "9502"
                 protocol: TCP
-        rules:
-          http:
-            - method: POST
-              path: "/webhook/validation$"
+            rules:
+              http:
+                - method: POST
+                  path: "/webhook/validation$"
 
   egress:
     toKubeApi: true
