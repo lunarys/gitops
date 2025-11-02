@@ -4,6 +4,5 @@ ingress:
 
 traefik:
   service:
-    type: ClusterIP
     externalIPs:
       - 10.0.4.9
