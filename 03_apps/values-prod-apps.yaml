@@ -7,3 +7,4 @@ enabled:
   #- adguard-home
 
   - teamspeak
+  - nodered

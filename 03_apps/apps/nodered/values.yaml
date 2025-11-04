@@ -1,0 +1,196 @@
+nodered:
+  ingress:
+    host: nodered.svc.elda
+    accessControl:
+      externalAccessAllowed: false
+
+  image:
+    name: nodered/node-red
+    tag: 4.1.1
+    args: ["--settings", "/configmap/settings.js"]  # store settings outside of the volume /data, which would be the default
+
+  service:
+    targetPort: 1880
+
+  extraConfig:
+    volumeMounts:
+      - name: nodered-settings
+        configMap: nodered-settings
+        mountPath: /configmap
+        readOnly: true
+
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    tcp:
+      port: 1880
+
+  readinessProbe:
+    enabled: true
+    periodSeconds: 10
+    http:
+      path: /
+      port: 1880
+
+  services:
+    integration:
+      enabled: true
+      ports:
+        smtp:
+          port: 1025
+        hmip-binrpc:
+          port: 2062
+        hmip-xmlrpc:
+          port: 2063
+      externalIPs:
+        - 10.0.4.7
+
+  longhornstorage:
+    volumes:
+      data:
+        size: 500Mi
+        variant: retain
+        #pvName: "pvc-4dad665b-3a5f-429f-bf8e-7b0ea35799b0"
+        mount:
+          path: "/data"
+
+  externalsecrets:
+    commonRemoteKey: 230c480a-b2db-4bc4-9186-b38a009fa815
+    mount:
+      env: true
+    fields:
+      MY_NODERED_ADMIN_USERNAME:
+        storeRefName: bitwarden-login
+        remoteProperty: username
+      MY_NODERED_ADMIN_PASSWORD:
+        storeRefName: bitwarden-login
+        remoteProperty: password
+      MY_NODERED_CREDENTIAL_SECRET:
+        storeRefName: bitwarden-fields
+        remoteProperty: credentialSecret
+
+  networkpolicy:
+    enabled: true
+    preset:
+      useChartEndpointSelector: true  # less restrictive policy for nodered vs. mongodb
+      ingress:
+        fromLocalSubnet: true
+        fromNamespace: "home-assistant"
+      egress:
+        toWorld: true
+        toLocalSubnet: true
+        # TODO: does not support list right now
+        # TODO: maybe just use external IP with DNS?
+        toNamespace: "home-assistant"
+          #- mosquitto
+
+
+mongodb:
+  global:
+    nameOverride: mongodb  # required to not collide with the release name, that would be used for default names
+
+  image:
+    name: mongo
+    tag: 8.2.1
+
+  ingress:
+    enabled: false
+
+  service:
+    port: 27017
+    targetPort: 27017
+    
+  longhornstorage:
+    volumes:
+      mongodb:
+        size: 500Mi
+        variant: retain
+        pvName: "pvc-133771c5-e7ea-4991-a400-df185f005683"
+        mount:
+          path: "/data/db"
+
+  podSecurityContextPreset:
+    runAsUser: 999  # user that mongo usually uses
+
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    tcp:
+      port: 27017
+
+  readinessProbe:
+    enabled: true
+    exec: 
+      command:
+        - "mongosh" 
+        - "--quiet" 
+        - "--eval" 
+        - "'db.runCommand({ ping: 1 })'"
+
+
+  externalsecrets:
+    name: mongodb-external-secret
+    commonRemoteKey: 89ccf809-d9b6-4291-8e44-b38a00a086cd
+    mount:
+      env: true
+    fields:
+      MONGO_INITDB_ROOT_USERNAME: "root"
+      MONGO_INITDB_ROOT_PASSWORD:
+        storeRefName: bitwarden-fields
+        remoteProperty: rootPassword
+      ME_CONFIG_MONGODB_URL: 
+        static: "mongodb://root:{{ .MONGO_INITDB_ROOT_PASSWORD }}@mongodb:27017/"  # k8s internal service hostname
+      ME_CONFIG_SITE_COOKIESECRET:
+        storeRefName: bitwarden-fields
+        remoteProperty: cookiesecret
+      ME_CONFIG_SITE_SESSIONSECRET:
+        storeRefName: bitwarden-fields
+        remoteProperty: sessionsecret
+      ME_CONFIG_BASICAUTH_ENABLED: "true"
+      ME_CONFIG_BASICAUTH_USERNAME:
+        storeRefName: bitwarden-login
+        remoteProperty: username
+      ME_CONFIG_BASICAUTH_PASSWORD:
+        storeRefName: bitwarden-login
+        remoteProperty: password
+
+  networkpolicy:  # without being scoped to the chart, this should also apply to the mongo-express deployment
+    enabled: true
+    preset:
+      namespaceIsolation: true
+
+
+mongo-express:
+  global:
+    nameOverride: mongo-express  # required to not collide with the release name, that would be used for default names
+
+  ingress:
+    host: mongo.svc.elda
+    accessControl:
+      externalAccessAllowed: false
+
+  image:
+    name: mongo-express
+    tag: 1.0.2
+
+  service:
+    targetPort: 8081
+
+  extraConfig:
+    secrets:
+      - mongodb-external-secret
+
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    tcp:
+      port: 8081
+
+  readinessProbe:
+    enabled: true
+    periodSeconds: 30
+    http:
+      path: /status
+      port: 8081

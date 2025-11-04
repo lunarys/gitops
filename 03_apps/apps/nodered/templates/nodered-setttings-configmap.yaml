@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nodered-settings
+data:
+  settings.js: | 
+    {{- .Files.Get "config/settings.js" | nindent 4 }}
