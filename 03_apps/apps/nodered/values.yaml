@@ -51,7 +51,7 @@ nodered:
       data:
         size: 500Mi
         variant: retain
-        #pvName: "pvc-4dad665b-3a5f-429f-bf8e-7b0ea35799b0"
+        pvName: "pvc-545cca2f-a761-46a1-92aa-65756f8cca54"
         mount:
           path: "/data"
 
