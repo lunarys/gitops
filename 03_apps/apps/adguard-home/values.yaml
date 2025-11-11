@@ -8,36 +8,26 @@ ingress:
 
 image:
   name: adguard/adguardhome
-  tag: v0.107.65
+  tag: v0.107.69
 
 
 service:
   targetPort: 3000
 
-containerSecurityContext:
-  allowPrivilegeEscalation: false
-  privileged: false
-  runAsNonRoot: true
-  readOnlyRootFilesystem: false
+containerSecurityContextPreset:
+  #runAsNonRoot: false  # <-- needed for first start
   capabilities:
     drop:  # <-- drop ALL fails, exec not possible then
       - CAP_NET_RAW
       - CAP_SYS_ADMIN
 
-podSecurityContext:
-  runAsNonRoot: true
-  runAsUser: 1000
-  runAsGroup: 3000
-  fsGroup: 2000
-  seccompProfile:
-    type: RuntimeDefault
-
+#podSecurityContextPreset: # use defaults
+  #runAsNonRoot: false  # <-- needed for first start
+  #runAsUser: 0         # <-- needed for first start
 
 services:
   dns:
     enabled: true
-    externalIPs:
-      - 10.0.1.189
     ports:
       dns-tcp:
         port: 53
@@ -69,6 +59,7 @@ env:
 
 
 networkpolicy:
+  enabled: true
   preset:
     namespaceIsolation: true
     ingress:
@@ -76,3 +67,15 @@ networkpolicy:
       fromCluster: true
     egress:
       toWorld: true
+
+livenessProbe:
+  enabled: true
+  http:
+    path: /login.html
+    port: 3000
+
+readinessProbe:
+  enabled: true
+  http:
+    path: /login.html
+    port: 3000

@@ -4,4 +4,10 @@ ingress:
 longhornstorage:
   volumes:
     confdir:
-      pvName: "" # <-- TODO
+      pvName: "pvc-71879d24-4905-4c9f-bcf7-96c29a647989"
+
+services:
+  dns:
+    externalIPs:
+      - 10.0.4.2
+      - fda0:f54f:5876::4:2
