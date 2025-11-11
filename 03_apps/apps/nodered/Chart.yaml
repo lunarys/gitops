@@ -6,14 +6,14 @@ version: 0.1.0
 appVersion: "0.1.0"
 dependencies:
   - name: generic-service
-    version: 2.3.0
+    version: 2.4.0
     repository: oci://registry.gitlab.com/juulun/helm-charts/charts
     alias: nodered
   - name: generic-service
-    version: 2.3.0
+    version: 2.4.0
     repository: oci://registry.gitlab.com/juulun/helm-charts/charts
     alias: mongodb
   - name: generic-service
-    version: 2.3.0
+    version: 2.4.0
     repository: oci://registry.gitlab.com/juulun/helm-charts/charts
     alias: mongo-express

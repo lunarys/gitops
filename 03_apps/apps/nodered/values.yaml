@@ -12,6 +12,9 @@ nodered:
   service:
     targetPort: 1880
 
+  env:
+    TZ: "Europe/Berlin"
+
   extraConfig:
     volumeMounts:
       - name: nodered-settings
@@ -32,6 +35,11 @@ nodered:
     http:
       path: /
       port: 1880
+
+  # better only run one instance of nodered, to avoid parallel executions of flows
+  update:
+    strategy:
+      type: Recreate
 
   services:
     integration:
