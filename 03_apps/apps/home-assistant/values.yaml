@@ -1,0 +1,96 @@
+ingress:
+  host: hass.svc.elda
+  accessControl:
+    externalAccessAllowed: false
+
+image:
+  name: homeassistant/home-assistant
+  tag: 2025.11.1
+
+service:
+  targetPort: 8123
+
+env:
+  TZ: "Europe/Berlin"
+
+services:
+  integration:
+    enabled: true
+    ports:
+      homekit-bridge:
+        port: 21063
+      hmip-callback:
+        port: 38087
+    externalIPs:
+      - 10.0.4.6
+
+longhornstorage:
+  volumes:
+    config:
+      size: 200Mi
+      variant: retain
+      pvName: "" # TODO
+      mount:
+        path: /config
+
+networkpolicy:
+  enabled: true
+  preset:
+    namespaceIsolation: true
+    ingress:
+      fromLocalSubnet: true
+      fromNamespace: nodered
+    egress:
+      toWorld: true
+      toLocalSubnet: true
+      # TODO: does not support list right now
+      # TODO: maybe just use external IP with DNS?
+      #toNamespace:
+      #  - nodered  # Might not even be needed?
+      #  - mosquitto
+
+podSecurityContext:
+  runAsNonRoot: false
+  fsGroup: 2000
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContextPreset:
+  runAsNonRoot: false
+  # From https://community.home-assistant.io/t/improving-docker-security-non-root-application-configuration/399971/7
+  # Alternative? https://docs.linuxserver.io/images/docker-homeassistant
+  capabilities:
+    drop: 
+      - ALL
+    add:
+      #- CHOWN
+      #- DAC_OVERRIDE
+      #- FSETID
+      #- FOWNER
+      - SETGID  # needed on startup apparently
+      - SETUID  # needed on startup apparently
+      #- SYS_CHROOT
+      #- KILL
+      - NET_RAW  # for the 'ping' integration
+      #- NET_ADMIN
+
+# home-assistant has a filesystem lock to only run one instance...
+update:
+  strategy:
+    type: Recreate
+
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  http:
+    path: /manifest.json  # just some unauthenticated endpoint
+    port: 8123
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 15
+  http:
+    path: /manifest.json  # just some unauthenticated endpoint
+    port: 8123
+
