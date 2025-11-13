@@ -1,0 +1,2 @@
+# The longhorn docs state that it should only be installed in the longhorn-system namespace
+namespace: longhorn-system

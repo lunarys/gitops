@@ -12,7 +12,8 @@
       {{- $_ := set $files $filePathStripped ($.Files.Get $filePath | fromYaml) }}
     {{- end }}
   {{- end }}
-  {{- $_ := set $apps $name (dict "name" $name "dir" $dir "files" $files "variant" "app") }}
+  {{- $settings := default (dict) (index $files "app.yaml" "settings") -}}
+  {{- $_ := set $apps $name (dict "name" $name "dir" $dir "files" $files "variant" "app" "settings" $settings) }}
 {{- end }}
 {{- $chartYamls := .Files.Glob "apps/*/Chart.yaml" }}
 {{- range $path, $_ := $chartYamls }}
@@ -25,7 +26,11 @@
       {{- $_ := set $files $filePathStripped ($.Files.Get $filePath | fromYaml) }}
     {{- end }}
   {{- end }}
-  {{- $_ := set $apps $name (dict "name" $name "dir" $dir "files" $files "variant" "chart") }}
+  {{- $settings := dict }}
+  {{- if hasKey $files "settings.yaml" }}
+    {{- $settings = index $files "settings.yaml" }}
+  {{- end }}
+  {{- $_ := set $apps $name (dict "name" $name "dir" $dir "files" $files "variant" "chart" "settings" $settings) }}
 {{- end }}
 {{/*
 Structure of the apps dictionary:
@@ -37,7 +42,8 @@ Structure of the apps dictionary:
         "file1.yaml": "<content as dict>",
         "app.yaml": "<content as dict>"
       },
-      "variant": "app"
+      "variant": "app",
+      "settings": {}  # from app.yaml
     },
     "chart1": {
       "name": "chart1",
@@ -46,7 +52,8 @@ Structure of the apps dictionary:
         "Chart.yaml": "<content as dict>",
         "values.yaml": "<content as dict>"
       },
-      "variant": "chart"
+      "variant": "chart",
+      "settings": {}  # from settings.yaml, e.g. namespace
     }
   }
 */}}

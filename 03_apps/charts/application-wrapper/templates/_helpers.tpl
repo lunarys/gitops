@@ -1,5 +1,5 @@
 {{- define "apps-wrapper.namespace" -}}
-{{ .settings.name }}
+{{ dig "settings" "namespace" .settings.name .settings }}
 {{- end }}
 
 {{- define "apps-wrapper.fullpath" -}}
