@@ -1,3 +1,8 @@
+# this does seem to block some necessary traffic,
+# and I'm tired of debugging this.
+#
+# The admission webhook call fails sometimes (?) when using this network policy,
+# but in my understanding everything should happen in the same namespace...
 preset:
   namespaceIsolation: true
   ingress:
