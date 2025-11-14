@@ -2,6 +2,7 @@
 
 - Restore data volume from backup
 - Restore PV for the volume
+- Backup group needs to be re-added!
 
 # Notes
 
