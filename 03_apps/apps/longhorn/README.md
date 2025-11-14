@@ -1,3 +1,10 @@
+# Restore
+
+- Restore data volume from backup
+- Restore PV for the volume
+
+# Notes
+
 /var/lib/longhorn
 
 
