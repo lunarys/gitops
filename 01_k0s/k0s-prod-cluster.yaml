@@ -23,5 +23,5 @@ spec:
       installFlags:
         - "--kubelet-extra-args=--node-ip=10.0.1.41,fda0:f54f:5876::1:41"
   k0s:
-    version: v1.33.4+k0s.0
+    version: v1.34.1+k0s.1
     config: {} # <-- merged from ClusterConfig
