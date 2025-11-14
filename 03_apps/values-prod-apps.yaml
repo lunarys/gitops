@@ -8,3 +8,4 @@ enabled:
 
   - teamspeak
   - nodered
+  - n8n

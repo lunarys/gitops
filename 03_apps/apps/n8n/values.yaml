@@ -1,0 +1,77 @@
+ingress:
+  host: n8n.svc.elda
+  accessControl:
+    externalAccessAllowed: false
+
+image:
+  name: docker.n8n.io/n8nio/n8n
+  tag: 1.119.1
+
+service:
+  targetPort: 5678
+
+env:
+  # From https://docs.n8n.io/hosting/installation/server-setups/docker-compose/#6-create-docker-compose-file
+  GENERIC_TIMEZONE: "Europe/Berlin"
+  TZ: "Europe/Berlin"
+  N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+  
+  #N8N_HOST: n8n.svc.elda
+  #N8N_PORT: "5678"
+  #N8N_PROTOCOL: http
+  #N8N_EDITOR_BASE_URL: http://n8n.svc.elda/
+
+  N8N_RUNNERS_ENABLED: "true"
+  #NODE_ENV: production
+  WEBHOOK_URL: http://n8n.svc.elda/
+
+  # for reverse proxy: https://github.com/n8n-io/n8n/issues/19151
+  N8N_PROXY_HOPS: "1"
+  N8N_SECURE_COOKIE: "false"        # set cookies as secure when using HTTPS
+  N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"  # prevent ENV access in code nodes
+
+
+longhornstorage:
+  volumes:
+    data:
+      size: 200Mi
+      variant: retain
+      pvName: "pvc-0bae2fdf-6d82-494f-b6e6-6b55065c1169"
+      mount:
+        path: /home/node/.n8n
+
+
+externalsecrets:
+  enabled: true
+  commonRemoteKey: "8b00da18-11ad-445f-afd7-b3940135bbf5"
+  fields:
+    N8N_ENCRYPTION_KEY:
+      storeRefName: bitwarden-login
+      remoteProperty: password
+
+
+networkpolicy:
+  enabled: true
+  preset:
+    namespaceIsolation: true
+    egress:
+      toWorld: true
+     
+
+# better only run one instance to avoid parallel executions of flows
+update:
+  strategy:
+    type: Recreate
+
+readinessProbe:
+  enabled: true
+  http:
+    path: /
+    port: 5678
+
+# From https://github.com/n8n-io/n8n-hosting/blob/3e6a954f2858f91d87a7603444b1863d3e49604e/kubernetes/n8n-deployment.yaml
+resources:
+  requests:
+    memory: "250Mi"
+  limits:
+    memory: "500Mi"
