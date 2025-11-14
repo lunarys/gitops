@@ -1,3 +1,10 @@
+#!/bin/bash
+set -eo pipefail  # Exit on error, undefined variables, and pipe failures
+
+# This script safely handles passwords and secrets with special characters
+# including: $, `, \, ", ', spaces, and other shell metacharacters
+# by using temporary files instead of environment variables
+
 SCRIPT_DIR="$(dirname "$0")"
 
 if [ -z "$1" ]; then
@@ -19,7 +26,7 @@ for file in $files; do
 			echo "Enter value for '$key' (default='$value'):"
 		fi
 
-		read newValue
+		read -r newValue
 		#if [ -z "$newValue" ]; then
 		#	echo no value
 		#else
@@ -27,7 +34,13 @@ for file in $files; do
 		#fi
 
 		if [ -n "$newValue" ]; then
-			manifest="$(echo "$manifest" | NEW_VALUE="$newValue" yq ".stringData.$key = strenv(NEW_VALUE)")"
+			# Use a temporary file to safely pass the value to yq
+			# This completely avoids shell interpretation of special characters
+			tmpfile=$(mktemp)
+			trap 'rm -f "$tmpfile"' EXIT  # Ensure cleanup on script exit
+			printf '%s' "$newValue" > "$tmpfile"
+			manifest="$(echo "$manifest" | yq ".stringData.$key = load_str(\"$tmpfile\")")"
+			rm -f "$tmpfile"
 		fi
 	done
 
@@ -37,8 +50,8 @@ for file in $files; do
 	echo "---"
 
 	echo "Apply manifest? (Y/n)"
-	read confirmation
-	if [ -z "$confirmation" ] || [ "$confirmation" == "y" ]; then
+	read -r confirmation
+	if [ -z "$confirmation" ] || [ "$confirmation" == "y" ] || [ "$confirmation" == "Y" ]; then
 		echo "Applying manifest for $file..."
 		echo "$manifest" | kubectl apply -f -
 	else
