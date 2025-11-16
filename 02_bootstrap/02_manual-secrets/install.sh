@@ -6,14 +6,53 @@ set -eo pipefail  # Exit on error, undefined variables, and pipe failures
 # by using temporary files instead of environment variables
 
 SCRIPT_DIR="$(dirname "$0")"
+ENV=""
+FILES=()
 
-if [ -z "$1" ]; then
-	files="$SCRIPT_DIR/"*.yaml
-else
-	files="$@"
+# Parse command-line arguments
+while [[ $# -gt 0 ]]; do
+	case $1 in
+		--env)
+			ENV="$2"
+			shift 2
+			;;
+		-h|--help)
+			echo "Usage: $0 [--env ENVIRONMENT] [files...]"
+			echo ""
+			echo "Options:"
+			echo "  --env ENV      Use kubeconfig at ~/.kube/config-ENV"
+			echo "  -h, --help     Show this help message"
+			echo ""
+			echo "Examples:"
+			echo "  $0 --env prod"
+			echo "  $0 --env prod *.yaml"
+			echo "  $0 --env test secret.yaml"
+			exit 0
+			;;
+		*)
+			FILES+=("$1")
+			shift
+			;;
+	esac
+done
+
+# If no files specified, use all yaml files in script directory
+if [ ${#FILES[@]} -eq 0 ]; then
+	FILES=("$SCRIPT_DIR"/*.yaml)
 fi
 
-for file in $files; do
+# Set kubeconfig if environment is specified
+if [ -n "$ENV" ]; then
+	KUBECONFIG_FILE="$HOME/.kube/config-$ENV"
+	if [ ! -f "$KUBECONFIG_FILE" ]; then
+		echo "Error: kubeconfig file not found: $KUBECONFIG_FILE"
+		exit 1
+	fi
+	export KUBECONFIG="$KUBECONFIG_FILE"
+	echo "Using kubeconfig: $KUBECONFIG_FILE"
+fi
+
+for file in "${FILES[@]}"; do
     echo "Processing yaml file: $file"
     manifest="$(yq "$file")"
 

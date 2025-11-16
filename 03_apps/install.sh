@@ -6,6 +6,8 @@ fi
 if [ "$1" != "test" ] && [ "$1" != "prod" ]; then
   echo "Error: Invalid environment. Use 'test' or 'prod'."
   exit 1
+else
+  export KUBECONFIG="$HOME/.kube/config-$1"
 fi
 
 helm upgrade --install argocd-apps . --namespace argocd --create-namespace --values values.yaml --values values-"$1".yaml

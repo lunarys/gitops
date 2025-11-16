@@ -124,6 +124,8 @@ else
   location="--repo ${REPOSITORY%/} $CHART"
 fi
 
+export KUBECONFIG="$HOME/.kube/config-$ENVIRONMENT"
+
 # --devel when beta chart
 if [ "$DRY_RUN" = true ]; then
   echo "Dry run mode - would execute:"

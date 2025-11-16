@@ -5,6 +5,7 @@ if [ -z "$1" ]; then
     exit 1
 else
     VALUES_FILE="values-$1.yaml"
+    export KUBECONFIG="$HOME/.kube/config-$1"
 fi
 
 helm dependency update

@@ -29,7 +29,7 @@ ENVIRONMENT="$1"
 declare -A COMPONENTS=(
     ["00_cilium"]="$ENVIRONMENT"
     ["01_argocd"]="$ENVIRONMENT"
-    ["02_manual-secrets"]=""
+    ["02_manual-secrets"]="--env $ENVIRONMENT"
     ["03_traefik"]="$ENVIRONMENT"
 )
 
