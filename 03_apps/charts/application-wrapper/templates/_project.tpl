@@ -20,8 +20,15 @@ spec:
       {{- end }}
     {{- end */}}
   destinations:
+    {{- $server := include "apps-wrapper.server" . }}
     - namespace: {{ include "apps-wrapper.namespace" . }}
-      server: {{ include "apps-wrapper.server" . }}
+      server: {{ $server }}
+    {{- if index .settings "settings" "additionalNamespaces" }}
+    {{- range $ns := (index .settings "settings" "additionalNamespaces") }}
+    - namespace: {{ $ns }}
+      server: {{ $server }}
+    {{- end }}
+    {{- end }}
   clusterResourceWhitelist:
     - group: '*'
       kind: '*'
