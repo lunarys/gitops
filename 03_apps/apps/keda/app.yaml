@@ -2,3 +2,10 @@ helm:
   chart: keda
   version: 2.18.1
   repo: https://kedacore.github.io/charts
+
+settings:
+  # keda needs a clusterrolebinding
+  # for the Kubernetes External Metrics API.
+  # The respective role is in the kube-system namespace.
+  additionalNamespaces:
+    - kube-system
