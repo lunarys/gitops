@@ -4,6 +4,7 @@ enabled:
   - local-path-provisioner
   - longhorn
   - smb-driver
+  - keda
 
   - adguard-home
 

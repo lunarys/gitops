@@ -1,0 +1,4 @@
+helm:
+  chart: keda
+  version: 2.18.1
+  repo: https://kedacore.github.io/charts

@@ -3,6 +3,7 @@ enabled:
   - bitwarden
   - longhorn
   - smb-driver
+  - keda
 
   - adguard-home
 

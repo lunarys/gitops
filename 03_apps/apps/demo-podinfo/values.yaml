@@ -1,0 +1,49 @@
+ingress:
+  host: demo.test.svc.elda
+  accessControl:
+    externalAccessAllowed: false
+
+image:
+  name: ghcr.io/stefanprodan/podinfo
+  tag: 6.9.2
+
+service:
+  targetPort: 9898
+
+
+autoscale:
+  enabled: true
+  preset:
+    switch:
+      enabled: true
+      url: "http://nodered.svc.elda/autoscaler/test-demo-podinfo"
+
+
+networkpolicy:
+  enabled: true
+  preset:
+    namespaceIsolation: true
+
+# From https://github.com/stefanprodan/podinfo/blob/902e62b5f3f732885b9b53f5afec3ea4a4f556de/charts/podinfo/templates/deployment.yaml
+readinessProbe:
+  exec:
+    command:
+      - podcli
+      - check
+      - http
+      - localhost:9898/readyz
+
+livenessProbe:
+  exec:
+    command:
+      - podcli
+      - check
+      - http
+      - localhost:9898/healthz
+
+extraConfig:
+  volumeMounts:
+    - name: data
+      mountPath: /data
+      emptyDir:
+        sizeLimit: 100Mi

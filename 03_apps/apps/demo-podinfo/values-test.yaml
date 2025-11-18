@@ -1,0 +1,4 @@
+autoscale:
+  preset:
+    switch:
+      url: "http://nodered.svc.elda/autoscaler/test-demo-podinfo"

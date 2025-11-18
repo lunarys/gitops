@@ -1,0 +1,2 @@
+networkPolicy:
+  enabled: true  # default network policy from the keda chart - https://github.com/kedacore/charts/pull/558/files

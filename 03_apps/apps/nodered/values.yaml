@@ -84,11 +84,12 @@ nodered:
       useChartEndpointSelector: true  # less restrictive policy for nodered vs. mongodb
       ingress:
         fromLocalSubnet: true
-        fromNamespace: "home-assistant"
+        fromNamespaces: 
+          - "home-assistant"
+          - "keda"
       egress:
         toWorld: true
         toLocalSubnet: true
-        # TODO: does not support list right now
         # TODO: maybe just use external IP with DNS?
         toNamespace: "home-assistant"
           #- mosquitto
