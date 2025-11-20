@@ -12,11 +12,19 @@ service:
   externalIPs:
     - 10.0.4.10
 
+services:
+  admin:
+    enabled: true
+    ports:
+      query:
+        port: 10011
+
 networkpolicy:
   enabled: true
   preset:
     ingress:
       fromWorld: true
+      fromNamespace: "node-red"
 
 longhornstorage:
   volumes:

@@ -91,7 +91,9 @@ nodered:
         toWorld: true
         toLocalSubnet: true
         # TODO: maybe just use external IP with DNS?
-        toNamespace: "home-assistant"
+        toNamespaces: 
+          - "home-assistant"
+          - "teamspeak"
           #- mosquitto
 
 
