@@ -24,7 +24,7 @@ networkpolicy:
   preset:
     ingress:
       fromWorld: true
-      fromNamespace: "node-red"
+      fromNamespace: "nodered"
 
 longhornstorage:
   volumes:
