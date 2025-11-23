@@ -3,16 +3,18 @@ ingress:
   accessControl:
     externalAccessAllowed: false
 
+  # currently, direct the ingress to the other service,
+  # that has all ports on the same external IP
+  serviceName: "home-assistant-integration"
+  servicePort: 8123
+
 image:
   name: homeassistant/home-assistant
   tag: 2025.11.1
 
 service:
   enabled: false
-  # currently a bit of a hacky way to direct the ingress to the other service,
-  # that has all ports on the same external IP
-  name: "home-assistant-integration"
-  port: 8123
+  # container.ports fails if this service is enabled, as there is a port collision with the integration service
   targetPort: 8123
 
 env:
@@ -22,7 +24,7 @@ services:
   integration:
     enabled: true
     ports:
-      proxyless:
+      http:
         port: 8123
       homekit-bridge:
         port: 21063
