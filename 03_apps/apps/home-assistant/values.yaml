@@ -8,6 +8,11 @@ image:
   tag: 2025.11.1
 
 service:
+  enabled: false
+  # currently a bit of a hacky way to direct the ingress to the other service,
+  # that has all ports on the same external IP
+  name: "home-assistant-integration"
+  port: 8123
   targetPort: 8123
 
 env:
