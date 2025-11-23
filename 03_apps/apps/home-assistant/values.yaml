@@ -24,21 +24,13 @@ services:
     externalIPs:
       - 10.0.4.6
 
-smbstorage:
-  volumes:
-    init-default:
-      enabled: true
-
-initCopy:
-  enabled: true
-  toVolume: longhorn-config
 
 longhornstorage:
   volumes:
     config:
-      size: 200Mi
+      size: 500Mi
       variant: retain
-      pvName: "" # TODO
+      pvName: "pvc-a2448f0d-74d1-446b-b28c-d0f1a374f81b"
       mount:
         path: /config
 
