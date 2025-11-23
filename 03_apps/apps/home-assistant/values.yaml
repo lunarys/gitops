@@ -17,6 +17,8 @@ services:
   integration:
     enabled: true
     ports:
+      proxyless:
+        port: 8123
       homekit-bridge:
         port: 21063
       hmip-callback:
