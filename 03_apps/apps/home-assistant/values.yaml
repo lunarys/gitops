@@ -46,6 +46,8 @@ longhornstorage:
 # store some secrets in an external store, rather than the filesystem
 externalsecrets:
   commonRemoteKey: "c0962728-e7f8-4cfc-a983-b39e00bb1ae0"
+  mount:
+    env: true
   fields:
     SECRET_HOMEMATIC_USER:
       storeRefName: bitwarden-fields
