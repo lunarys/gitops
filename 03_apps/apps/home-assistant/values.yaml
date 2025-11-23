@@ -24,6 +24,15 @@ services:
     externalIPs:
       - 10.0.4.6
 
+smbstorage:
+  volumes:
+    init-default:
+      enabled: true
+
+initCopy:
+  enabled: true
+  toVolume: longhorn-config
+
 longhornstorage:
   volumes:
     config:
@@ -32,6 +41,28 @@ longhornstorage:
       pvName: "" # TODO
       mount:
         path: /config
+
+
+# store some secrets in an external store, rather than the filesystem
+externalsecrets:
+  commonRemoteKey: "c0962728-e7f8-4cfc-a983-b39e00bb1ae0"
+  fields:
+    SECRET_HOMEMATIC_USER:
+      storeRefName: bitwarden-fields
+      remoteProperty: homematic_username
+    SECRET_HOMEMATIC_PASSWORD:
+      storeRefName: bitwarden-fields
+      remoteProperty: homematic_password
+    SECRET_JELLYFIN_APIKEY:
+      storeRefName: bitwarden-fields
+      remoteProperty: jellyfin_apikey
+    SECRET_MQTT_USER:
+      storeRefName: bitwarden-fields
+      remoteProperty: mqtt_username
+    SECRET_MQTT_PASSWORD:
+      storeRefName: bitwarden-fields
+      remoteProperty: mqtt_password
+
 
 networkpolicy:
   enabled: true
@@ -50,13 +81,12 @@ networkpolicy:
       #  - mosquitto
 
 podSecurityContext:
-  runAsNonRoot: false
+  runAsNonRoot: false  # home-assistant requires root for the s6 init thingy
   fsGroup: 2000
   seccompProfile:
     type: RuntimeDefault
 
 containerSecurityContextPreset:
-  runAsNonRoot: false
   # From https://community.home-assistant.io/t/improving-docker-security-non-root-application-configuration/399971/7
   # Alternative? https://docs.linuxserver.io/images/docker-homeassistant
   capabilities:
@@ -82,14 +112,12 @@ update:
 
 livenessProbe:
   enabled: true
-  initialDelaySeconds: 30
   http:
     path: /manifest.json  # just some unauthenticated endpoint
     port: 8123
 
 readinessProbe:
   enabled: true
-  initialDelaySeconds: 15
   http:
     path: /manifest.json  # just some unauthenticated endpoint
     port: 8123

@@ -7,6 +7,7 @@ enabled:
 
   - adguard-home
 
+  - home-assistant
   - teamspeak
   - nodered
   - n8n
