@@ -115,7 +115,7 @@ mongodb:
   longhornstorage:
     volumes:
       mongodb:
-        size: 500Mi
+        size: 1Gi
         variant: retain
         pvName: "pvc-133771c5-e7ea-4991-a400-df185f005683"
         mount:
