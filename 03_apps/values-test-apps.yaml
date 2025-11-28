@@ -7,6 +7,7 @@ enabled:
   - keda
 
   - adguard-home
+  - cert-manager
   - minio
 
   # testing only

@@ -1,0 +1,4 @@
+helm:
+  chart: cert-manager
+  version: v1.19.1
+  repo: oci://quay.io/jetstack/charts

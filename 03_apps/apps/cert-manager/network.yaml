@@ -1,0 +1,8 @@
+preset:
+  namespaceIsolation: true
+  ingress:
+    rules:
+      - fromEntities:
+          - kube-apiserver
+  egress:
+    toKubeApi: true
