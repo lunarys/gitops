@@ -1,0 +1,49 @@
+# https://github.com/minio/minio/blob/master/helm/minio/README.md
+minio:
+  mode: standalone
+
+  persistence:
+    enabled: true
+    existingClaim: "minio-data-pvc"
+
+  replicas: 1
+
+  # API
+  #ingress:
+  #  enabled: true
+  #  hosts:
+  #    - <overwrite>
+
+  # Web UI
+  consoleIngress:
+    enabled: true
+    hosts:
+      - <overwrite>
+
+  existingSecret:
+
+  rootUser: root
+  rootPassword: password # TODO
+
+  resources:
+    requests:
+      memory: 512Mi  # default requests 16Gi of memory...
+
+  #networkpolicy:  # using my own generic chart for network policies
+  #  enabled: true
+  #  flavor: cilium
+  #  allowExternal: false
+
+longhornstorage:
+  volumes:
+    minio-data:
+      enabled: true
+      size: "2Gi"
+      variant: "retain"
+      pvName: ""  # TODO
+      name: "minio-data-pvc"
+
+networkpolicy:
+  preset:
+    ingress:
+      fromNamespace: "cloudnative-pg"

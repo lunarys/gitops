@@ -1,0 +1,10 @@
+minio:
+  consoleIngress:
+    enabled: true
+    hosts:
+      - minio.test.svc.elda
+
+longhornstorage:
+  volumes:
+    minio-data:
+      pvName: ""  # TODO

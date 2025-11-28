@@ -1,0 +1,15 @@
+apiVersion: v2
+name: minio
+description: A Helm chart for deploying minio with Longhorn storage and network policies
+type: application
+version: 0.1.0
+dependencies:
+  - name: minio
+    version: 5.4.0
+    repository: https://charts.min.io/
+  - name: longhornstorage
+    version: 2.5.2
+    repository: oci://registry.gitlab.com/juulun/helm-charts/charts
+  - name: networkpolicy
+    version: 2.5.2
+    repository: oci://registry.gitlab.com/juulun/helm-charts/charts
