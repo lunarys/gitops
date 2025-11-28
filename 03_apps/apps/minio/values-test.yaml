@@ -7,4 +7,4 @@ minio:
 longhornstorage:
   volumes:
     minio-data:
-      pvName: ""  # TODO
+      pvName: "pvc-787d4c7c-a77f-4a94-82ea-e19a89616ead"

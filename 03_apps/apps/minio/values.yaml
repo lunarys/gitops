@@ -2,6 +2,14 @@
 minio:
   mode: standalone
 
+  # TODO: docker image is not provided anymore, uses an old version
+  #image:
+  #  repository: quay.io/minio/minio
+  #  tag: RELEASE.2024-12-18T13-15-44Z
+  #mcImage:
+  #  repository: quay.io/minio/mc
+  #  tag: RELEASE.2024-11-21T17-21-54Z
+
   persistence:
     enabled: true
     existingClaim: "minio-data-pvc"
