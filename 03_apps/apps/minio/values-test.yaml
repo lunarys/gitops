@@ -7,4 +7,11 @@ minio:
 longhornstorage:
   volumes:
     minio-data:
-      pvName: "pvc-787d4c7c-a77f-4a94-82ea-e19a89616ead"
+      pvName: "pvc-d4c33521-b9ed-4ad6-ac40-114f0a075314"
+
+externalsecrets:
+  secrets:
+    minio-root-credentials:
+      commonRemoteKey: "20fdcf6a-0d0d-4490-a77f-b3a400b2c43c" 
+    cloudnative-pg-minio-user-credentials:
+      commonRemoteKey: "b8223814-7afc-43f1-9d62-b3a400b3002e" 

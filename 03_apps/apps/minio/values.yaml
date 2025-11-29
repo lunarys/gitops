@@ -28,10 +28,7 @@ minio:
     hosts:
       - <overwrite>
 
-  existingSecret:
-
-  rootUser: root
-  rootPassword: password # TODO
+  existingSecret: "minio-root-credentials"
 
   resources:
     requests:
@@ -42,16 +39,51 @@ minio:
   #  flavor: cilium
   #  allowExternal: false
 
+  ## List of buckets to be created after minio install
+  buckets:
+    - name: cloudnative-pg-backup
+      policy: none
+      purge: false
+      versioning: false
+      objectlocking: false
+
+  users:
+    - accessKey: "cloudnative-pg"
+      existingSecret: "cloudnative-pg-minio-user-credentials"
+      existingSecretKey: secretKey
+      policy: readwrite  # TODO: not limited to a specific bucket...
+
 longhornstorage:
   volumes:
     minio-data:
       enabled: true
       size: "2Gi"
       variant: "retain"
-      pvName: ""  # TODO
+      pvName: "<overwrite>"
       name: "minio-data-pvc"
 
 networkpolicy:
   preset:
     ingress:
       fromNamespace: "cloudnative-pg"
+
+externalsecrets:
+  secrets:
+    minio-root-credentials:
+      commonRemoteKey: "<overwrite>" 
+      fields:
+        rootUser:
+          storeRefName: bitwarden-login
+          remoteProperty: username
+        rootPassword:
+          storeRefName: bitwarden-login
+          remoteProperty: password
+    cloudnative-pg-minio-user-credentials:
+      commonRemoteKey: "<overwrite>" 
+      fields:
+        #accessKey:  # <-- can not be used from the secret apparently
+        #  storeRefName: bitwarden-login
+        #  remoteProperty: username
+        secretKey:
+          storeRefName: bitwarden-login
+          remoteProperty: password

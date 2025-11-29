@@ -8,3 +8,10 @@ longhornstorage:
   volumes:
     minio-data:
       pvName: ""  # TODO
+
+externalsecrets:
+  secrets:
+    minio-root-credentials:
+      commonRemoteKey: "d276b852-4e3a-457f-a9a2-b3a400b210ca" 
+    cloudnative-pg-minio-user-credentials:
+      commonRemoteKey: "7778bd62-ca44-4cbb-a56c-b3a400b28ac1" 
