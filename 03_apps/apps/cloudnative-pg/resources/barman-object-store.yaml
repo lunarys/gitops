@@ -1,0 +1,21 @@
+# Object store for backups using barman-cloud plugin
+# https://cloudnative-pg.io/plugin-barman-cloud/docs/usage/
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: minio-store
+spec:
+  configuration:
+    destinationPath: s3://cloudnative-pg-backup/
+    endpointURL: http://minio.minio.svc.cluster.local:9000
+    s3Credentials:
+      accessKeyId:
+        name: minio-credentials
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: minio-credentials
+        key: ACCESS_SECRET_KEY
+    wal:
+      compression: gzip
+    data:
+      compression: gzip

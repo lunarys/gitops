@@ -1,0 +1,18 @@
+externalsecrets:
+  secrets:
+    minio-credentials:
+      commonRemoteKey: "b8223814-7afc-43f1-9d62-b3a400b3002e"
+
+pgadmin:
+  ingress:
+    host: pgadmin.test.svc.elda
+
+  externalsecrets:
+    secrets:
+      pgadmin-credentials:
+        commonRemoteKey: "75d1b643-8c14-447f-b904-b3a501129670"
+
+  longhornstorage:
+    volumes:
+      pgadmin-config:
+        pvName: ""  # TODO

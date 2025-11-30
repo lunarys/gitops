@@ -1,0 +1,31 @@
+apiVersion: v2
+name: cloudnative-pg
+description: A Helm chart for deploying cloudnative-pg with barman cloud plugin
+type: application
+version: 0.1.0
+dependencies:
+  - name: cloudnative-pg
+    version: 0.26.1
+    repository: https://cloudnative-pg.github.io/charts
+  - name: plugin-barman-cloud
+    version: 0.3.1
+    repository: https://cloudnative-pg.github.io/charts
+  - name: networkpolicy
+    version: 2.5.2
+    repository: oci://registry.gitlab.com/juulun/helm-charts/charts
+    alias: networkpolicy-cnpg
+  - name: networkpolicy
+    version: 2.5.2
+    repository: oci://registry.gitlab.com/juulun/helm-charts/charts
+    alias: networkpolicy-postgresdb
+  - name: networkpolicy
+    version: 2.5.2
+    repository: oci://registry.gitlab.com/juulun/helm-charts/charts
+    alias: networkpolicy-barman-cloud-plugin
+  - name: externalsecrets
+    version: 2.5.2
+    repository: oci://registry.gitlab.com/juulun/helm-charts/charts
+  - name: generic-service
+    version: 2.5.2
+    repository: oci://registry.gitlab.com/juulun/helm-charts/charts
+    alias: pgadmin

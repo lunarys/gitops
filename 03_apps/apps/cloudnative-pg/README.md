@@ -1,0 +1,1 @@
+Inspired by https://www.adesso.nl/en/news/blog/cloudnative-pg-in-the-homelab-with-longhorn.jsp
