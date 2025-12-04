@@ -1,0 +1,89 @@
+ingress:
+  host: jellyfin.svc.elda
+  accessControl:
+    externalAccessAllowed: false
+
+image:
+  name: ghcr.io/jellyfin/jellyfin
+  tag: 10.11.4
+
+service:
+  targetPort: 8096
+  # TODO: Port 7359/UDP is used for client discovery... 
+
+env:
+  TZ: "Europe/Berlin"
+
+livenessProbe:
+  enabled: true
+  http:
+    path: /health
+    port: 8096
+
+readinessProbe:
+  enabled: true
+  http:
+    path: /health
+    port: 8096
+
+longhornstorage:
+  volumes:
+    ## config and metadata
+    config:
+      size: "5Gi"
+      variant: "retain"
+      pvName: "pvc-67dbe02d-bb6f-43f7-b6cf-dc80fd598543"
+      mount:
+        path: "/config"
+
+smbstorage:
+  volumes:
+    ## media collection.
+    media:
+      # Jellyfin can't seem to handle renames of library folders without loosing all related metadata.
+      # In my case, it expects the library at /media/movies1, but it is called /media/movies in the share.
+      # So i need to mount all libraries separately under the correct path.
+      #mount:
+      #  path: "/media"
+      smb:
+        host: "erolas.elda"
+        share: "media"
+        capacity: "100Gi"  # ignored, but required
+      externalsecret:
+        commonRemoteKey: "08fcb826-138c-4ca7-ae96-b3a9012fc292"
+
+extraConfig:
+  volumeMounts:
+    ## media directories
+    - name: smb-media
+      mountPath: "/media/movies1"
+      subPath: movies
+      existingVolume: true
+    - name: smb-media
+      mountPath: "/media/anime1"
+      subPath: anime
+      existingVolume: true
+    - name: smb-media
+      mountPath: "/media/shows1"
+      subPath: shows
+      existingVolume: true
+    - name: smb-media
+      mountPath: "/media/music1"
+      subPath: music
+      existingVolume: true
+    - name: smb-media
+      mountPath: "/media/family1"
+      subPath: family
+      existingVolume: true
+    ## transcode and images cache
+    - name: cache
+      mountPath: "/cache"
+      emptyDir:
+        sizeLimit: 10Gi
+
+networkpolicy:
+  enabled: true
+  preset:
+    namespaceIsolation: true
+    egress:
+      toWorld: true  # needs to load metadata
