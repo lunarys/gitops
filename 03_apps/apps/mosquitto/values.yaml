@@ -20,8 +20,10 @@ longhornstorage:
         path: /mosquitto/data
 
 networkpolicy:
+  enabled: true
   preset:
     ingress:
+      fromLocalSubnet: true
       fromNamespaces: 
         - "home-assistant"
         - "nodered"
