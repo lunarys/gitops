@@ -13,7 +13,7 @@ data:
 
     allow_anonymous false
 
-    connection_messages true
+    connection_messages false
 
     # log_dest [stdout|stderr|syslog|topic|file <file path>]
     # log_facility <int>
