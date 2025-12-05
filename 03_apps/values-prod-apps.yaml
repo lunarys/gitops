@@ -10,6 +10,7 @@ enabled:
   - home-assistant
   - teamspeak
   - nodered
+  - mosquitto
   - n8n
 
   - jellyfin

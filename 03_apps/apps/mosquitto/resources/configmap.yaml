@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mosquitto-config
+data:
+  mosquitto.conf: |
+    listener 1883
+
+    # Access control
+    acl_file /mosquitto/config/acl
+    # Password file can be generated using mosquitto_passwd
+    password_file /mosquitto/passwd
+
+    allow_anonymous false
+
+    connection_messages true
+
+    # log_dest [stdout|stderr|syslog|topic|file <file path>]
+    # log_facility <int>
+
+    # Timestamp
+    log_timestamp_format %Y-%m-%dT%H:%M:%S
+
+    # Data persistence
+    persistence true
+    persistence_file mosquitto.db
+    persistence_location /mosquitto/data/
+
+    # General options for host and port available in man
+    # Options for certificate based SSL/TLS available in man
+  acl: |
+    pattern readwrite device/vergathos/controller/from/%u
+    pattern read device/vergathos/controller/to/%u
+
+    user root
+    topic readwrite #
+
+    user beloth
+    topic readwrite actuator/433MHZ/#
+    topic readwrite sensor/button/+
+
+    user bridge
+    topic readwrite #
+
+    user glaedr
+    topic readwrite actuator/vbackup
+    topic readwrite device/+/status/retained
+    topic readwrite sensor/mqtt-bridge/ebrithil/delayed
+    topic readwrite device/gilderien/wifi/#
+
+    user ebrithil
+    topic readwrite device/gilderien/wifi/#
+
+    pattern readwrite test/#
+    pattern read #
+    pattern readwrite device/%u/#
+    pattern readwrite +/desired
+    pattern readwrite +/+/desired
+    pattern readwrite +/+/+/desired
+    pattern readwrite +/+/+/+/desired
+    pattern readwrite +/+/+/+/+/desired

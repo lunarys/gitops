@@ -1,0 +1,64 @@
+ingress:
+  enabled: false
+
+image: 
+  name: eclipse-mosquitto
+  tag: 2.0.22
+
+service:
+  port: 1883
+  targetPort: 1883
+  externalIPs:
+    - 10.0.4.5
+
+longhornstorage:
+  volumes:
+    data:
+      size: "10Mi"
+      variant: auto-delete  # Just start anew when the deployment was removed
+      mount: 
+        path: /mosquitto/data
+
+networkpolicy:
+  preset:
+    ingress:
+      fromNamespaces: 
+        - "home-assistant"
+        - "nodered"
+
+externalsecrets:
+  secrets:
+    mosquitto-users:
+      commonRemoteKey: "741a9f4f-684f-4cba-aef2-b3aa00b47396"
+      #mount:
+      #  path: xxx  # not implemented
+      fields:
+        # Use mosquitto_passwd to edit the passwd file
+        mosquitto_passwd:
+          storeRefName: bitwarden-notes
+          remoteProperty: ""  # not required
+
+extraConfig:
+  volumeMounts:
+    - name: mosquitto-config
+      mountPath: /mosquitto/config
+      readOnly: true
+      configMap: mosquitto-config
+    - name: mosquitto-users
+      mountPath: /mosquitto/passwd
+      readOnly: true
+      secretName: mosquitto-users
+      subPath: mosquitto_passwd
+
+podSecurityContextPreset:
+  runAsUser: 1883
+
+livenessProbe:
+  enabled: true
+  tcp:
+    port: 1883
+
+readinessProbe:
+  enabled: true
+  tcp:
+    port: 1883
