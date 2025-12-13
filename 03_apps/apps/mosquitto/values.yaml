@@ -32,7 +32,8 @@ externalsecrets:
   secrets:
     mosquitto-users:
       commonRemoteKey: "741a9f4f-684f-4cba-aef2-b3aa00b47396"
-      #mount:
+      mount:
+        env: false
       #  path: xxx  # not implemented
       fields:
         # Use mosquitto_passwd to edit the passwd file
