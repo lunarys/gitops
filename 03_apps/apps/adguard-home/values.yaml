@@ -8,7 +8,7 @@ ingress:
 
 image:
   name: adguard/adguardhome
-  tag: v0.107.69
+  tag: v0.107.71
 
 
 service:
