@@ -17,7 +17,7 @@ env:
   N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
   
   #N8N_HOST: n8n.svc.elda
-  #N8N_PORT: "5678"
+  N8N_PORT: "5678"
   #N8N_PROTOCOL: http
   #N8N_EDITOR_BASE_URL: http://n8n.svc.elda/
 
@@ -36,7 +36,7 @@ longhornstorage:
     data:
       size: 200Mi
       variant: retain
-      pvName: ""
+      pvName: "pvc-9bfbdd5b-a12f-41aa-ada3-84dcfd1ae2e4"
       mount:
         path: /home/node/.n8n
 
