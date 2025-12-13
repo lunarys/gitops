@@ -65,6 +65,7 @@ networkpolicy:
     ingress:
       fromLocalSubnet: true
       fromCluster: true
+      fromNamespace: adguard-sync
     egress:
       toWorld: true
 
