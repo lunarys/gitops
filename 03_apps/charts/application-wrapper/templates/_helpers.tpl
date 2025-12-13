@@ -55,17 +55,9 @@ true
 {{- end }}
 
 {{- define "apps-wrapper.autoSyncEnabled" -}}
-{{- if eq "chart" .settings.variant -}}
-false
-{{- else if and (eq "app" .settings.variant) -}}
-  {{- if not (index .settings.files "app.yaml" "helm" "repo") -}}
-    true
-  {{- else if eq (index .settings.files "app.yaml" "helm" "repo") .root.Values.mainHelmRepo -}}
-    true
-  {{- else -}}
-    false
-  {{- end -}}
+{{- if hasKey .settings.settings "autoSync" -}}
+{{ .settings.settings.autoSync }}
 {{- else -}}
-{{- fail "Application is neither variant 'chart' or 'app'" -}}
+false
 {{- end -}}
 {{- end }}

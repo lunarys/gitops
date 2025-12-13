@@ -53,7 +53,7 @@ Structure of the apps dictionary:
         "values.yaml": "<content as dict>"
       },
       "variant": "chart",
-      "settings": {}  # from settings.yaml, e.g. namespace
+      "settings": {}  # from settings.yaml or app.yaml[settings], e.g. namespace
     }
   }
 */}}
