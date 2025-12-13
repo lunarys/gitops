@@ -24,6 +24,11 @@ while [[ $# -gt 0 ]]; do
       DRY_RUN=true
       shift
       ;;
+    --experimental)
+      EXPERIMENTAL_HELM_CHART=true
+      echo "⚠️  Using local, experimental Helm chart version!"
+      shift
+      ;;
     --template)
       TEMPLATE_ONLY=true
       shift
@@ -118,7 +123,11 @@ if [ -n "$ENVIRONMENT" ] && [ -f "$DIRECTORY/values-${ENVIRONMENT}.yaml" ]; then
     values_file_option="$values_file_option -f values-${ENVIRONMENT}.yaml"
 fi
 
-if grep -q "^oci://" <<< "$REPOSITORY"; then
+if [ "$EXPERIMENTAL_HELM_CHART" == "true" ]; then
+  helm_charts_dir="$(realpath "$(dirname "$0")/../../helm-charts")"
+  location="$helm_charts_dir"
+  values_file_option="-f $helm_charts_dir/values.yaml $values_file_option"
+elif grep -q "^oci://" <<< "$REPOSITORY"; then
   location="${REPOSITORY%/}/$CHART"
 else
   location="--repo ${REPOSITORY%/} $CHART"
