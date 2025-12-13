@@ -10,9 +10,7 @@ privateRepoEnabled: true
 # -- The helm repository where my base helm charts are stored.
 mainHelmRepo: registry.gitlab.com/juulun/helm-charts/charts
 # -- The helm repository where the application-wrapper helm chart is stored.
-# Use a classic helm package registry instead of OCI, as login to the OCI registry does not work from ArgoCD.
-# It uses the whole OCI repository URL as git repository path in the JWT authentication flow.
-wrapperHelmRepo: https://gitlab.com/api/v4/projects/55959441/packages/helm/release
+wrapperHelmRepo: oci://ghcr.io/lunarys
 
 # -- The revision of the `mainRepo` to use.
 targetRevision: main
