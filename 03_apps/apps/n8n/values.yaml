@@ -43,11 +43,13 @@ longhornstorage:
 
 externalsecrets:
   enabled: true
-  commonRemoteKey: "8b00da18-11ad-445f-afd7-b3940135bbf5"
-  fields:
-    N8N_ENCRYPTION_KEY:
-      storeRefName: bitwarden-login
-      remoteProperty: password
+  secrets:
+    n8n-encryption-key:
+      commonRemoteKey: "8b00da18-11ad-445f-afd7-b3940135bbf5"
+      fields:
+        N8N_ENCRYPTION_KEY:
+          storeRefName: bitwarden-login
+          remoteProperty: password
 
 
 networkpolicy:
