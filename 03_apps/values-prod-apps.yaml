@@ -6,6 +6,7 @@ enabled:
   - keda
 
   - adguard-home
+  - adguard-sync
 
   - home-assistant
   - teamspeak

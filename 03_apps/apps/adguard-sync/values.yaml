@@ -1,0 +1,120 @@
+ingress:
+  host: adguard-sync.svc.elda
+  accessControl:
+    externalAccessAllowed: false
+
+image:
+  name: ghcr.io/bakito/adguardhome-sync
+  #name: linuxserver/adguardhome-sync
+  tag: v0.8.2
+
+service:
+  targetPort: 8080
+
+containerSecurityContextPreset:
+  readOnlyRootFilesystem: true
+
+env:
+  TZ: "Europe/Berlin"
+
+networkpolicy:
+  enabled: true
+  preset:
+    namespaceIsolation: true
+    egress:
+      toNamespace: adguard-home
+      rules:
+        - toCIDR:
+            - 10.0.0.5/32  # cluster external adguard-home instance
+          toPorts:
+            - ports:
+                - port: "80"
+                  protocol: TCP
+      
+livenessProbe:
+  enabled: true
+  http:
+    path: /
+    port: 8080
+
+readinessProbe:
+  enabled: true
+  http:
+    path: /
+    port: 8080
+
+externalsecrets:
+  secrets:
+    adguard-origin-credentials:
+      commonRemoteKey: "0686e3e1-8737-42ff-b267-b3b20135d9e0"
+      fields:
+        ORIGIN_USERNAME:
+          storeRefName: bitwarden-login
+          remoteProperty: username
+        ORIGIN_PASSWORD:
+          storeRefName: bitwarden-login
+          remoteProperty: password
+    adguard-replica-credentials:
+      commonRemoteKey: "211f4a82-531f-4187-9a4c-b3920134f557"
+      fields:
+        REPLICA1_USERNAME:
+          storeRefName: bitwarden-login
+          remoteProperty: username
+        REPLICA1_PASSWORD:
+          storeRefName: bitwarden-login
+          remoteProperty: password
+    #api-credentials:
+    #  commonRemoteKey:
+    #  fields:
+    #    API_USERNAME:
+    #    API_PASSWORD:
+
+
+config:
+  mount:
+    subPath: "/config/adguardhome-sync.yaml"
+  values:
+    config.yaml:
+      cron: "*/10 * * * *"
+      runOnStart: true
+      printConfigOnly: false
+      continueOnError: true
+      origin:
+        url: http://10.0.0.5/
+        #webURL: http://islingr.elda/
+        #apiPath: # (string) API Path
+        autoSetup: false  # could break, depending on how ports are configured
+        #interfaceName: # (string) Network interface name
+        dhcpServerEnabled: false
+      replicas: # (struct) List or replica instances (don't use in combination with replicas')
+        - url: http://adguard-home.adguard-home.svc.cluster.local/
+          webURL: http://adguard.svc.elda/
+          #apiPath: # (string) API Path
+          autoSetup: false
+          #interfaceName: # (string) Network interface name
+          dhcpServerEnabled: false
+      api: # (struct) 
+        port: 8080
+        #username: # (string) API username
+        #password: # (string) API password
+        #darkMode: # (bool) API dark mode
+        metrics:
+          enabled: false  # TODO
+          #scrapeInterval: # (int64) Interval for metrics scraping
+          #queryLogLimit: # (int) Metrics log query limit
+      features:
+        dns:
+          accessLists: true
+          serverConfig: true
+          rewrites: true
+        dhcp:
+          serverConfig: false
+          staticLeases: false
+        generalSettings: true
+        queryLogConfig: true
+        statsConfig: true
+        clientSettings: true
+        services: true
+        filters: true
+        theme: true
+        tlsConfig: false
