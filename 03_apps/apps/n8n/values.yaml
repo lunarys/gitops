@@ -36,7 +36,7 @@ longhornstorage:
     data:
       size: 200Mi
       variant: retain
-      pvName: "pvc-0bae2fdf-6d82-494f-b6e6-6b55065c1169"
+      pvName: ""
       mount:
         path: /home/node/.n8n
 
