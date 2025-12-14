@@ -42,7 +42,7 @@ services:
 longhornstorage:
   volumes:
     confdir:
-      size: 20Mi
+      size: 50Mi
       variant: retain
       pvName: ""
       mount:
