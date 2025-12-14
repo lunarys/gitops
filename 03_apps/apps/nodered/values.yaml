@@ -92,9 +92,9 @@ nodered:
         toLocalSubnet: true
         # TODO: maybe just use external IP with DNS?
         toNamespaces: 
-          - "home-assistant"
-          - "teamspeak"
-          #- mosquitto
+          - home-assistant
+          - teamspeak
+          - mosquitto
 
 
 mongodb:
