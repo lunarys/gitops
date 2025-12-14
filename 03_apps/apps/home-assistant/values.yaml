@@ -77,12 +77,10 @@ networkpolicy:
     egress:
       toWorld: true
       toLocalSubnet: true
-      # TODO: does not support list right now
-      # TODO: maybe just use external IP with DNS?
-      #toNamespace:
-      #  - nodered  # Might not even be needed?
-      #  - mosquitto
+      toNamespaces:
+        - mosquitto
 
+      
 podSecurityContext:
   runAsNonRoot: false  # home-assistant requires root for the s6 init thingy
   fsGroup: 2000
