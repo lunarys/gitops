@@ -50,6 +50,7 @@ data:
 
     user ebrithil
     topic readwrite device/gilderien/wifi/#
+    topic readwrite homeassistant/#
 
     pattern readwrite test/#
     pattern read #
