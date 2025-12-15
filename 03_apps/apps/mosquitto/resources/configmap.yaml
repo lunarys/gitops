@@ -54,7 +54,7 @@ data:
 
     user zigbee2mqtt
     topic readwrite zigbee2mqtt/#
-    topic read homeassistant/#
+    topic readwrite homeassistant/#
 
     pattern readwrite test/#
     pattern read #
