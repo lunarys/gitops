@@ -52,6 +52,10 @@ data:
     topic readwrite device/gilderien/wifi/#
     topic readwrite homeassistant/#
 
+    user zigbee2mqtt
+    topic readwrite zigbee2mqtt/#
+    topic read homeassistant/#
+
     pattern readwrite test/#
     pattern read #
     pattern readwrite device/%u/#
