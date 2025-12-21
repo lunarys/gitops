@@ -1,6 +1,3 @@
-# -- Render a test configmap for debugging wrapper processing.
-renderTest: false
-
 # -- Path to the root of this helm chart within the git repository.
 baseDir: 03_apps
 # -- The main git repository where the apps are stored. (This repository.)

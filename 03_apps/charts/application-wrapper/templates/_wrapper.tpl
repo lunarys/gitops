@@ -1,36 +1,79 @@
 {{- define "apps-wrapper.wrapper" }}
+{{- /* Collect all applications and charts from the apps/ directory */ -}}
 {{- $apps := dict -}}
 {{- $allfiles := .Files.Glob "apps/*/**" -}}
-{{- $appYamls := .Files.Glob "apps/*/app.yaml" }}
-{{- range $path, $_ := $appYamls }}
-  {{- $dir := dir $path }}
-  {{- $name := base $dir }}
-  {{- $files := dict }}
-  {{- range $filePath, $fileContent := $allfiles }}
-    {{- if hasPrefix $dir $filePath }}
-      {{- $filePathStripped := trimPrefix (printf "%s/" $dir) $filePath }}
-      {{- $_ := set $files $filePathStripped ($.Files.Get $filePath | fromYaml) }}
-    {{- end }}
-  {{- end }}
-  {{- $settings := default (dict) (index $files "app.yaml" "settings") -}}
-  {{- $_ := set $apps $name (dict "name" $name "dir" $dir "files" $files "variant" "app" "settings" $settings) }}
-{{- end }}
+{{- $appYamls := .Files.Glob "apps/*/*app.yaml" }}
 {{- $chartYamls := .Files.Glob "apps/*/Chart.yaml" }}
+{{- /* Get a concatenated list of app.yaml and Chart.yaml. This workaround is required, as 'keys' does not work with .Files.Glob */ -}}
+{{- $appsAndCharts := list }}
+{{- range $path, $_ := $appYamls }}
+  {{- $appsAndCharts = append $appsAndCharts $path }}
+{{- end }}
 {{- range $path, $_ := $chartYamls }}
-  {{- $dir := dir $path }}
-  {{- $name := base $dir }}
+  {{- $appsAndCharts = append $appsAndCharts $path }}
+{{- end }}
+{{- /* Group all applications from the same directory */ -}}
+{{- $groupedApps := dict }}
+{{- range $path := $appsAndCharts }}
+  {{- $pathSplit := regexSplit "/" $path -1 }}
+  {{- $groupName := index $pathSplit 1 }}
+  {{- if not (hasKey $groupedApps $groupName) }}
+    {{- $_ := set $groupedApps $groupName (list) }}
+  {{- end }}
+  {{- $_ := set $groupedApps $groupName (append (index $groupedApps $groupName) $path) }}
+{{- end }}
+{{- /* Create a dictionary of apps, nested in projects */ -}}
+{{- range $group, $paths := $groupedApps }}
+  {{- $projectDir := printf "apps/%s" $group }}
+  {{- /* Get a list of files in the project directory, strip the project path prefix */ -}}
   {{- $files := dict }}
   {{- range $filePath, $fileContent := $allfiles }}
-    {{- if hasPrefix $dir $filePath }}
-      {{- $filePathStripped := trimPrefix (printf "%s/" $dir) $filePath }}
+    {{- if hasPrefix $projectDir $filePath }}
+      {{- $filePathStripped := trimPrefix (printf "%s/" $projectDir) $filePath }}
       {{- $_ := set $files $filePathStripped ($.Files.Get $filePath | fromYaml) }}
     {{- end }}
   {{- end }}
+  {{- /* Find optional settings */ -}}
   {{- $settings := dict }}
   {{- if hasKey $files "settings.yaml" }}
     {{- $settings = index $files "settings.yaml" }}
   {{- end }}
-  {{- $_ := set $apps $name (dict "name" $name "dir" $dir "files" $files "variant" "chart" "settings" $settings) }}
+  {{- if hasKey $files "app.yaml" }}
+    {{- $appSettings := index $files "app.yaml" "settings" | default (dict) }}
+    {{- $settings = mergeOverwrite $settings $appSettings }}
+  {{- end }}
+  {{- /* Create a project entry in the apps dictionary */ -}}
+  {{- $projectApps := dict -}}
+  {{- $project := dict "name" $group "dir" $projectDir "settings" $settings "apps" $projectApps }}
+  {{- $_ := set $apps $group $project }}
+  {{- /* Now add each application in the group to the projectApps dictionary */ -}}
+  {{- range $path := $paths }}
+    {{- $fileName := base $path }}
+    {{- $name := $group }}
+    {{- $prefix := "" }}
+    {{- $appFiles := $files }}
+    {{- /* Chart.yaml variant is simpler: Prefix is not supported, so no further processing*/ -}}
+    {{- if ne $fileName "Chart.yaml" }}
+      {{- /* app.yaml may have a prefix in order to place multiple in the same directory */ -}}
+      {{- if ne $fileName "app.yaml" }}
+        {{- $prefix = trimSuffix "app.yaml" $fileName }}
+        {{- $name = trimSuffix "-" $prefix }}
+        {{- /* In order to facilitate processing in later steps, strip the prefix from filenames and filter for files that have the prefix */ -}}
+        {{- $appFiles = dict }}
+        {{- range $filePath, $fileContent := $files }}
+          {{- if hasPrefix $prefix $filePath }}
+            {{- $_ := set $appFiles (trimPrefix $prefix $filePath) $fileContent }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- /* Get app-specific settings and merge them with the project settings */ -}}
+      {{- $appSettings := index $appFiles "app.yaml" "settings" | default (dict) }}
+      {{- $settings := mergeOverwrite $settings $appSettings }}
+    {{- end }}
+    {{- /* Finally, construct the app dict */ -}}
+    {{- $app := dict "name" $name "dir" $projectDir "prefix" $prefix "files" $appFiles "settings" $settings "project" $group }}
+    {{- $_ := set $projectApps $name $app }}
+  {{- end }}
 {{- end }}
 {{/*
 Structure of the apps dictionary:
@@ -38,31 +81,80 @@ Structure of the apps dictionary:
     "app1": {
       "name": "app1",
       "dir": "apps/app1",
-      "files": {
-        "file1.yaml": "<content as dict>",
-        "app.yaml": "<content as dict>"
-      },
-      "variant": "app",
-      "settings": {}  # from app.yaml
+      "settings": {},  # from app.yaml or settings.yaml
+      "apps": {
+        "app1": {
+          "name": "app1",
+          "project": "app1",
+          "dir": "apps/app1",
+          "prefix": "",
+          "files": {
+            "file1.yaml": "<content as dict>",
+            "app.yaml": "<content as dict>"
+          },
+          "settings": {}  # from app.yaml
+        }
+      }
     },
     "chart1": {
       "name": "chart1",
       "dir": "apps/chart1",
-      "files": {
-        "Chart.yaml": "<content as dict>",
-        "values.yaml": "<content as dict>"
-      },
-      "variant": "chart",
       "settings": {}  # from settings.yaml or app.yaml[settings], e.g. namespace
+      "apps": {
+        "chart1": {
+          "name": "chart1",
+          "project": "chart1",
+          "dir": "apps/chart1",
+          "prefix": "",
+          "files": {
+            "Chart.yaml": "<content as dict>",
+            "values.yaml": "<content as dict>"
+          },
+          "settings": {}  # from settings.yaml or app.yaml[settings], e.g. namespace
+        }
+      }
+    },
+    "multiapp": {
+      "name: "apps",
+      "dir: "apps/mutliapp",
+      "settings": {},  # from settings.yaml or app.yaml[settings]
+      "apps": {
+        "multiapp": {
+          "name": "multiapp",
+          "project": "multiapp",
+          "dir": "apps/multiapp",
+          "prefix": "",
+          "files": {
+            "app.yaml": "<content as dict>",
+            "values.yaml": "<content as dict>"
+          },
+          "settings": {}  # from settings.yaml or app.yaml[settings]
+        },
+        "nginx": {
+          "name": "nginx",
+          "project": "multiapp",
+          "dir": "apps/multiapp",
+          "prefix": "nginx-"
+          "files": {
+            "app.yaml": "<content as dict, removed filename prefix>",
+            "values.yaml": "<content as dict, removed filename prefix>"
+          }
+          "settings": {}  # merged from nginx-app.yaml and app.yaml[settings] and settings.yaml}
+        }
+      }
     }
   }
 */}}
-{{- range $app, $settings := $apps }}
-{{- if or (not (hasKey $.Values "enabled")) (has $app $.Values.enabled) }}
----
-{{ include "apps-wrapper.application" (dict "settings" $settings "root" $) }}
+{{- range $project, $settings := $apps }}
+  {{- if or (not (hasKey $.Values "enabled")) (has $project $.Values.enabled) }}
+  {{- /* Template the project */}}
 ---
 {{ include "apps-wrapper.project" (dict "settings" $settings "root" $) }}
-{{- end }}
+    {{- /* Template each application in the project */}}
+    {{- range $app, $appSettings := (index $settings "apps") }}
+---
+{{ include "apps-wrapper.application" (dict "settings" $appSettings "root" $) }}
+    {{- end }}
+  {{- end }}
 {{- end }}
 {{- end }}

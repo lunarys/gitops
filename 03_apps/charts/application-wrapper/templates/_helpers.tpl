@@ -61,3 +61,9 @@ true
 false
 {{- end -}}
 {{- end }}
+
+{{- define "apps-wrapper.hasPrivateSettings" -}}
+{{- if .settings.settings.privateSettings -}}
+true
+{{- end -}}
+{{- end }}

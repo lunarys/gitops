@@ -10,15 +10,12 @@ spec:
     - {{ .root.Values.mainHelmRepo }}
     # this repo, containing the wrapper chart or the values.yaml file 
     - {{ include "apps-wrapper.repoUrl" . }}
-    {{- if and (eq "app" .settings.variant) (index .settings.files "app.yaml" "helm" "repo") }}
-    # repo from app.yaml
-    - {{ index .settings.files "app.yaml" "helm" "repo" }}
-    {{- end }}
-    {{- /* if eq "chart" .settings.variant }}
-      {{- range $dep := (index .settings "files" "Chart.yaml" "dependencies" | required "Helm Chart does not have dependencies") }}
-    - {{ .repository }}
+    {{- range $app, $settings := .settings.apps }}
+      {{- if and (hasKey $settings.files "app.yaml") (index $settings.files "app.yaml" "helm" "repo") }}
+    # repo from {{ .settings.prefix }}app.yaml
+    - {{ index $settings.files "app.yaml" "helm" "repo" }}
       {{- end }}
-    {{- end */}}
+    {{- end }}
   destinations:
     {{- $server := include "apps-wrapper.server" . }}
     - namespace: {{ include "apps-wrapper.namespace" . }}
