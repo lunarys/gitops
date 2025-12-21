@@ -1,5 +1,7 @@
 {{- define "apps-wrapper.namespace" -}}
-{{ dig "settings" "namespace" .settings.name .settings }}
+{{- /* project is set in the apps context, but not in the project context */ -}}
+{{- $defaultNamespace := ternary .settings.project .settings.name (hasKey .settings "project") -}}
+{{ dig "settings" "namespace" $defaultNamespace .settings }}
 {{- end }}
 
 {{- define "apps-wrapper.fullpath" -}}
