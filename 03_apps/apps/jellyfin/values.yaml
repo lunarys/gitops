@@ -79,6 +79,10 @@ extraConfig:
       mountPath: "/media/shows1"
       subPath: shows
       existingVolume: true
+    - name: smb-mediarr
+      mountPath: "/media/shows2"
+      subPath: shows
+      existingVolume: true
     - name: smb-media
       mountPath: "/media/music1"
       subPath: music
