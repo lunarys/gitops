@@ -69,7 +69,7 @@
       {{- end }}
       {{- /* Get app-specific settings and merge them with the project settings */ -}}
       {{- $appSettings := index $appFiles "app.yaml" "settings" | default (dict) }}
-      {{- $settings := merge $appSettings $defaultSettings $settings }}  # TODO: ensure order!!
+      {{- $settings := merge $appSettings $defaultSettings $settings }}
     {{- end }}
     {{- /* Finally, construct the app dict */ -}}
     {{- $app := dict "name" $name "dir" $projectDir "prefix" $prefix "files" $appFiles "settings" $settings "project" $group }}
