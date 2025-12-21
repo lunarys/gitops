@@ -39,3 +39,16 @@ server: https://kubernetes.default.svc
 
 # -- Only apps listed here will be rendered. Set via `values-[env]-apps.yaml`.
 enabled: []
+
+# -- Settings that are passed to the application-wrapper chart as default settings for all apps and projects.
+defaultSettings:
+  # -- Whether to enable automatic sync by default.
+  autoSync: false
+  selfHeal: true
+  prune: false
+  # -- Additional namespaces that should be allowed in a project.
+  additionalNamespaces: []
+  # -- Whether there are settings in the separate, private gitops repository.
+  privateSettings: false
+  # -- Whether to use server-side apply by default.
+  serverSideApply: true

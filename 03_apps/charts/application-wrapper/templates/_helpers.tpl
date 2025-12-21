@@ -54,14 +54,6 @@ true
 {{- end }}
 {{- end }}
 
-{{- define "apps-wrapper.autoSyncEnabled" -}}
-{{- if hasKey .settings.settings "autoSync" -}}
-{{ .settings.settings.autoSync }}
-{{- else -}}
-false
-{{- end -}}
-{{- end }}
-
 {{- define "apps-wrapper.hasPrivateSettings" -}}
 {{- if .settings.settings.privateSettings -}}
 true

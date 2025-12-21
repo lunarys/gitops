@@ -4,6 +4,7 @@
 {{- $allfiles := .Files.Glob "apps/*/**" -}}
 {{- $appYamls := .Files.Glob "apps/*/*app.yaml" }}
 {{- $chartYamls := .Files.Glob "apps/*/Chart.yaml" }}
+{{- $defaultSettings := .Values.defaultSettings }}
 {{- /* Get a concatenated list of app.yaml and Chart.yaml. This workaround is required, as 'keys' does not work with .Files.Glob */ -}}
 {{- $appsAndCharts := list }}
 {{- range $path, $_ := $appYamls }}
@@ -34,13 +35,13 @@
     {{- end }}
   {{- end }}
   {{- /* Find optional settings */ -}}
-  {{- $settings := dict }}
+  {{- $settings := $defaultSettings }}
   {{- if hasKey $files "settings.yaml" }}
-    {{- $settings = index $files "settings.yaml" }}
+    {{- $settings = merge (index $files "settings.yaml") $settings }}
   {{- end }}
   {{- if hasKey $files "app.yaml" }}
     {{- $appSettings := index $files "app.yaml" "settings" | default (dict) }}
-    {{- $settings = mergeOverwrite $settings $appSettings }}
+    {{- $settings = merge $appSettings $settings }}
   {{- end }}
   {{- /* Create a project entry in the apps dictionary */ -}}
   {{- $projectApps := dict -}}
@@ -68,7 +69,7 @@
       {{- end }}
       {{- /* Get app-specific settings and merge them with the project settings */ -}}
       {{- $appSettings := index $appFiles "app.yaml" "settings" | default (dict) }}
-      {{- $settings := mergeOverwrite $settings $appSettings }}
+      {{- $settings := merge $appSettings $defaultSettings $settings }}  # TODO: ensure order!!
     {{- end }}
     {{- /* Finally, construct the app dict */ -}}
     {{- $app := dict "name" $name "dir" $projectDir "prefix" $prefix "files" $appFiles "settings" $settings "project" $group }}

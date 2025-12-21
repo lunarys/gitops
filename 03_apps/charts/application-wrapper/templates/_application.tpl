@@ -97,10 +97,12 @@ spec:
   {{- end }}
   syncPolicy:
     automated:
-      enabled: {{ include "apps-wrapper.autoSyncEnabled" . }}
-      selfHeal: true
-      prune: false
+      enabled: {{ .settings.settings.autoSync }}
+      selfHeal: {{ .settings.settings.selfHeal }}
+      prune: {{ .settings.settings.prune }}
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true  # cloudnative-pg threw an error otherwise  # TODO: could be used everywhere?
+      {{- if hasKey .root.Values.defaultSettings "serverSideApply" }}
+      - ServerSideApply={{ .settings.settings.serverSideApply }}
+      {{- end }}
 {{- end }}
