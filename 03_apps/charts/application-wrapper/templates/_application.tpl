@@ -102,7 +102,7 @@ spec:
       prune: {{ .settings.settings.prune }}
     syncOptions:
       - CreateNamespace=true
-      {{- if hasKey .root.Values.defaultSettings "serverSideApply" }}
+      {{- if hasKey .settings.settings "serverSideApply" }}
       - ServerSideApply={{ .settings.settings.serverSideApply }}
       {{- end }}
 {{- end }}
