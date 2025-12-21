@@ -68,6 +68,10 @@ extraConfig:
       subPath: movies
       existingVolume: true
     - name: smb-mediarr
+      mountPath: "/media/movies2"
+      subPath: movies
+      existingVolume: true
+    - name: smb-mediarr
       mountPath: "/media/anime1"
       subPath: anime
       existingVolume: true
