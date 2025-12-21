@@ -51,6 +51,14 @@ smbstorage:
         capacity: "100Gi"  # ignored, but required
       externalsecret:
         commonRemoteKey: "08fcb826-138c-4ca7-ae96-b3a9012fc292"
+    mediarr:
+      smb:
+        host: "erolas.elda"
+        share: "mediarr"
+        capacity: "100Gi"  # ignored, but required
+      externalsecret:
+        commonRemoteKey: "08fcb826-138c-4ca7-ae96-b3a9012fc292"
+      
 
 extraConfig:
   volumeMounts:
@@ -59,7 +67,7 @@ extraConfig:
       mountPath: "/media/movies1"
       subPath: movies
       existingVolume: true
-    - name: smb-media
+    - name: smb-mediarr
       mountPath: "/media/anime1"
       subPath: anime
       existingVolume: true
