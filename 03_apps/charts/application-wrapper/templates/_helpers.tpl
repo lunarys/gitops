@@ -49,8 +49,10 @@ resources-{{ .Values.environment }}
 {{- end }}
 
 {{- define "apps-wrapper.hasAdditionalResources" -}}
+{{- $dirprefix := .settings.prefix -}}
+{{- $dirname := printf "%sresources/" $dirprefix -}}
 {{- range $filename, $_ := .settings.files }}
-{{- if hasPrefix "resources/" $filename }}
+{{- if hasPrefix $dirname $filename }}
 true
 {{- end }}
 {{- end }}

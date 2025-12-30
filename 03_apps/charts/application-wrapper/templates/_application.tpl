@@ -62,9 +62,9 @@ spec:
       helm:
         skipCrds: true
         valueFiles:
-          - '$repo/{{ include "apps-wrapper.fullpath" . }}/secrets.yaml'
+          - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}secrets.yaml'
           {{- if include "apps-wrapper.targetSecretsFile" .root }}
-          - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ include "apps-wrapper.targetSecretsFile" .root }}'
+          - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}{{ include "apps-wrapper.targetSecretsFile" .root }}'
           {{- end }}
   {{- end }}
   {{- if hasKey .settings.files "network.yaml" }}
@@ -75,7 +75,7 @@ spec:
       helm:
         skipCrds: true
         valueFiles:
-          - '$repo/{{ include "apps-wrapper.fullpath" . }}/network.yaml'
+          - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}network.yaml'
   {{- end }}
   {{- if or (hasKey .settings.files "app.yaml") (hasKey .settings.files "secrets.yaml") (hasKey .settings.files "network.yaml") }}
     # repo reference for values.yaml for app.yaml, network.yaml or secrets.yaml for secrets
