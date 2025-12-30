@@ -3,32 +3,16 @@ preset:
   endpointSelector:
     matchLabels:
       cnpg.io/podRole: instance
-  namespaceIsolation: false
+  namespaceIsolation: true
   ingress:
     # access the database for application workloads
     fromNamespaces:
       - nodered
     fromIngressController: false
-    rules:
-      # postgres cluster communication
-      - fromEndpoints:
-          - matchLabels:
-              cnpg.io/podRole: instance
-              io.kubernetes.pod.namespace: cloudnative-pg
-      # pgadmin
-      - fromEndpoints:
-          - matchLabels:
-              app.kubernetes.io/name: pgadmin
-              io.kubernetes.pod.namespace: cloudnative-pg
       # TODO: just introduce a label for "allowed clients" aka dbusers?
   egress:
     toKubeApi: true
     rules:
-      # postgres cluster communication
-      - toEndpoints:
-          - matchLabels:
-              cnpg.io/podRole: instance
-              io.kubernetes.pod.namespace: cloudnative-pg
       # s3 host
       # TODO: improve, does not update with the setting from values.yaml
       - toCIDRSet:
