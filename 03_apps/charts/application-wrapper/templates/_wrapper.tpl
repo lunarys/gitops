@@ -74,6 +74,9 @@
     {{- else }}
       {{- $appFiles = $files }}
     {{- end }}
+    {{- /* Name can be overwritten in the settings*/ -}}
+    {{- if hasKey $settings "applicationName" }}
+      {{- $name = $settings.applicationName }}
     {{- end }}
     {{- /* Finally, construct the app dict */ -}}
     {{- $app := dict "name" $name "dir" $projectDir "prefix" $prefix "files" $appFiles "settings" $settings "project" $group }}
