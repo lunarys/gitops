@@ -53,8 +53,20 @@
     {{- $name := $group }}
     {{- $prefix := "" }}
     {{- $appFiles := dict }}
-    {{- /* Chart.yaml variant is simpler: Prefix is not supported, so no further processing*/ -}}
-    {{- if ne $fileName "Chart.yaml" }}
+    {{- /* Chart.yaml variant is simpler: Prefix may only (optionally) be Chart- and there may be a Chart-settings.yaml file */ -}}
+    {{- if eq $fileName "Chart.yaml" }}
+      {{- /* Get app-specific settings and merge them with the project settings */ -}}
+      {{- if hasKey $files "Chart-settings.yaml" }}
+        {{- $chartSettings := index $files "Chart-settings.yaml" | default (dict) }}
+        {{- $settings = merge $chartSettings $defaultSettings $settings }}
+      {{- end }}
+      {{- /* The files for Chart.yaml apps can be prefixed with Chart-, check values.yaml if this is the case */ -}}
+      {{- if hasKey $files "Chart-values.yaml" }}
+        {{- $prefix = "Chart-" -}}
+        {{- /* Filtering files for the prefix would remove Chart.yaml from the list, to add it here */ -}}
+        {{- $_ := set $appFiles "Chart.yaml" (index $files "Chart.yaml") -}}
+      {{- end }}
+    {{- else -}}
       {{- /* app.yaml may have a prefix in order to place multiple in the same directory */ -}}
       {{- if ne $fileName "app.yaml" }}
         {{- $prefix = trimSuffix "app.yaml" $fileName }}
@@ -118,7 +130,7 @@ Structure of the apps dictionary:
             "Chart.yaml": "<content as dict>",
             "values.yaml": "<content as dict>"
           },
-          "settings": {}  # from settings.yaml or app.yaml[settings], e.g. namespace
+          "settings": {}  # from settings.yaml, Chart-settings.yaml or app.yaml[settings], e.g. namespace
         }
       }
     },

@@ -9,24 +9,24 @@ spec:
     server: {{ include "apps-wrapper.server" . }}
   project: {{ .settings.project }}-project
   sources:
+  {{- $appFilesPrefix := .settings.prefix }}
   {{- if hasKey .settings.files "Chart.yaml" }}
     # from Chart.yaml
     - helm:
         version: v3
         valueFiles:
-          - values.yaml
+          - {{ $appFilesPrefix }}values.yaml
           {{- if include "apps-wrapper.targetValuesFile" .root }}
-          - {{ include "apps-wrapper.targetValuesFile" .root }}
+          - {{ $appFilesPrefix }}{{ include "apps-wrapper.targetValuesFile" .root }}
           {{- end }}
           {{- if and .root.Values.privateRepoEnabled .root.Values.privateRepo (include "apps-wrapper.hasPrivateSettings" .) (include "apps-wrapper.targetValuesFile" .root) }}
-          - $privateRepo/config/{{ .settings.name }}/{{ include "apps-wrapper.targetValuesFile" .root }}
+          - $privateRepo/config/{{ .settings.name }}/{{ $appFilesPrefix }}{{ include "apps-wrapper.targetValuesFile" .root }}
           {{- end }}
         ignoreMissingValueFiles: true
       repoURL: {{ include "apps-wrapper.repoUrl" . }}
       targetRevision: {{ include "apps-wrapper.targetRevision" . }}
       path: {{ include "apps-wrapper.fullpath" . }}
   {{- end }}
-  {{- $appFilesPrefix := .settings.prefix }}
   {{- if hasKey .settings.files "app.yaml" }}
     # from app.yaml
     {{- $defaultHelmRepo := .root.Values.mainHelmRepo }}
