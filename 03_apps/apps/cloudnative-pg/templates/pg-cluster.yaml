@@ -63,6 +63,7 @@ spec:
     - name: {{ include "postgresdb.cnpg.previousClusterName" . }}  # any name, that is references in recovery.source  
       plugin:
         name: barman-cloud.cloudnative-pg.io
+        isWALArchiver: true
         parameters:
           barmanObjectName: garage-s3-object-store
           serverName: {{ include "postgresdb.cnpg.previousClusterName" . }}  # name of the postgresdb cluster to restore from
