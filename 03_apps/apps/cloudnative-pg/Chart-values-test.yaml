@@ -2,7 +2,7 @@ clusterGeneration: "002"
 clusterPreviousGeneration: "001"
 
 restore: 
-  enabled: false
+  enabled: true
 
 externalsecrets:
   secrets:
