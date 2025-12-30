@@ -4,14 +4,6 @@
 #  pathPattern: "pvc-{{ .PVC.Namespace }}-{{ .PVC.Name }}"
 #  relaimPolicy: Delete
 
-configmap:
-  # opposed to the default, use file mode 0770 instead of 0777
-  # this should work if always setting fsGroup in securityContext
-  setup: |-
-    #!/bin/sh
-    set -eu
-    mkdir -m 0770 -p "$VOL_DIR"
-
 # https://github.com/rancher/local-path-provisioner/blob/master/deploy/chart/local-path-provisioner/templates/storageclass.yaml
 storageClassConfigs:
   local-path:
