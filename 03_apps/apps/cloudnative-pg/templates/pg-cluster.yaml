@@ -30,12 +30,10 @@ spec:
     storageClass: local-path-auto-delete
     size: 2Gi
 
-  # required for garage s3 (?)
+  # required for garage s3: https://garagehq.deuxfleurs.fr/cookbook/clients.html
   env:
     - name: AWS_S3_FORCE_PATH_STYLE
       value: "true"
-    - name: AWS_REGION
-      value: garage
     - name: AWS_DEFAULT_REGION
       value: garage
 
