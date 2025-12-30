@@ -10,6 +10,8 @@ enabled:
   - cert-manager
   - minio
 
+  - cloudnative-pg
+
   # testing only
   - hello-world
   - hello-world-simple

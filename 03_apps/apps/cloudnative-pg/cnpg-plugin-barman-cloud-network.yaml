@@ -1,0 +1,16 @@
+preset:
+  name: networkpolicy-barman-cloud-plugin
+  endpointSelector:
+    app.kubernetes.io/name: cnpg-plugin-barman-cloud
+  namespaceIsolation: false
+  ingress:
+    fromIngressController: false
+    rules:
+      - fromEntities:
+          - kube-apiserver
+      - fromEndpoints:
+          - matchLabels:
+              app.kubernetes.io/name: cloudnative-pg-operator
+              io.kubernetes.pod.namespace: cloudnative-pg
+  egress:
+    toKubeApi: true

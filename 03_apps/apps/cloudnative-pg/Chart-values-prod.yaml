@@ -1,0 +1,7 @@
+externalsecrets:
+  secrets:
+    s3-credentials:
+      commonRemoteKey: "7778bd62-ca44-4cbb-a56c-b3a400b28ac1"
+
+s3:
+  backupBucket: "cloudnative-pg-backup-prod"

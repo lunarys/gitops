@@ -1,0 +1,38 @@
+
+# On restore, this value must be changed!
+# cloudnative-pg will not allow the same restore source and backup target on cluster restore.
+# Thus, this creates a new generation of the Postgres cluster, 
+# restoring from the previous generation, but writing backups to its own, new location.
+# See https://github.com/cloudnative-pg/cloudnative-pg/blob/main/docs/src/recovery.md#restoring-into-a-cluster-with-a-backup-section
+clusterGeneration: "002"
+clusterPreviousGeneration: "001"
+
+
+postgres:
+  instances: 2
+  clusterNameOverride: ""
+
+backup:
+  #schedule: "0 0 23/12 * * *" # At 0 minutes past the hour, every 12 hours, starting at 11:00 PM
+  schedule: "0 */10 * * * *"  # every 10 minutes
+
+restore: 
+  enabled: true
+  # In case a different name was used before, set it here to allow restores from previous backups.
+  clusterNameOverride: ""
+
+s3:
+  backupBucket: "<overwrite>"
+  endpoint: http://10.0.1.21:3900
+
+externalsecrets:
+  secrets:
+    s3-credentials:
+      commonRemoteKey: "<overwrite>"
+      fields:
+        ACCESS_KEY_ID:
+          storeRefName: bitwarden-login
+          remoteProperty: username
+        ACCESS_SECRET_KEY:
+          storeRefName: bitwarden-login
+          remoteProperty: password

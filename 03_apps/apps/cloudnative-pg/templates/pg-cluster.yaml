@@ -1,13 +1,16 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: postgresdb
+  name: {{ include "postgresdb.cnpg.clusterName" . }}
   labels:
     app.kubernetes.io/component: database
-    app.kubernetes.io/version: 16.3-bullseye
+    app.kubernetes.io/name: postgresdb
+    app.kubernetes.io/instance: {{ include "postgresdb.cnpg.clusterName" . }}
+    app.kubernetes.io/version: {{ .Values.clusterGeneration | quote }}
+    
 spec:
   # Documentation: https://cloudnative-pg.io/documentation/1.27/cloudnative-pg.v1/#postgresql-cnpg-io-v1-ClusterSpec
-  instances: 3
+  instances: {{ .Values.postgres.instances }}
   description: "General purpose PostgreSQL cluster"
   #imageName: "ghcr.io/cloudnative-pg/postgresql:16.3-bullseye"
   primaryUpdateStrategy: unsupervised  # default, automated. opposed to 'supervised'
@@ -36,60 +39,24 @@ spec:
   #   enablePodAntiAffinity: true
   # topologySpreadConstraints:
 
-  # see https://cloudnative-pg.io/documentation/1.22/kubernetes_upgrade/
-  # enablePCB instead (?)
-  #nodeMaintenanceWindow:
-  #  reusePVC: false # rebuild from other replica instead
-
-  # also: 
-  #backup:
-  #  retentionPolicy: "60d"
-  #  barmanObjectStore:
-  #    destinationPath: s3://databases/iam-db
-  #    endpointURL: https://your-s3-minio-or-aws-url
-  #    s3Credentials:
-  #      accessKeyId:
-  #        name: barman-credentials
-  #        key: access-key-id
-  #      secretAccessKey:
-  #        name: barman-credentials
-  #        key: secret-access-key
-  #    wal:
-  #      compression: gzip # this saves a lot of storage
-  #    data:
-  #      compression: gzip
-  #      jobs: 2
-  #backup:
-  #  volumeSnapshot:
-  #    className: longhorn-snapshot-vsc
-#
-  #backup:
-  #  barmanObjectStore:
-  #    [...]
-  #    wal:
-  #      compression: gzip
-  #      encryption: AES256
-
-
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
       parameters:
-        barmanObjectName: minio-store
+        barmanObjectName: garage-s3-object-store
 
-  # TODO
+  {{- if .Values.restore.enabled }}
   # https://cloudnative-pg.io/documentation/current/recovery/
   # https://cloudnative-pg.io/plugin-barman-cloud/docs/migration/
   bootstrap:
     recovery:
-      source: minio-backup-ref
+      source: {{ include "postgresdb.cnpg.previousClusterName" . }}
 
-  # TODO: currently does not work properly - the restore fails because "Expected empty archive"
-  # See https://github.com/cloudnative-pg/plugin-barman-cloud/issues/606
   externalClusters:
-    - name: minio-backup-ref  # any name, that is references in recovery.source (?)  
+    - name: {{ include "postgresdb.cnpg.previousClusterName" . }}  # any name, that is references in recovery.source  
       plugin:
         name: barman-cloud.cloudnative-pg.io
         parameters:
-          barmanObjectName: minio-store
-          serverName: postgresdb  # name of the postgresdb cluster to restore from (?)
+          barmanObjectName: garage-s3-object-store
+          serverName: {{ include "postgresdb.cnpg.previousClusterName" . }}  # name of the postgresdb cluster to restore from
+  {{- end }}

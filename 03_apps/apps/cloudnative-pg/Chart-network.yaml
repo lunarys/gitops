@@ -1,0 +1,32 @@
+preset:
+  name: networkpolicy-postgresdb
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: postgresdb
+  namespaceIsolation: false
+  ingress:
+    # access the database for application workloads
+    fromNamespaces:
+      - nodered
+    fromIngressController: false
+    rules:
+      # postgres cluster communication
+      - fromEndpoints:
+          - matchLabels:
+              cnpg.io/cluster: postgresdb
+              io.kubernetes.pod.namespace: cloudnative-pg
+      # pgadmin
+      - fromEndpoints:
+          - matchLabels:
+              app.kubernetes.io/name: pgadmin
+              io.kubernetes.pod.namespace: cloudnative-pg
+      # TODO: just introduce a label for "allowed clients" aka dbusers?
+  egress:
+    # backup to minio
+    toNamespace: minio
+    # postgres cluster communication
+    rules:
+      - toEndpoints:
+          - matchLabels:
+              cnpg.io/cluster: postgresdb
+              io.kubernetes.pod.namespace: cloudnative-pg

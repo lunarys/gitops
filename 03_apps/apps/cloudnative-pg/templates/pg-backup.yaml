@@ -1,20 +1,17 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:
-  name: db-scheduled-backup
+  name: {{ include "postgresdb.cnpg.clusterName" . }}-scheduled-backup
   labels:
     app.kubernetes.io/component: database-backup
 spec:
-  #schedule: "0 0 23/12 * * *" # At 0 minutes past the hour, every 12 hours, starting at 11:00 PM
-  schedule: "0 */10 * * * *"
+  schedule: {{ .Values.backup.schedule | quote }}
   backupOwnerReference: self  # TODO: cluster or self??
   immediate: false
   cluster:
-    name: "postgresdb" # Your Cluster resource name
+    name: {{ include "postgresdb.cnpg.clusterName" . }}
 
   # configure backup type - https://cloudnative-pg.io/plugin-barman-cloud/docs/usage/#performing-a-base-backup
   method: plugin
   pluginConfiguration:
     name: barman-cloud.cloudnative-pg.io
-
-  # TODO: https://cloudnative-pg.io/plugin-barman-cloud/docs/usage/

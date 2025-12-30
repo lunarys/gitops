@@ -1,0 +1,12 @@
+ingress:
+  host: pgadmin.svc.elda
+
+externalsecrets:
+  secrets:
+    pgadmin-credentials:
+      commonRemoteKey: "67d4f7fc-5790-4f9b-82bf-b3a50112d257"
+
+longhornstorage:
+  volumes:
+    pgadmin-config:
+      pvName: ""  # TODO

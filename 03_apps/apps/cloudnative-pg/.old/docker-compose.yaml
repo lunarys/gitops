@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres
+    restart: unless-stopped
+    volumes:
+        - pgdata:/var/lib/postgresql
+    environment:
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: "password"
+
+  pg-admin:
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "root@local.box"
+      PGADMIN_DEFAULT_PASSWORD: "password"
+      PGADMIN_DISABLE_POSTFIX: "true"
+      PGPASS_FILE: "/.pgpass"
+    volumes:
+      - ./pgpass:/.pgpass
+      - pgadmin_data:/var/lib/pgadmin
+
+  # User root, PW Password123
+  cloudbeaver:
+    image: dbeaver/cloudbeaver
+    restart: unless-stopped
+    ports:
+      - "8081:8978"
+    volumes:
+      - ./pgpass:/root/.pgpass
+      - cloudbeaver_data:/opt/cloudbeaver/workspace
+
+volumes:
+  pgdata:
+  pgadmin_data:
+  cloudbeaver_data:

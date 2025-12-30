@@ -3,17 +3,17 @@
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore
 metadata:
-  name: minio-store
+  name: garage-s3-object-store
 spec:
   configuration:
-    destinationPath: s3://cloudnative-pg-backup/
-    endpointURL: http://minio.minio.svc.cluster.local:9000
+    destinationPath: s3://{{ .Values.s3.backupBucket }}/
+    endpointURL: {{ .Values.s3.endpoint | quote }}
     s3Credentials:
       accessKeyId:
-        name: minio-credentials
+        name: s3-credentials
         key: ACCESS_KEY_ID
       secretAccessKey:
-        name: minio-credentials
+        name: s3-credentials
         key: ACCESS_SECRET_KEY
     wal:
       compression: gzip
