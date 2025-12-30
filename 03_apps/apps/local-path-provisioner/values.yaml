@@ -16,7 +16,7 @@ storageClassConfigs:
       defaultClass: false
       defaultVolumeType: "hostPath"
       volumeBindingMode: WaitForFirstConsumer  # vs. Immediate
-      pathPattern: "{{ .PVC.Namespace }}/{{ .PVC.Name }}"
+      pathPattern: "{{ .PVC.Namespace }}/{{ .PVC.Name }}/"
       reclaimPolicy: Retain
 
   local-path-auto-delete:
@@ -29,6 +29,5 @@ storageClassConfigs:
       defaultClass: false
       defaultVolumeType: "hostPath"
       volumeBindingMode: WaitForFirstConsumer  # vs. Immediate
-      pathPattern: "{{ .PVC.Namespace }}/{{ .PVC.Name }}"
+      pathPattern: "{{ .PVC.Namespace }}/{{ .PVC.Name }}/"
       reclaimPolicy: Delete
-
