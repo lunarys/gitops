@@ -61,10 +61,12 @@ networkpolicy:
     namespaceIsolation: false  # don't allow access to the whole namespace
     egress:
       rules:
-        - toEndpoints:
-            - matchLabels:
-                cnpg.io/cluster: postgresdb
-                io.kubernetes.pod.namespace: cloudnative-pg
+        - toServices:
+            - k8sServiceSelector:
+                selector:
+                  matchLabels:
+                    app.kubernetes.io/name: postgresdb
+                    io.kubernetes.pod.namespace: cloudnative-pg
           toPorts:
             - ports:
                 - port: "5432"

@@ -2,7 +2,7 @@ preset:
   name: networkpolicy-postgresdb
   endpointSelector:
     matchLabels:
-      cnpg.io/cluster: postgresdb
+      cnpg.io/podRole: instance
   namespaceIsolation: false
   ingress:
     # access the database for application workloads
@@ -13,7 +13,7 @@ preset:
       # postgres cluster communication
       - fromEndpoints:
           - matchLabels:
-              cnpg.io/cluster: postgresdb
+              cnpg.io/podRole: instance
               io.kubernetes.pod.namespace: cloudnative-pg
       # pgadmin
       - fromEndpoints:
@@ -26,7 +26,7 @@ preset:
       # postgres cluster communication
       - toEndpoints:
           - matchLabels:
-              cnpg.io/cluster: postgresdb
+              cnpg.io/podRole: instance
               io.kubernetes.pod.namespace: cloudnative-pg
       # s3 host
       # TODO: improve, does not update with the setting from values.yaml

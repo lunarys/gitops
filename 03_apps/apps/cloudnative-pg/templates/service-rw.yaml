@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresdb-rw
+  labels:
+    app.kubernetes.io/component: database
+    app.kubernetes.io/name: postgresdb
+    app.kubernetes.io/instance: {{ include "postgresdb.cnpg.clusterName" . }}
+spec:
+  selector:
+    cnpg.io/cluster: {{ include "postgresdb.cnpg.clusterName" . }}
+    cnpg.io/instanceRole: primary
+  ports:
+    - name: postgres
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
