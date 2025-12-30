@@ -22,6 +22,7 @@ preset:
               io.kubernetes.pod.namespace: cloudnative-pg
       # TODO: just introduce a label for "allowed clients" aka dbusers?
   egress:
+    toKubeApi: true
     rules:
       # postgres cluster communication
       - toEndpoints:
