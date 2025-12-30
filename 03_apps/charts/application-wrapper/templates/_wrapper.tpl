@@ -52,24 +52,28 @@
     {{- $fileName := base $path }}
     {{- $name := $group }}
     {{- $prefix := "" }}
-    {{- $appFiles := $files }}
+    {{- $appFiles := dict }}
     {{- /* Chart.yaml variant is simpler: Prefix is not supported, so no further processing*/ -}}
     {{- if ne $fileName "Chart.yaml" }}
       {{- /* app.yaml may have a prefix in order to place multiple in the same directory */ -}}
       {{- if ne $fileName "app.yaml" }}
         {{- $prefix = trimSuffix "app.yaml" $fileName }}
         {{- $name = trimSuffix "-" $prefix }}
-        {{- /* In order to facilitate processing in later steps, strip the prefix from filenames and filter for files that have the prefix */ -}}
-        {{- $appFiles = dict }}
-        {{- range $filePath, $fileContent := $files }}
-          {{- if hasPrefix $prefix $filePath }}
-            {{- $_ := set $appFiles (trimPrefix $prefix $filePath) $fileContent }}
-          {{- end }}
-        {{- end }}
       {{- end }}
       {{- /* Get app-specific settings and merge them with the project settings */ -}}
-      {{- $appSettings := index $appFiles "app.yaml" "settings" | default (dict) }}
+      {{- $appSettings := index $files $fileName "settings" | default (dict) }}
       {{- $settings := merge $appSettings $defaultSettings $settings }}
+    {{- end }}
+    {{- /* In order to facilitate processing in later steps, strip the prefix from filenames and filter for files that have the prefix */ -}}
+    {{- if $prefix }}
+      {{- range $filePath, $fileContent := $files }}
+        {{- if hasPrefix $prefix $filePath }}
+          {{- $_ := set $appFiles (trimPrefix $prefix $filePath) $fileContent }}
+        {{- end }}
+      {{- end }}
+    {{- else }}
+      {{- $appFiles = $files }}
+    {{- end }}
     {{- end }}
     {{- /* Finally, construct the app dict */ -}}
     {{- $app := dict "name" $name "dir" $projectDir "prefix" $prefix "files" $appFiles "settings" $settings "project" $group }}
