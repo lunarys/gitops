@@ -14,7 +14,7 @@ service:
 longhornstorage:
   volumes:
     data:
-      size: "10Mi"
+      size: "30Mi"
       variant: auto-delete  # Just start anew when the deployment was removed
       mount: 
         path: /mosquitto/data
