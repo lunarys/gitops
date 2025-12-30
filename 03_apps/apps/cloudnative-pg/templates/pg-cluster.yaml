@@ -30,6 +30,13 @@ spec:
     storageClass: local-path-auto-delete
     size: 2Gi
 
+  # required for garage s3 (?)
+  env:
+    - name: AWS_S3_FORCE_PATH_STYLE
+      value: "true"
+    - name: AWS_REGION
+      value: home
+
   # prometheus
   #monitoring:
   #  enablePodMonitor: true  # TODO
