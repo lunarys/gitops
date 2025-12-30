@@ -8,7 +8,6 @@ enabled:
 
   - adguard-home
   - cert-manager
-  - minio
 
   - cloudnative-pg
 
