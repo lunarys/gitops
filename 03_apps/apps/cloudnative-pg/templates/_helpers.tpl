@@ -2,7 +2,7 @@
 {{- if .Values.postgres.clusterNameOverride -}}
 {{- .Values.postgres.clusterNameOverride -}}
 {{- else -}}
-postgresdb-{{ .Values.clusterGeneration | required "clusterGeneration is required when postgres.clusterNameOverride is not set" }}
+postgresdb-gen-{{ .Values.clusterGeneration | required "clusterGeneration is required when postgres.clusterNameOverride is not set" }}
 {{- end -}}
 {{- end }}
 
@@ -10,6 +10,6 @@ postgresdb-{{ .Values.clusterGeneration | required "clusterGeneration is require
 {{- if .Values.restore.clusterNameOverride -}}
 {{- .Values.restore.clusterNameOverride -}}
 {{- else -}}
-postgresdb-{{ .Values.clusterPreviousGeneration | required "clusterPreviousGeneration is required when restore.clusterNameOverride is not set" }}
+postgresdb-gen-{{ .Values.clusterPreviousGeneration | required "clusterPreviousGeneration is required when restore.clusterNameOverride is not set" }}
 {{- end -}}
 {{- end }}
