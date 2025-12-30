@@ -1,7 +1,8 @@
 preset:
   name: networkpolicy-barman-cloud-plugin
   endpointSelector:
-    app.kubernetes.io/name: cnpg-plugin-barman-cloud
+    matchLabels:
+      app.kubernetes.io/name: cnpg-plugin-barman-cloud
   namespaceIsolation: false
   ingress:
     fromIngressController: false
