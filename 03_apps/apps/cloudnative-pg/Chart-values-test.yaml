@@ -1,3 +1,9 @@
+clusterGeneration: "002"
+clusterPreviousGeneration: "001"
+
+restore: 
+  enabled: false
+
 externalsecrets:
   secrets:
     s3-credentials:
