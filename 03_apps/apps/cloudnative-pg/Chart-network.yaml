@@ -22,11 +22,17 @@ preset:
               io.kubernetes.pod.namespace: cloudnative-pg
       # TODO: just introduce a label for "allowed clients" aka dbusers?
   egress:
-    # backup to minio
-    toNamespace: minio
-    # postgres cluster communication
     rules:
+      # postgres cluster communication
       - toEndpoints:
           - matchLabels:
               cnpg.io/cluster: postgresdb
               io.kubernetes.pod.namespace: cloudnative-pg
+      # s3 host
+      # TODO: improve, does not update with the setting from values.yaml
+      - toCIDRSet:
+          - cidr: 10.0.1.21/32
+        toPorts:
+            - ports:
+                - port: "3900"
+                  protocol: TCP

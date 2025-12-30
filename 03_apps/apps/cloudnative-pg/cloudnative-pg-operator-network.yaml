@@ -2,7 +2,7 @@ preset:
   name: networkpolicy-cnpg
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/name: cloudnative-pg-operator
+      app.kubernetes.io/instance: cloudnative-pg-operator
   namespaceIsolation: false
   ingress:
     fromIngressController: false
