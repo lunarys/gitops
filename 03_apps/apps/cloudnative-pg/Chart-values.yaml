@@ -4,8 +4,8 @@
 # Thus, this creates a new generation of the Postgres cluster, 
 # restoring from the previous generation, but writing backups to its own, new location.
 # See https://github.com/cloudnative-pg/cloudnative-pg/blob/main/docs/src/recovery.md#restoring-into-a-cluster-with-a-backup-section
-clusterGeneration: "002"
-clusterPreviousGeneration: "001"
+clusterGeneration: "001"
+clusterPreviousGeneration: "000"
 
 
 postgres:
@@ -17,7 +17,7 @@ backup:
   schedule: "0 */10 * * * *"  # every 10 minutes
 
 restore: 
-  enabled: true
+  enabled: false
   # In case a different name was used before, set it here to allow restores from previous backups.
   clusterNameOverride: ""
 
