@@ -3,5 +3,3 @@ helm:
   repo: ghcr.io/rancher/local-path-provisioner/charts
   chart: local-path-provisioner
   version: 0.0.33
-
-# TODO: was: syncPolicy.automated.prune: true

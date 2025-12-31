@@ -4,7 +4,18 @@
 #  pathPattern: "pvc-{{ .PVC.Namespace }}-{{ .PVC.Name }}"
 #  relaimPolicy: Delete
 
+
+configmap:
+  # opposed to the default, use file mode 0770 instead of 0777
+  # this should work if always setting fsGroup in securityContext
+  setup: |-
+    #!/bin/sh
+    set -eu
+    mkdir -m 0770 -p "$VOL_DIR"
+
+
 # https://github.com/rancher/local-path-provisioner/blob/master/deploy/chart/local-path-provisioner/templates/storageclass.yaml
+# https://github.com/rancher/local-path-provisioner/pull/542/files
 storageClassConfigs:
   local-path:
     nodePathMap:
@@ -14,7 +25,8 @@ storageClassConfigs:
     storageClass:
       create: true
       defaultClass: false
-      defaultVolumeType: "hostPath"
+      # local works with fsGroup, hostPath does not
+      defaultVolumeType: "local"
       volumeBindingMode: WaitForFirstConsumer  # vs. Immediate
       pathPattern: "{{ .PVC.Namespace }}/{{ .PVC.Name }}/"
       reclaimPolicy: Retain
@@ -27,7 +39,7 @@ storageClassConfigs:
     storageClass:
       create: true
       defaultClass: false
-      defaultVolumeType: "hostPath"
+      defaultVolumeType: "local"
       volumeBindingMode: WaitForFirstConsumer  # vs. Immediate
       pathPattern: "{{ .PVC.Namespace }}/{{ .PVC.Name }}/"
       reclaimPolicy: Delete
