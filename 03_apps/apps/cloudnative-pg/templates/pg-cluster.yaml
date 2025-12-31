@@ -37,6 +37,11 @@ spec:
     - name: AWS_DEFAULT_REGION
       value: garage
 
+  securityContext:
+    # using the default of 26 shows as the 'tape' user in the node filesystem due to local-path volumes
+    # mostly cosmetic, but cleaner in that it does not clash with a existing user in debian
+    fsGroup: 5432
+
   # prometheus
   #monitoring:
   #  enablePodMonitor: true  # TODO
