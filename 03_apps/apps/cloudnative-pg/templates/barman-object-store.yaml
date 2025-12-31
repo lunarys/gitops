@@ -19,3 +19,6 @@ spec:
       compression: gzip
     data:
       compression: gzip
+  {{- if .Values.backup.retentionPolicy }}
+  retentionPolicy: {{ .Values.backup.retentionPolicy }}
+  {{- end }}

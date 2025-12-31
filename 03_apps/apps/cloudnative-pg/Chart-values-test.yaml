@@ -1,7 +1,10 @@
 clusterGeneration: "004"
 clusterPreviousGeneration: "003"
 
-restore: 
+backup:
+  retentionPolicy: 1d
+
+restore:
   enabled: true
 
 externalsecrets:
