@@ -66,7 +66,7 @@ spec:
       source: {{ include "postgresdb.cnpg.previousClusterName" . }}
 
   externalClusters:
-    - name: {{ include "postgresdb.cnpg.previousClusterName" . }}  # any name, that is references in recovery.source  
+    - name: {{ include "postgresdb.cnpg.previousClusterName" . }}  # any name, that is referenced in recovery.source  
       plugin:
         name: barman-cloud.cloudnative-pg.io
         isWALArchiver: true
@@ -74,3 +74,10 @@ spec:
           barmanObjectName: garage-s3-object-store
           serverName: {{ include "postgresdb.cnpg.previousClusterName" . }}  # name of the postgresdb cluster to restore from
   {{- end }}
+
+  postgresql:
+    # https://www.postgresql.org/docs/current/auth-pg-hba-conf.html
+    pg_hba:
+      # use a headless service to resolve to the pgadmin pod ip
+      - "host all postgres pgadmin-headless.cloudnative-pg.svc.cluster.local scram-sha-256"
+      - "host all postgres all reject"
