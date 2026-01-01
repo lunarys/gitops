@@ -57,10 +57,8 @@
     {{- /* Chart.yaml variant is simpler: Prefix may only (optionally) be Chart- and there may be a Chart-settings.yaml file */ -}}
     {{- if eq $fileName "Chart.yaml" }}
       {{- /* Get app-specific settings and merge them with the project settings */ -}}
-      {{- if hasKey $files "Chart-settings.yaml" }}
-        {{- $chartSettings := index $files "Chart-settings.yaml" | default (dict) }}
-        {{- $settings = mergeOverwrite (dict) $projectSettings $defaultSettings $chartSettings }}
-      {{- end }}
+      {{- $chartSettings := index $files "Chart-settings.yaml" | default (dict) }}
+      {{- $settings = mergeOverwrite (dict) $projectSettings $chartSettings }}
       {{- /* The files for Chart.yaml apps can be prefixed with Chart-, check values.yaml if this is the case */ -}}
       {{- if hasKey $files "Chart-values.yaml" }}
         {{- $prefix = "Chart-" -}}
@@ -75,7 +73,7 @@
       {{- end }}
       {{- /* Get app-specific settings and merge them with the project settings */ -}}
       {{- $appSettings := index $files $fileName "settings" | default (dict) }}
-      {{- $settings = mergeOverwrite (dict) $projectSettings $defaultSettings $appSettings }}
+      {{- $settings = mergeOverwrite (dict) $projectSettings $appSettings }}
     {{- end }}
     {{- /* In order to facilitate processing in later steps, strip the prefix from filenames and filter for files that have the prefix */ -}}
     {{- if $prefix }}
