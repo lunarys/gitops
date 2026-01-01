@@ -3,10 +3,14 @@ enabled:
   - bitwarden
   - longhorn
   - smb-driver
+  - local-path-provisioner
   - keda
 
   - adguard-home
   - adguard-sync
+
+  - cert-manager
+  - cloudnative-pg
 
   - home-assistant
   - teamspeak
