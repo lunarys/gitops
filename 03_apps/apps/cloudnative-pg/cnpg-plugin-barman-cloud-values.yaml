@@ -1,0 +1,4 @@
+# It creates a clusterrole and clusterrolebinding, but should only run in the cloudnative-pg namespace
+#  -> create rbac separately
+rbac:
+  create: false
