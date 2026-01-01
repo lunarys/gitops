@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/component: database-backup
 spec:
   schedule: {{ .Values.backup.schedule | quote }}
-  backupOwnerReference: self  # TODO: cluster or self??
+  backupOwnerReference: self  # vs. cluster
   immediate: false
   cluster:
     name: {{ include "postgresdb.cnpg.clusterName" . }}

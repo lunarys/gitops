@@ -11,6 +11,8 @@ externalsecrets:
   secrets:
     s3-credentials:
       commonRemoteKey: "b8223814-7afc-43f1-9d62-b3a400b3002e"
+    db-superuser:
+      commonRemoteKey: "83c71120-85b4-4bab-ac41-b3c500cb4087"
 
 s3:
   backupBucket: "cloudnative-pg-backup-test"

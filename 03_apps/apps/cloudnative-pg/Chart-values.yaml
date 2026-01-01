@@ -15,7 +15,7 @@ postgres:
 backup:
   #schedule: "0 0 23/12 * * *" # At 0 minutes past the hour, every 12 hours, starting at 11:00 PM
   schedule: "0 */10 * * * *"  # every 10 minutes
-  retentionPolicy: 30d
+  retentionPolicy: 60d
 
 restore: 
   enabled: false
@@ -35,5 +35,14 @@ externalsecrets:
           storeRefName: bitwarden-login
           remoteProperty: username
         ACCESS_SECRET_KEY:
+          storeRefName: bitwarden-login
+          remoteProperty: password
+    db-superuser:
+      commonRemoteKey: "<overwrite>"
+      fields:
+        username:  # must be postgres apparently
+          storeRefName: bitwarden-login
+          remoteProperty: username
+        password:
           storeRefName: bitwarden-login
           remoteProperty: password

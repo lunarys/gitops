@@ -19,7 +19,8 @@ spec:
   # https://cloudnative-pg.io/documentation/1.27/applications/#secrets
   # -> kubectl get secret -n cloudnative-pg postgresdb-superuser -o jsonpath='{.data.password}' | base64 --decode
   enableSuperuserAccess: true
-  #superuserSecret: "xxx TODO xxx"
+  superuserSecret: 
+    name: "db-superuser"
   
   storage:
     #storageClass: longhorn-postgres-replica-storage  # TODO: could use local-storage-provisioner?
