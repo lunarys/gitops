@@ -1,5 +1,0 @@
-helm:
-  chart: cloudnative-pg
-  version: 0.23.2
-  repo: https://cloudnative-pg.github.io/charts
-#additionalResources: true
