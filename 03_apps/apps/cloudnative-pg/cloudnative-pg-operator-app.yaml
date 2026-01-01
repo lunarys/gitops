@@ -2,3 +2,6 @@ helm:
   chart: cloudnative-pg
   version: 0.27.0
   repo: https://cloudnative-pg.github.io/charts
+
+settings:
+  skipCrds: false

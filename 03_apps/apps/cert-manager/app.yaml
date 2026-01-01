@@ -7,3 +7,4 @@ settings:
   # cert-manager places its leader-election roles and objects in the kube-system namespace
   additionalNamespaces:
     - kube-system
+  skipCrds: false
