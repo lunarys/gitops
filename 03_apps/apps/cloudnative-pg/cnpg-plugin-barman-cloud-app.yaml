@@ -5,3 +5,4 @@ helm:
 
 settings:
   skipCrds: false
+  serverSideApply: false
