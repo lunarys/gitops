@@ -26,6 +26,8 @@ restore:
 
 s3:
   backupBucket: "<overwrite>"
+  # TODO: don't forget to adjust the network policy if this is changed...
+  # it is currently manually set to this ip address
   endpoint: http://10.0.1.21:3900
 
 externalsecrets:

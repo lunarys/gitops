@@ -23,12 +23,15 @@ spec:
     name: "db-superuser"
   
   storage:
-    #storageClass: longhorn-postgres-replica-storage  # TODO: could use local-storage-provisioner?
+    # currently, using a local path is sufficient
+    # it will be cleaned up if the pvc is deleted
+    # the database will be restored from a backup
     storageClass: local-path-auto-delete
+    #storageClass: longhorn-postgres-replica-storage
     size: 2Gi
   walStorage:
-    #storageClass: longhorn-postgres-replica-storage  # TODO: could use local-storage-provisioner?
     storageClass: local-path-auto-delete
+    #storageClass: longhorn-postgres-replica-storage
     size: 2Gi
 
   # required for garage s3: https://garagehq.deuxfleurs.fr/cookbook/clients.html
