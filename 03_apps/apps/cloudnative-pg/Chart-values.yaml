@@ -15,8 +15,7 @@ postgres:
   clusterNameOverride: ""
 
 backup:
-  #schedule: "0 0 23/12 * * *" # At 0 minutes past the hour, every 12 hours, starting at 11:00 PM
-  schedule: "0 */10 * * * *"  # every 10 minutes
+  schedule: "0 0 3,15 * * *"
   retentionPolicy: 60d
 
 restore: 

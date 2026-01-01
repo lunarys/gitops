@@ -5,6 +5,7 @@ strictAntiAffinity: false
 
 backup:
   retentionPolicy: 1d
+  schedule: "0 */10 * * * *"  # every 10 minutes
 
 restore:
   enabled: true
