@@ -78,6 +78,9 @@ spec:
   postgresql:
     # https://www.postgresql.org/docs/current/auth-pg-hba-conf.html
     pg_hba:
-      # use a headless service to resolve to the pgadmin pod ip
-      - "host all postgres pgadmin-headless.cloudnative-pg.svc.cluster.local scram-sha-256"
+      # limit superuser access
+      # postgres does a reverse lookup of the connecting IP address, 
+      # which will look something like 10-243-0-237.pgadmin.cloudnative-pg.svc.cluster.local
+      # so the prefix-based DNS rule works for this case
+      - "host all postgres .pgadmin.cloudnative-pg.svc.cluster.local scram-sha-256"
       - "host all postgres all reject"
