@@ -14,6 +14,7 @@ spec:
     # from Chart.yaml
     - helm:
         version: v3
+        skipCrds: {{ .settings.settings.skipCrds }}
         valueFiles:
           - {{ $appFilesPrefix }}values.yaml
           {{- if include "apps-wrapper.targetValuesFile" .root }}
@@ -43,7 +44,7 @@ spec:
     {{- end }}
       helm:
         #releaseName: ''
-        skipCrds: true  # <-- TODO: not used everywhere
+        skipCrds: {{ .settings.settings.skipCrds }}
         valueFiles:
           - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}values.yaml'
           {{- if include "apps-wrapper.targetValuesFile" .root }}

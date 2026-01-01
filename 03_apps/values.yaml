@@ -52,3 +52,4 @@ defaultSettings:
   privateSettings: false
   # -- Whether to use server-side apply by default.
   serverSideApply: true
+  skipCrds: true
