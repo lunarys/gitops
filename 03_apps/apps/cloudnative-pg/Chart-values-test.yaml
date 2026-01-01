@@ -1,6 +1,8 @@
 clusterGeneration: "004"
 clusterPreviousGeneration: "003"
 
+strictAntiAffinity: false
+
 backup:
   retentionPolicy: 1d
 

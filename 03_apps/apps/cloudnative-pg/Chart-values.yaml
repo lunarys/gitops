@@ -8,6 +8,8 @@ clusterGeneration: "001"
 clusterPreviousGeneration: "000"
 
 
+strictAntiAffinity: true
+
 postgres:
   instances: 2
   clusterNameOverride: ""

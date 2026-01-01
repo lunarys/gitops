@@ -47,10 +47,10 @@ spec:
   #monitoring:
   #  enablePodMonitor: true  # TODO
 
-  # TODO: 
-  # affinity:
-  #   enablePodAntiAffinity: true
-  # topologySpreadConstraints:
+  affinity:
+    enablePodAntiAffinity: true
+    podAntiAffinityType: {{ if .Values.strictAntiAffinity }}required{{ else }}preferred{{ end }}
+
 
   plugins:
     - name: barman-cloud.cloudnative-pg.io
