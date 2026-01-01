@@ -37,11 +37,11 @@
   {{- /* Find optional settings */ -}}
   {{- $settings := $defaultSettings }}
   {{- if hasKey $files "settings.yaml" }}
-    {{- $settings = merge (index $files "settings.yaml") $settings }}
+    {{- $settings = mergeOverwrite (dict) $settings (index $files "settings.yaml") }}
   {{- end }}
   {{- if hasKey $files "app.yaml" }}
     {{- $appSettings := index $files "app.yaml" "settings" | default (dict) }}
-    {{- $settings = merge $appSettings $settings }}
+    {{- $settings = mergeOverwrite (dict) $settings $appSettings }}
   {{- end }}
   {{- /* Create a project entry in the apps dictionary */ -}}
   {{- $projectApps := dict -}}
@@ -58,7 +58,7 @@
       {{- /* Get app-specific settings and merge them with the project settings */ -}}
       {{- if hasKey $files "Chart-settings.yaml" }}
         {{- $chartSettings := index $files "Chart-settings.yaml" | default (dict) }}
-        {{- $settings = merge $chartSettings $defaultSettings $settings }}
+        {{- $settings = mergeOverwrite (dict) $settings $defaultSettings $chartSettings }}
       {{- end }}
       {{- /* The files for Chart.yaml apps can be prefixed with Chart-, check values.yaml if this is the case */ -}}
       {{- if hasKey $files "Chart-values.yaml" }}
@@ -74,7 +74,7 @@
       {{- end }}
       {{- /* Get app-specific settings and merge them with the project settings */ -}}
       {{- $appSettings := index $files $fileName "settings" | default (dict) }}
-      {{- $settings := merge $appSettings $defaultSettings $settings }}
+      {{- $settings := mergeOverwrite (dict) $settings $defaultSettings $appSettings }}
     {{- end }}
     {{- /* In order to facilitate processing in later steps, strip the prefix from filenames and filter for files that have the prefix */ -}}
     {{- if $prefix }}
