@@ -35,17 +35,17 @@
     {{- end }}
   {{- end }}
   {{- /* Find optional settings */ -}}
-  {{- $settings := $defaultSettings }}
+  {{- $projectSettings := $defaultSettings }}
   {{- if hasKey $files "settings.yaml" }}
-    {{- $settings = mergeOverwrite (dict) $settings (index $files "settings.yaml") }}
+    {{- $projectSettings = mergeOverwrite (dict) $projectSettings (index $files "settings.yaml") }}
   {{- end }}
   {{- if hasKey $files "app.yaml" }}
     {{- $appSettings := index $files "app.yaml" "settings" | default (dict) }}
-    {{- $settings = mergeOverwrite (dict) $settings $appSettings }}
+    {{- $projectSettings = mergeOverwrite (dict) $projectSettings $appSettings }}
   {{- end }}
   {{- /* Create a project entry in the apps dictionary */ -}}
   {{- $projectApps := dict -}}
-  {{- $project := dict "name" $group "dir" $projectDir "settings" $settings "apps" $projectApps }}
+  {{- $project := dict "name" $group "dir" $projectDir "settings" $projectSettings "apps" $projectApps }}
   {{- $_ := set $apps $group $project }}
   {{- /* Now add each application in the group to the projectApps dictionary */ -}}
   {{- range $path := $paths }}
@@ -53,12 +53,13 @@
     {{- $name := $group }}
     {{- $prefix := "" }}
     {{- $appFiles := dict }}
+    {{- $settings := dict -}}
     {{- /* Chart.yaml variant is simpler: Prefix may only (optionally) be Chart- and there may be a Chart-settings.yaml file */ -}}
     {{- if eq $fileName "Chart.yaml" }}
       {{- /* Get app-specific settings and merge them with the project settings */ -}}
       {{- if hasKey $files "Chart-settings.yaml" }}
         {{- $chartSettings := index $files "Chart-settings.yaml" | default (dict) }}
-        {{- $settings = mergeOverwrite (dict) $settings $defaultSettings $chartSettings }}
+        {{- $settings = mergeOverwrite (dict) $projectSettings $defaultSettings $chartSettings }}
       {{- end }}
       {{- /* The files for Chart.yaml apps can be prefixed with Chart-, check values.yaml if this is the case */ -}}
       {{- if hasKey $files "Chart-values.yaml" }}
@@ -74,7 +75,7 @@
       {{- end }}
       {{- /* Get app-specific settings and merge them with the project settings */ -}}
       {{- $appSettings := index $files $fileName "settings" | default (dict) }}
-      {{- $settings := mergeOverwrite (dict) $settings $defaultSettings $appSettings }}
+      {{- $settings = mergeOverwrite (dict) $projectSettings $defaultSettings $appSettings }}
     {{- end }}
     {{- /* In order to facilitate processing in later steps, strip the prefix from filenames and filter for files that have the prefix */ -}}
     {{- if $prefix }}
