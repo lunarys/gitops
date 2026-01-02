@@ -6,9 +6,7 @@ preset:
   namespaceIsolation: false
   ingress:
     fromIngressController: false
-    rules:
-      - fromEntities:
-          - kube-apiserver
+    fromKubeApi: true
   egress:
     toKubeApi: true
     rules:

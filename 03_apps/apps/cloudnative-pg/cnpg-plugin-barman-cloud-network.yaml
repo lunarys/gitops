@@ -6,9 +6,8 @@ preset:
   namespaceIsolation: false
   ingress:
     fromIngressController: false
+    fromKubeApi: true
     rules:
-      - fromEntities:
-          - kube-apiserver
       - fromEndpoints:
           - matchLabels:
               app.kubernetes.io/instance: cloudnative-pg-operator

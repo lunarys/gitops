@@ -1,8 +1,6 @@
 preset:
   namespaceIsolation: true
   ingress:
-    rules:
-      - fromEntities:
-          - kube-apiserver
+    fromKubeApi: true
   egress:
     toKubeApi: true
