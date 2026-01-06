@@ -79,8 +79,10 @@ networkpolicy:
       toLocalSubnet: true
       toNamespaces:
         - mosquitto
+      toNetworkLabels:
+        - custom.network/homeassistant-integrated
 
-      
+
 podSecurityContext:
   runAsNonRoot: false  # home-assistant requires root for the s6 init thingy
   fsGroup: 2000

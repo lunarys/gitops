@@ -6,10 +6,11 @@ preset:
   namespaceIsolation: true
   ingress:
     # access the database for application workloads
-    fromNamespaces:
-      - nodered
+    fromNetworkLabels:
+      - label: custom.network/postgresdb
+        ports:
+          - 5432
     fromIngressController: false
-      # TODO: just introduce a label for "allowed clients" aka dbusers?
   egress:
     toKubeApi: true
     rules:

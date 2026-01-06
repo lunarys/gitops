@@ -101,5 +101,8 @@ networkpolicy:
   enabled: true
   preset:
     namespaceIsolation: true
+    ingress:
+      fromNetworkLabels:
+        - custom.network/jellyfin-automation
     egress:
       toWorld: true  # needs to load metadata

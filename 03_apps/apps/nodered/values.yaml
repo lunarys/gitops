@@ -90,7 +90,8 @@ nodered:
       egress:
         toWorld: true
         toLocalSubnet: true
-        # TODO: maybe just use external IP with DNS?
+        toNetworkLabels:
+          - custom.network/postgresdb
         toNamespaces: 
           - home-assistant
           - teamspeak
