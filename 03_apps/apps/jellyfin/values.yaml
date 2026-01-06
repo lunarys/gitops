@@ -103,6 +103,6 @@ networkpolicy:
     namespaceIsolation: true
     ingress:
       fromNetworkLabels:
-        - custom.network/jellyfin-automation
+        - custom.network/jellyfin-tools
     egress:
       toWorld: true  # needs to load metadata
