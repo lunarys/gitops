@@ -10,7 +10,7 @@ ingress:
 
 image:
   name: homeassistant/home-assistant
-  tag: 2025.11.3
+  tag: 2025.12.5
 
 service:
   enabled: false
