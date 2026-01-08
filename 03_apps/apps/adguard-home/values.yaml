@@ -64,8 +64,10 @@ networkpolicy:
     namespaceIsolation: true
     ingress:
       fromLocalSubnet: true
-      fromCluster: true
+      fromCluster: false  # not necessary, dns resolution is done via the router
       fromNamespace: adguard-sync
+      fromNetworkLabels:
+        - custom.network/homeassistant-integrated
     egress:
       toWorld: true
 
