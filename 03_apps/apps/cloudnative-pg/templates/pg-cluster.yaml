@@ -1,3 +1,4 @@
+# TODO? https://github.com/cloudnative-pg/charts/tree/main/charts/cluster
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
@@ -7,6 +8,7 @@ metadata:
     app.kubernetes.io/name: postgresdb
     app.kubernetes.io/instance: {{ include "postgresdb.cnpg.clusterName" . }}
     app.kubernetes.io/version: {{ .Values.clusterGeneration | quote }}
+    custom.network/postgresdb: ingress
     
 spec:
   # Documentation: https://cloudnative-pg.io/documentation/1.27/cloudnative-pg.v1/#postgresql-cnpg-io-v1-ClusterSpec
