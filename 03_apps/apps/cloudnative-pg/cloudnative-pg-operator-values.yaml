@@ -2,3 +2,5 @@
 config:
   clusterWide: false  # can be disabled if only running a single database in the namespace
 
+  data:
+    INHERITED_LABELS: "custom.network/*"
