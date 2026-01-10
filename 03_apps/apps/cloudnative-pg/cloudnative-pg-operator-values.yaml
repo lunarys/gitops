@@ -1,4 +1,4 @@
 # https://github.com/cloudnative-pg/charts/tree/main/charts/cloudnative-pg
-cloudnative-pg:
-  config:
-    clusterWide: false  # can be disabled if only running a single database in the namespace
+config:
+  clusterWide: false  # can be disabled if only running a single database in the namespace
+
