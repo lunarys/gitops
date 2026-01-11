@@ -14,11 +14,9 @@ preset:
   egress:
     toKubeApi: true
     rules:
-      # s3 host
-      # TODO: improve, does not update with the setting from values.yaml
-      - toCIDRSet:
-          - cidr: 10.0.1.21/32
+      - toFQDNs:
+          - matchName: s3.svc.elda
         toPorts:
             - ports:
-                - port: "3900"
+                - port: "80"
                   protocol: TCP
