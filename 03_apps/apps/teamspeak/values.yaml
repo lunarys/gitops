@@ -25,6 +25,10 @@ networkpolicy:
     ingress:
       fromWorld: true
       fromNamespace: "nodered"
+    egress:
+      toFQDNs:
+        # revocation list download, TODO: just port 443 would be sufficient
+        - ts3services.teamspeak.com
 
 longhornstorage:
   volumes:
