@@ -100,7 +100,10 @@ spec:
     automated:
       enabled: {{ .settings.settings.autoSync }}
       selfHeal: {{ .settings.settings.selfHeal }}
+      {{- if .settings.settings.prune }}
+      {{- /* This setting is excluded when disabled, as it leads to OutOfSync after a Sync of the Application resources for some reason */ -}}
       prune: {{ .settings.settings.prune }}
+      {{- end }}
     syncOptions:
       - CreateNamespace=true
       {{- if hasKey .settings.settings "serverSideApply" }}

@@ -22,6 +22,7 @@ spec:
     automated:
       enabled: false
       selfHeal: true
-      prune: false
+      # This setting is excluded when disabled, as it leads to OutOfSync after a Sync of the Application resources for some reason
+      #prune: false
     syncOptions:
       - CreateNamespace=true
