@@ -1,4 +1,5 @@
 # It creates a clusterrole and clusterrolebinding, but should only run in the cloudnative-pg namespace
 #  -> create rbac separately
+# TODO: could be removed when the included rbac is less permissive / supports namespaced install
 rbac:
   create: false
