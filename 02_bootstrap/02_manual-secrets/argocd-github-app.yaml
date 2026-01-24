@@ -1,0 +1,17 @@
+# https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/#github-app-credential
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-app-argocd
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repo-creds
+type: Opaque
+stringData:
+  name: github-app-argocd
+  url: https://github.com/lunarys
+  githubAppID: ""
+  githubAppInstallationID: ""
+  githubAppPrivateKey: |
+    ---
+    enter your private key

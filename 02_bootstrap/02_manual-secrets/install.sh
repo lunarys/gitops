@@ -72,18 +72,44 @@ for file in "${FILES[@]}"; do
 	for key in $(echo "$manifest" | yq ".stringData | keys[]"); do
 		value="$(echo "$manifest" | yq ".stringData.$key")"
 
-		if [ -z "$value" ]; then
-			echo "Enter value for '$key':"
+		# Detect if value is multiline (contains a newline)
+		if [[ "$value" == *$'\n'* ]]; then
+			is_multiline=1
 		else
-			echo "Enter value for '$key' (default='$value'):"
+			is_multiline=0
 		fi
 
-		read -r newValue
-		#if [ -z "$newValue" ]; then
-		#	echo no value
-		#else
-		#	echo value $newValue
-		#fi
+		if [ -z "$value" ]; then
+			if [ $is_multiline -eq 1 ]; then
+				echo "Enter value for '$key' (multiline, finish with Ctrl-D):"
+			else
+				echo "Enter value for '$key':"
+			fi
+		else
+			if [ $is_multiline -eq 1 ]; then
+				echo "Enter value for '$key' (default shown below, multiline, finish with Ctrl-D):"
+				echo "-----"
+				echo "$value"
+				echo "-----"
+			else
+				echo "Enter value for '$key' (default='$value'):"
+			fi
+		fi
+
+		newValue=""
+		if [ $is_multiline -eq 1 ]; then
+			# Read multiline input (Ctrl-D to finish)
+			input_lines=()
+			while IFS= read -r line; do
+				input_lines+=("$line")
+			done
+			if [ ${#input_lines[@]} -gt 0 ]; then
+				newValue=$(printf "%s\n" "${input_lines[@]}")
+			fi
+		else
+			# Read single line
+			IFS= read -r newValue
+		fi
 
 		if [ -n "$newValue" ]; then
 			# Use a temporary file to safely pass the value to yq
