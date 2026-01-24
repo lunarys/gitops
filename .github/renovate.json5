@@ -1,0 +1,15 @@
+{
+    ignorePaths: [
+        ".archive/**"
+    ],
+    customManagers: [
+        {
+            customType: "jsonata",
+            fileFormat: "yaml",
+            managerFilePatterns: ["**/k0s-*-cluster.yaml"],
+            matchStrings: ["spec.k0s.{\"version\": version}"],
+            depNameTemplate: "k0sproject/k0s"
+            datasourceTemplate: "github-releases"
+        }
+    ]
+}
