@@ -3,6 +3,3 @@ targetRevision: main
 #targetSecretsFile: secrets-test.yaml
 #targetResourcesDir: resources-test
 environment: test
-
-mainRepo: https://github.com/lunarys/gitops.git
-privateRepo: https://github.com/lunarys/gitops-private.git
