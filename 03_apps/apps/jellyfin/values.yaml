@@ -5,7 +5,7 @@ ingress:
 
 image:
   name: ghcr.io/jellyfin/jellyfin
-  tag: 10.11.4
+  tag: 10.11.6
 
 service:
   targetPort: 8096
