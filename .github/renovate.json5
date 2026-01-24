@@ -10,6 +10,16 @@
             matchStrings: ["spec.k0s.{\"currentValue\": version}"],
             depNameTemplate: "k0sproject/k0s",
             datasourceTemplate: "github-releases"
+        },
+        {
+            customType: "jsonata",
+            fileFormat: "yaml",
+            managerFilePatterns: ["/(^|/)values\\.ya?ml$/"],
+            matchStrings: [
+                "image.{\"depName\": name, \"currentValue\": tag}",
+                "*.image.{\"depName\": name, \"currentValue\": tag}"
+            ],
+            datasourceTemplate: "docker"
         }
     ]
 }
