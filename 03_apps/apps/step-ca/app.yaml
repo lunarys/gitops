@@ -1,0 +1,4 @@
+helm:
+  chart: step-certificates
+  version: 1.29.0
+  repo: https://smallstep.github.io/helm-charts

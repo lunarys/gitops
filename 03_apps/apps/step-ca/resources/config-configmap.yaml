@@ -1,0 +1,70 @@
+# Step-CA Configuration ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: step-certificates-config
+data:
+  ca.json: |
+    {
+      "root": "/home/step/certs/root_ca.crt",
+      "federatedRoots": [],
+      "crt": "/home/step/certs/intermediate_ca.crt",
+      "key": "/home/step/secrets/intermediate_ca_key",
+      "address": ":9000",
+      "insecureAddress": "",
+      "dnsNames": [
+        "step-ca.svc.elda",
+        "ca.svc.elda",
+        "step-certificates.step-ca.svc.cluster.local"
+      ],
+      "logger": {
+        "format": "json"
+      },
+      "db": {
+        "type": "badgerv2",
+        "dataSource": "/home/step/db"
+      },
+      "authority": {
+        "enableAdmin": false,
+        "provisioners": [
+          {
+            "type": "JWK",
+            "name": "ju@step-ca.svc.elda",
+            "key": {
+              "use": "sig",
+              "kty": "EC",
+              "kid": "WZGjzBJ0-IpDPml8_GAPfF1GeXqHSogjCr7UxMWPjLs",
+              "crv": "P-256",
+              "alg": "ES256",
+              "x": "QAznOiFZD3DjUtsJw1pnEDVIe2I43GxLQ-GyNM6rspw",
+              "y": "trQDJDTcN_zzeuCJ_cQfA5MY41P2_xtE7vKe6xIhgZE"
+            },
+            "encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoiMGJhZExCaU1INXR0Z2xza3YxSFRQUSJ9.eHxUcguXnosWNNO7yl4r5mHHtTZZnL0dsXnLr-Rumrq1osoKzi-qsA.Xr0uSMyvqqZTp9L2.Ytw33D4u45r5_jsFtxSf2cyK6cCeLr8hDcLQmRA0Rr8JxgCWVy_zW5WnGJ0nbRqKlneAdqFyKA_UQ6gQVWaP1KGQOr6CRErZXFybcAuMq2yDx3E07IJExJoAztQ5C6kd6uEzweIlP87Xo6JnDdWlta2McePI7gDpMix73VmXBWLBYwfSgJp6jrZO46EcLObJc8qLD2rQtNmXG8gta4D5XBEptC5LpUpM4eJ9OaSgZOaFX6NfGhbkcH26xOCAjtwNJ-N5lr7BalvsxrFTuJWO9MFJCRiXLGFqSuqzjTSFKCKih93M665BSapWen1Mq79T6NGGfFhq8fcYIb_jL9o.jpA6ygXCp9XMD-J3y4epIg"
+          }
+        ],
+        "policy": {
+          "x509": {
+            "allow": {
+              "dns": ["*.elda", "*.local"]
+            },
+            "allowWildcardNames": false
+          }
+        }
+      },
+      "tls": {
+        "cipherSuites": [
+          "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+          "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+        ],
+        "minVersion": 1.2,
+        "maxVersion": 1.3,
+        "renegotiation": false
+      }
+    }
+  defaults.json: |
+    {
+      "ca-url": "https://step-ca.svc.elda",
+      "ca-config": "/home/step/config/ca.json",
+      "fingerprint": "78591edc0fb2ccc688560bf65f3e17e233db2d3c1586c9571fd72e86b5c340a5",
+      "root": "/home/step/certs/root_ca.crt"
+    }

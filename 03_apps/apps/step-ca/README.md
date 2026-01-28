@@ -1,0 +1,2 @@
+- https://github.com/smallstep/helm-charts
+- https://smallstep.github.io/helm-charts/
