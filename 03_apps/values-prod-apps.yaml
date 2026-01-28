@@ -5,6 +5,7 @@ enabled:
   - smb-driver
   - local-path-provisioner
   - keda
+  - step-ca
 
   - adguard-home
   - adguard-sync
