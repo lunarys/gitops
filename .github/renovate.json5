@@ -14,7 +14,7 @@
         {
             customType: "jsonata",
             fileFormat: "yaml",
-            managerFilePatterns: ["/(^|/)values\\.ya?ml$/"],
+            managerFilePatterns: ["/(^|/)(.*-)?values(-prod|-test)?\\.ya?ml$/"],
             matchStrings: [
                 "image.{\"depName\": name, \"currentValue\": tag}",
                 "*.image.{\"depName\": name, \"currentValue\": tag}"
