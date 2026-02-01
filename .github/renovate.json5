@@ -20,6 +20,34 @@
                 "*.image.{\"depName\": name, \"currentValue\": tag}"
             ],
             datasourceTemplate: "docker"
+        },
+        {
+            customType: "jsonata",
+            fileFormat: "yaml",
+            managerFilePatterns: ["/(.*-)?app.yaml$/"],
+            matchStrings: [
+                "helm.{\"depName\": chart, \"currentValue\": version, \"registryUrl\": repo}"
+            ],
+            datasourceTemplate: "helm",
+            registryUrlTemplate: "oci://registry.gitlab.com/juulun/helm-charts/charts"
+        },
+        {
+            customType: "jsonata",
+            fileFormat: "yaml",
+            managerFilePatterns: ["03_apps/values.yaml"],
+            matchStrings: [
+                "{\"depName\": secretsChart, \"currentValue\": secretsChartVersion, \"registryUrl\": mainHelmRepo}"
+            ],
+            datasourceTemplate: "helm"
+        },
+        {
+            customType: "jsonata",
+            fileFormat: "yaml",
+            managerFilePatterns: ["03_apps/values.yaml"],
+            matchStrings: [
+                "{\"depName\": networkPolicyChart, \"currentValue\": networkPolicyChartVersion, \"registryUrl\": mainHelmRepo}"
+            ],
+            datasourceTemplate: "helm"
         }
     ]
 }
