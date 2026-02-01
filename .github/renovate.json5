@@ -26,10 +26,9 @@
             fileFormat: "yaml",
             managerFilePatterns: ["/(.*-)?app.yaml$/"],
             matchStrings: [
-                "helm.{\"custom_chart\": chart, \"currentValue\": version, \"custom_repo\": repo}"
+                "helm.{ 'packageName': (($exists(repo) and repo) ? repo : 'registry.gitlab.com/juulun/helm-charts/charts') & '/' & chart, 'currentValue': version }"
             ],
-            datasourceTemplate: "helm",
-            packageNameTemplate: "{{#if custom_repo}}{{custom_repo}}{{else}}registry.gitlab.com/juulun/helm-charts/charts{{/if}}/{{custom_chart}}"
+            datasourceTemplate: "helm"
         },
         {
             customType: "jsonata",
