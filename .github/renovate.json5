@@ -26,10 +26,10 @@
             fileFormat: "yaml",
             managerFilePatterns: ["/(.*-)?app.yaml$/"],
             matchStrings: [
-                "helm.{\"depName\": chart, \"currentValue\": version, \"registryUrl\": repo}"
+                "helm.{\"custom_chart\": chart, \"currentValue\": version, \"custom_repo\": repo}"
             ],
             datasourceTemplate: "helm",
-            registryUrlTemplate: "oci://registry.gitlab.com/juulun/helm-charts/charts"
+            packageNameTemplate: "{{default custom_repo 'registry.gitlab.com/juulun/helm-charts/charts'}}/{{custom_chart}}"
         },
         {
             customType: "jsonata",
