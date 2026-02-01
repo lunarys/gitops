@@ -33,7 +33,7 @@
               'registryUrl': ( \
                 $exists(repo) and $type(repo)='string' and $match(repo, /^https?:\\/\\//) \
                   ? repo \
-                  : ('oci://' & $replace(repo, /^oci:\\/\\//, '')) \
+                  : undefined \
               ), \
               'packageName': ( \
                 $exists(repo) and $type(repo)='string' and $match(repo, /^https?:\\/\\//) \
