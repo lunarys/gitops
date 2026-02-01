@@ -22,13 +22,26 @@
             datasourceTemplate: "docker"
         },
         {
-            customType: "jsonata",
-            fileFormat: "yaml",
-            managerFilePatterns: ["/(.*-)?app.yaml$/"],
-            matchStrings: [
-                "helm.{ 'packageName': (($exists(repo) and repo) ? repo : 'registry.gitlab.com/juulun/helm-charts/charts') & '/' & chart, 'currentValue': version }"
-            ],
-            datasourceTemplate: "helm"
+          customType: "jsonata",
+          fileFormat: "yaml",
+          managerFilePatterns: ["/(.*-)?app.yaml$/"],
+          matchStrings: [
+            "helm.{ \
+              'datasource': 'helm', \
+              'depName': chart, \
+              'currentValue': version, \
+              'registryUrl': ( \
+                $exists(repo) and ($startsWith(repo,'http://') or $startsWith(repo,'https://')) \
+                  ? repo \
+                  : ('oci://' & $replace(repo, /^oci:\\/\\//, '')) \
+              ), \
+              'packageName': ( \
+                $exists(repo) and not($startsWith(repo,'http://') or $startsWith(repo,'https://')) \
+                  ? ($replace(repo, /^oci:\\/\\//, '') & '/' & chart) \
+                  : chart \
+              ) \
+            }"
+          ]
         },
         {
             customType: "jsonata",
