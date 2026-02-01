@@ -24,7 +24,7 @@
         {
           customType: "jsonata",
           fileFormat: "yaml",
-          managerFilePatterns: ["/(.*-)?app.yaml$/"],
+          managerFilePatterns: ["//apps/.+/(.*-)?app.yaml$/"],
           matchStrings: [
             "helm.{ \
               'datasource': 'helm', \
