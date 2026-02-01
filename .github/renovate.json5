@@ -36,18 +36,20 @@
             fileFormat: "yaml",
             managerFilePatterns: ["03_apps/values.yaml"],
             matchStrings: [
-                "{\"depName\": secretsChart, \"currentValue\": secretsChartVersion, \"registryUrl\": mainHelmRepo}"
+                "{\"custom_chart\": secretsChart, \"currentValue\": secretsChartVersion, \"custom_repo\": mainHelmRepo}"
             ],
-            datasourceTemplate: "helm"
+            datasourceTemplate: "helm",
+            packageNameTemplate: "{{custom_repo}}/{{custom_chart}}"
         },
         {
             customType: "jsonata",
             fileFormat: "yaml",
             managerFilePatterns: ["03_apps/values.yaml"],
             matchStrings: [
-                "{\"depName\": networkPolicyChart, \"currentValue\": networkPolicyChartVersion, \"registryUrl\": mainHelmRepo}"
+                "{\"custom_chart\": networkPolicyChart, \"currentValue\": networkPolicyChartVersion, \"custom_repo\": mainHelmRepo}"
             ],
-            datasourceTemplate: "helm"
+            datasourceTemplate: "helm",
+            packageNameTemplate: "{{custom_repo}}/{{custom_chart}}"
         }
     ]
 }
