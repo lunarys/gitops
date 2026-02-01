@@ -48,7 +48,7 @@
             fileFormat: "yaml",
             managerFilePatterns: ["03_apps/values.yaml"],
             matchStrings: [
-                "{\"currentValue\": secretsChartVersion, \"packageName\": mainHelmRepo & '/' & secretsChart}"
+                "{\"currentValue\": secretsChartVersion, \"packageName\": mainHelmRepo & '/' & secretsChart, 'depName': secretsChart}"
             ],
             datasourceTemplate: "helm"
         },
@@ -57,7 +57,7 @@
             fileFormat: "yaml",
             managerFilePatterns: ["03_apps/values.yaml"],
             matchStrings: [
-                "{\"currentValue\": networkPolicyChartVersion, \"packageName\": mainHelmRepo & '/' & networkPolicyChart}"
+                "{\"currentValue\": networkPolicyChartVersion, \"packageName\": mainHelmRepo & '/' & networkPolicyChart, 'depName': networkPolicyChart}"
             ],
             datasourceTemplate: "helm"
         }
