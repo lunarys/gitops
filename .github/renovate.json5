@@ -29,7 +29,7 @@
                 "helm.{\"custom_chart\": chart, \"currentValue\": version, \"custom_repo\": repo}"
             ],
             datasourceTemplate: "helm",
-            packageNameTemplate: "{{default custom_repo \"registry.gitlab.com/juulun/helm-charts/charts\"}}/{{custom_chart}}"
+            packageNameTemplate: "{{#if custom_repo}}{{custom_repo}}{{else}}registry.gitlab.com/juulun/helm-charts/charts{{/if}}/{{custom_chart}}"
         },
         {
             customType: "jsonata",
