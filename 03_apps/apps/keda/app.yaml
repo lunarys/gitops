@@ -1,6 +1,6 @@
 helm:
   chart: keda
-  version: 2.18.1
+  version: 2.19.0
   repo: https://kedacore.github.io/charts
 
 settings:
