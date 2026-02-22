@@ -1,0 +1,3 @@
+defaultCluster:
+  namespace: cloudnative-pg
+  selector: app.kubernetes.io/name=postgresdb

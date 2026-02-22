@@ -1,0 +1,15 @@
+preset:
+  name: networkpolicy-user-operator
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: postgresdb-user-operator
+  namespaceIsolation: false
+  ingress:
+    fromIngressController: false
+    fromKubeApi: true
+  egress:
+    toKubeApi: true
+    toNetworkLabels:
+      - label: custom.network/postgresdb
+        ports:
+          - 5432

@@ -11,6 +11,11 @@ preset:
         ports:
           - 5432
     fromIngressController: false
+    rules:
+      - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/instance: postgresdb-user-operator
+            io.kubernetes.pod.namespace: cloudnative-pg
   egress:
     toKubeApi: true
     rules:
