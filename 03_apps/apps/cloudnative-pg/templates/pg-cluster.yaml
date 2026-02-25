@@ -88,4 +88,5 @@ spec:
       # which will look something like 10-243-0-237.pgadmin.cloudnative-pg.svc.cluster.local
       # so the prefix-based DNS rule works for this case
       - "host all postgres .pgadmin.cloudnative-pg.svc.cluster.local scram-sha-256"
+      - "host all postgres .postgresdb-user-operator.cloudnative-pg.svc.cluster.local scram-sha-256"
       - "host all postgres all reject"
