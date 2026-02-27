@@ -1,0 +1,7 @@
+ui:
+  ingress:
+    hosts:
+      - host: kyverno.test.svc.elda
+        paths:
+          - path: /
+            pathType: Prefix

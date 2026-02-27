@@ -11,6 +11,7 @@ enabled:
   - adguard-sync
 
   - cert-manager
+  - kyverno
   - cloudnative-pg
 
   - home-assistant

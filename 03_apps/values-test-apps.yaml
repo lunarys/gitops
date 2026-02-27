@@ -8,6 +8,7 @@ enabled:
 
   - adguard-home
   - cert-manager
+  - kyverno
 
   - cloudnative-pg
 

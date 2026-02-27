@@ -1,0 +1,16 @@
+# https://kyverno.io/docs/installation/methods/
+# https://github.com/kyverno/kyverno/tree/main/charts/kyverno
+
+admissionController:
+  replicas: 1  # single replica is fine for homelab
+
+backgroundController:
+  enabled: true  # needed for background scans (audit mode PolicyReports)
+  replicas: 1
+
+reportsController:
+  enabled: true  # generates PolicyReport resources
+  replicas: 1
+
+cleanupController:
+  enabled: false

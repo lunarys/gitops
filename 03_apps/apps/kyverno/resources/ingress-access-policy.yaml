@@ -1,0 +1,41 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-ingress-access-annotation
+  annotations:
+    policies.kyverno.io/title: Require Ingress Access Annotation
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >-
+      Every Ingress must either restrict access to the internal network via the IP allowlist
+      middleware, or be explicitly annotated as intentionally externally accessible.
+      Annotate internal-only ingresses with the allowlist middleware:
+        traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd"
+      Annotate intentionally public ingresses with:
+        custom.security/external-access: "true"
+spec:
+  # Start in Audit mode to identify existing violations without blocking deployments.
+  # Switch to Enforce once all existing ingresses are compliant.
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: check-ingress-access-control
+      match:
+        any:
+          - resources:
+              kinds:
+                - Ingress
+      validate:
+        message: >-
+          Ingress '{{ request.object.metadata.name }}' in namespace
+          '{{ request.object.metadata.namespace }}' must either have the IP allowlist middleware
+          annotation (traefik.ingress.kubernetes.io/router.middlewares containing
+          'common-internal-access-allowlist') or be explicitly annotated as external
+          with 'custom.security/external-access: "true"'.
+        anyPattern:
+          - metadata:
+              annotations:
+                traefik.ingress.kubernetes.io/router.middlewares: "*common-internal-access-allowlist*"
+          - metadata:
+              annotations:
+                custom.security/external-access: "true"

@@ -1,0 +1,8 @@
+preset:
+  namespaceIsolation: true
+  ingress:
+    # kube-apiserver calls Kyverno webhooks
+    fromKubeApi: true
+  egress:
+    # Kyverno watches cluster resources for background scanning
+    toKubeApi: true

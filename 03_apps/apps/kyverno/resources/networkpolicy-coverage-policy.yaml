@@ -1,0 +1,44 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-namespace-networkpolicy
+  annotations:
+    policies.kyverno.io/title: Require Namespace NetworkPolicy
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Every non-system namespace must have at least one CiliumNetworkPolicy
+      to ensure network traffic is explicitly controlled.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: check-cilium-networkpolicy-coverage
+      match:
+        any:
+          - resources:
+              kinds:
+                - Namespace
+      exclude:
+        any:
+          - resources:
+              names:
+                - kube-system
+                - kube-public
+                - kube-node-lease
+                - default
+      context:
+        - name: policyCount
+          apiCall:
+            urlPath: "/apis/cilium.io/v2/namespaces/{{request.object.metadata.name}}/ciliumnetworkpolicies"
+            jmesPath: "items | length(@)"
+      validate:
+        message: >-
+          Namespace '{{request.object.metadata.name}}' has no CiliumNetworkPolicy.
+          Add a network.yaml file to the app directory to define network access rules.
+        deny:
+          conditions:
+            all:
+              - key: "{{policyCount}}"
+                operator: LessThan
+                value: 1

@@ -1,0 +1,15 @@
+# https://github.com/kyverno/policy-reporter/tree/main/charts/policy-reporter
+
+ui:
+  enabled: true
+
+  ingress:
+    enabled: true
+    className: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-common-internal-access-allowlist@kubernetescrd
+    hosts:
+      - host: <overwrite>
+        paths:
+          - path: /
+            pathType: Prefix
