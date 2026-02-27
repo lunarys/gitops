@@ -42,3 +42,6 @@ spec:
               - key: "{{policyCount}}"
                 operator: LessThan
                 value: 1
+
+# TODO: maybe should be extended to make sure Deployments are covered by the Policies
+# -> https://kyverno.io/policies/other/require-netpol/require-netpol/
