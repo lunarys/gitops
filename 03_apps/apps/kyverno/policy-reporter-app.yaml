@@ -1,4 +1,5 @@
 helm:
   chart: policy-reporter
   version: 3.7.2
-  repo: oci://ghcr.io/kyverno/charts
+  #repo: oci://ghcr.io/kyverno/charts
+  repo: ghcr.io/kyverno/charts
