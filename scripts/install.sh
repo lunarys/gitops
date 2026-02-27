@@ -6,8 +6,10 @@ PPD="$(pwd)"
 # Default values
 DIRECTORY="."
 ENVIRONMENT=""
+PREFIX=""
 DRY_RUN=false
 TEMPLATE_ONLY=false
+UNINSTALL=false
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -18,6 +20,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     -e|--env|--environment)
       ENVIRONMENT="$2"
+      shift 2
+      ;;
+    -p|--prefix)
+      PREFIX="$2"
       shift 2
       ;;
     --dry-run)
@@ -33,13 +39,19 @@ while [[ $# -gt 0 ]]; do
       TEMPLATE_ONLY=true
       shift
       ;;
+    --uninstall)
+      UNINSTALL=true
+      shift
+      ;;
     -h|--help)
       echo "Usage: $0 [OPTIONS]"
       echo "Options:"
       echo "  -d, --directory DIR     Directory containing app.yaml (default: current directory)"
       echo "  -e, --env ENVIRONMENT   Environment (test, prod, dev, etc.)"
+      echo "  -p, --prefix PREFIX     App file prefix for multi-app directories (e.g. policy-reporter)"
       echo "      --dry-run           Print the helm command that would be run (don't execute)"
       echo "      --template          Render the Helm chart templates without installing"
+      echo "      --uninstall         Uninstall the Helm release"
       echo "  -h, --help              Show this help message"
       echo ""
       echo "Examples:"
@@ -48,6 +60,8 @@ while [[ $# -gt 0 ]]; do
       echo "  $0 --env test"
       echo "  $0 --dry-run --env test"
       echo "  $0 --template --env test"
+      echo "  $0 -d apps/kyverno --prefix policy-reporter --env prod"
+      echo "  $0 -d apps/kyverno --prefix policy-reporter --env prod --uninstall"
       exit 0
       ;;
     *)
@@ -58,17 +72,17 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-APPFILE="app.yaml"
+APPFILE="${PREFIX:+${PREFIX}-}app.yaml"
 
 cd "$DIRECTORY"
 
-# Check if environment is set, if not ask for confirmation
-if [ -z "$ENVIRONMENT" ]; then
+# Check if environment is set, if not ask for confirmation (skip for uninstall)
+if [ "$UNINSTALL" = false ] && [ -z "$ENVIRONMENT" ]; then
   echo "⚠️  No environment specified. This will install using only base values.yaml"
   echo "Available environment files in this directory:"
-  for values_file in values-*.yaml; do
+  for values_file in ${PREFIX:+${PREFIX}-}values-*.yaml; do
     if [ -f "$values_file" ]; then
-      env_name=$(basename "$values_file" .yaml | sed 's/values-//')
+      env_name=$(basename "$values_file" .yaml | sed "s/${PREFIX:+${PREFIX}-}values-//")
       echo "  - $env_name (use --env $env_name)"
     fi
   done
@@ -106,6 +120,8 @@ fi
 
 if [ "$ARGO_APPNAME" != "null" ] && [ -n "$ARGO_APPNAME" ]; then
   RELEASE_NAME="$ARGO_APPNAME"
+elif [ -n "$PREFIX" ]; then
+  RELEASE_NAME="$PREFIX"
 else
   RELEASE_NAME="$APPNAME"
 fi
@@ -114,13 +130,13 @@ fi
 values_file_option=""
 
 # Add base values.yaml if it exists
-if [ -f "$DIRECTORY/values.yaml" ]; then
-    values_file_option="-f values.yaml"
+if [ -f "$DIRECTORY/${PREFIX:+${PREFIX}-}values.yaml" ]; then
+    values_file_option="-f ${PREFIX:+${PREFIX}-}values.yaml"
 fi
 
 # Add environment-specific values file if specified
-if [ -n "$ENVIRONMENT" ] && [ -f "$DIRECTORY/values-${ENVIRONMENT}.yaml" ]; then
-    values_file_option="$values_file_option -f values-${ENVIRONMENT}.yaml"
+if [ -n "$ENVIRONMENT" ] && [ -f "$DIRECTORY/${PREFIX:+${PREFIX}-}values-${ENVIRONMENT}.yaml" ]; then
+    values_file_option="$values_file_option -f ${PREFIX:+${PREFIX}-}values-${ENVIRONMENT}.yaml"
 fi
 
 if [ "$EXPERIMENTAL_HELM_CHART" == "true" ]; then
@@ -137,8 +153,14 @@ if [ -n "$ENVIRONMENT" ]; then
   export KUBECONFIG="$HOME/.kube/config-$ENVIRONMENT"
 fi
 
-# --devel when beta chart
-if [ "$DRY_RUN" = true ]; then
+if [ "$UNINSTALL" = true ]; then
+  if [ "$DRY_RUN" = true ]; then
+    echo "Dry run mode - would execute:"
+    echo "helm uninstall \"$RELEASE_NAME\" --namespace \"$NAMESPACE\""
+  else
+    helm uninstall "$RELEASE_NAME" --namespace "$NAMESPACE"
+  fi
+elif [ "$DRY_RUN" = true ]; then
   echo "Dry run mode - would execute:"
   echo "helm install \"$RELEASE_NAME\" $location --version \"$VERSION\" --create-namespace --namespace \"$NAMESPACE\" $values_file_option"
 elif [ "$TEMPLATE_ONLY" = true ]; then
