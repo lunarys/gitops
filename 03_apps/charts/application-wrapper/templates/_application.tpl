@@ -46,7 +46,9 @@ spec:
     {{- end }}
       helm:
         #releaseName: ''
+        {{- if .settings.settings.skipCrds }}
         skipCrds: {{ .settings.settings.skipCrds }}
+        {{- end }}
         valueFiles:
           - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}values.yaml'
           {{- if include "apps-wrapper.targetValuesFile" .root }}
