@@ -21,7 +21,6 @@ env:
   #N8N_PROTOCOL: http
   #N8N_EDITOR_BASE_URL: http://n8n.svc.elda/
 
-  N8N_RUNNERS_ENABLED: "true"
   #NODE_ENV: production
   WEBHOOK_URL: http://n8n.svc.elda/
 
