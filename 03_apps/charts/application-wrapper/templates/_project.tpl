@@ -7,7 +7,7 @@ spec:
   description: Project for application {{ include "apps-wrapper.name" . }} 
   sourceRepos:
     # my generic app helm charts, including subcharts for secrets, smb-storage, ...
-    - {{ .root.Values.mainHelmRepo }}
+    - {{ .root.Values.mainHelmRepo | trimPrefix "oci://" }}
     # this repo, containing the wrapper chart or the values.yaml file 
     - {{ include "apps-wrapper.repoUrl" . }}
     {{- range $app, $settings := .settings.apps }}

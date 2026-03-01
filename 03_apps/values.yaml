@@ -5,7 +5,7 @@ mainRepo: https://github.com/lunarys/gitops.git
 privateRepo: https://github.com/lunarys/gitops-private.git
 privateRepoEnabled: true
 # -- The helm repository where my base helm charts are stored.
-mainHelmRepo: registry.gitlab.com/juulun/helm-charts/charts
+mainHelmRepo: oci://registry.gitlab.com/juulun/helm-charts/charts
 # -- The helm repository where the application-wrapper helm chart is stored.
 wrapperHelmRepo: oci://ghcr.io/lunarys
 

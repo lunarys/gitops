@@ -57,7 +57,7 @@ spec:
   {{- end }}
   {{- if hasKey .settings.files "secrets.yaml" }}
     # secrets
-    - repoURL: {{ .root.Values.mainHelmRepo }}
+    - repoURL: {{ .root.Values.mainHelmRepo | trimPrefix "oci://" }}
       chart: {{ .root.Values.secretsChart }}
       targetRevision: {{ index .settings.files "secrets.yaml" "version" | default .root.Values.secretsChartVersion }}
       helm:
@@ -70,7 +70,7 @@ spec:
   {{- end }}
   {{- if hasKey .settings.files "network.yaml" }}
     # network policy
-    - repoURL: {{ .root.Values.mainHelmRepo }}
+    - repoURL: {{ .root.Values.mainHelmRepo | trimPrefix "oci://" }}
       chart: {{ .root.Values.networkPolicyChart }}
       targetRevision: {{ index .settings.files "network.yaml" "version" | default .root.Values.networkPolicyChartVersion }}
       helm:
