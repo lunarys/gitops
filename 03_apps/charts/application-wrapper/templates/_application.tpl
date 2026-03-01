@@ -14,7 +14,9 @@ spec:
     # from Chart.yaml
     - helm:
         version: v3
+        {{- if .settings.settings.skipCrds }}
         skipCrds: {{ .settings.settings.skipCrds }}
+        {{- end }}
         valueFiles:
           - {{ $appFilesPrefix }}values.yaml
           {{- if include "apps-wrapper.targetValuesFile" .root }}
