@@ -22,7 +22,7 @@ spec:
       repoURL: {{ .Values.mainRepo }}
       targetRevision: {{ .Values.targetRevision }}
     # network policy
-    - repoURL: {{ .Values.mainHelmRepo }}
+    - repoURL: {{ .Values.mainHelmRepo | trimPrefix "oci://" }}
       chart: {{ .Values.networkPolicyChart }}
       targetRevision: {{ .Values.networkPolicyChartVersion }}
       helm:

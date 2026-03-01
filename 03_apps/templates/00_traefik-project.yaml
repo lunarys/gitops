@@ -6,7 +6,7 @@ spec:
   description: Traefik Project
   sourceRepos:
     - {{ .Values.mainRepo }}
-    - {{ .Values.mainHelmRepo }}
+    - {{ .Values.mainHelmRepo | trimPrefix "oci://" }}
   destinations:
     - namespace: traefik
       server: {{ .Values.server }}
