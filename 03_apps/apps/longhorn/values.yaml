@@ -11,6 +11,9 @@ longhorn:
     replicaAutoBalance: ""
     restoreVolumeRecurringJobs: ""
 
+    # Maximum number of engines that are allowed to concurrently upgrade on each node after Longhorn Manager is upgraded. When the value is "0", Longhorn does not automatically upgrade volume engines to the new default engine image version.
+    concurrentAutomaticEngineUpgradePerNodeLimit: 1
+
   persistence:
     defaultClassReplicaCount: 2
     defaultClass: false
