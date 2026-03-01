@@ -13,7 +13,7 @@ spec:
     {{- range $app, $settings := .settings.apps }}
       {{- if and (hasKey $settings.files "app.yaml") (index $settings.files "app.yaml" "helm" "repo") }}
     # repo from {{ .settings.prefix }}app.yaml
-    - {{ index $settings.files "app.yaml" "helm" "repo" }}
+    - {{ index $settings.files "app.yaml" "helm" "repo" | trimPrefix "oci://" }}
       {{- end }}
     {{- end }}
   destinations:

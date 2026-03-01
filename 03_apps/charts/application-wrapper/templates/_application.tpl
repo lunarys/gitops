@@ -32,7 +32,7 @@ spec:
     # from app.yaml
     {{- $defaultHelmRepo := .root.Values.mainHelmRepo }}
     {{- with (index .settings.files "app.yaml") }}
-    - repoURL: {{ .helm.repo | default $defaultHelmRepo | quote }}
+    - repoURL: {{ .helm.repo | default $defaultHelmRepo | trimPrefix "oci://" | quote }}
       {{- if .helm.chart }}
       chart: {{ .helm.chart | quote }}
       {{- else if .helm.path }}

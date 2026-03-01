@@ -1,7 +1,7 @@
 helm:
   chart: cert-manager
   version: v1.19.1
-  repo: quay.io/jetstack/charts  # omit oci:// for argocd compatibility
+  repo: oci://quay.io/jetstack/charts
 
 settings:
   # cert-manager places its leader-election roles and objects in the kube-system namespace

@@ -1,5 +1,4 @@
 helm:
-  # TODO: locally needs oci://, but this does not work with argo
-  repo: ghcr.io/rancher/local-path-provisioner/charts
+  repo: oci://ghcr.io/rancher/local-path-provisioner/charts
   chart: local-path-provisioner
   version: 0.0.33
