@@ -30,11 +30,6 @@ traefik:
     general:
       level: INFO
 
-  # TODO: not in production
-  globalArguments:
-    - "--api.dashboard=true"
-    - "--api.insecure=true"
-
   # https://community.traefik.io/t/traefik-ingress-not-getting-loadbalancer-ip/17445/3
   #additionalArguments:
   #  - "--providers.kubernetesingress.ingressendpoint.publishedservice=default/traefik"
