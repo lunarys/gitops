@@ -4,5 +4,6 @@ ingress:
 
 traefik:
   service:
-    externalIPs:
-      - 10.0.4.9
+    type: LoadBalancer
+    annotations:
+      lbipam.cilium.io/ips: "10.0.4.200"
