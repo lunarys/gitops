@@ -12,6 +12,7 @@ longhornstorage:
       pvName: ""  # TODO
 
 autoscale:
+  enabled: false  # does not work currently because the default networkpolicy of keda does not include this
   preset:
     switch:
       url: "http://nodered.svc.elda/autoscaler/pgadmin"
