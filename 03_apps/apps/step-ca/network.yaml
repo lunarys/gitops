@@ -18,5 +18,5 @@ preset:
             rules:
               http:
                 - method: GET
-                  path: ^/.well-known/acme-challenge/
+                  path: "^/.well-known/acme-challenge/.*"
 
