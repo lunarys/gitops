@@ -59,7 +59,7 @@ data:
         "policy": {
           "x509": {
             "allow": {
-              "dns": ["*.elda", "*.local"]
+              "dns": ["*.elda", "*.svc.elda", "*.test.svc.elda"]
             },
             "allowWildcardNames": false
           }
