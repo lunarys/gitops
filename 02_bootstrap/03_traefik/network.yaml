@@ -2,6 +2,20 @@ preset:
   namespaceIsolation: true
   ingress:
     fromLocalSubnet: true
+    rules:
+      - fromEndpoints:
+          - matchLabels:
+              io.kubernetes.pod.namespace: cert-manager  # certificate issuance: self-check for ACME challenge response
+          - matchLabels:
+              io.kubernetes.pod.namespace: step-ca  # certificate issuance: check for ACME challenge response
+        toPorts:
+          - ports:
+              - port: '8000'
+                protocol: TCP
+            rules:
+              http:
+                - method: GET
+                  path: "^/.well-known/acme-challenge/.*"
   egress:
     toCluster: true
     # sometimes requests from traefik to my dev machine are blocked e.g. on ports 57273 or 57269
