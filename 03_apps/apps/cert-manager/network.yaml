@@ -1,6 +1,8 @@
 preset:
   namespaceIsolation: true
   ingress:
+    fromIngressController: true # cert-manager needs to solve ACME challenges via traefik
     fromKubeApi: true
   egress:
     toKubeApi: true
+    toNamespace: step-ca  # cert-manager needs to call step-ca to initiate the ACME challenge

@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: step-ca-internal
+spec:
+  acme:
+    server: https://step-certificates.step-ca.svc.cluster.local/acme/elda/directory
+    # base64-encoded root CA PEM from certs-configmap.yaml root_ca.crt
+    # generate with: 
+    #   - kubectl get cm step-certificates-certs -n step-ca -o jsonpath='{.data.root_ca\.crt}' | base64 -w0
+    #  or
+    #   -  yq '.data."root_ca.crt"' resources/certs-configmap.yaml | base64 -w0
+    caBundle: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJ3ekNDQVdxZ0F3SUJBZ0lSQVBNaGhpajh6Q1RQWStrTytuUmxqUVl3Q2dZSUtvWkl6ajBFQXdJd1FERWEKTUJnR0ExVUVDaE1SVTIxaGJHeHpkR1Z3SUNoTWIyTmhiQ2t4SWpBZ0JnTlZCQU1UR1ZOdFlXeHNjM1JsY0NBbwpURzlqWVd3cElGSnZiM1FnUTBFd0hoY05Nall3TVRJNE1UUXdOekExV2hjTk16WXdNVEkyTVRRd056QTFXakJBCk1Sb3dHQVlEVlFRS0V4RlRiV0ZzYkhOMFpYQWdLRXh2WTJGc0tURWlNQ0FHQTFVRUF4TVpVMjFoYkd4emRHVncKSUNoTWIyTmhiQ2tnVW05dmRDQkRRVEJaTUJNR0J5cUdTTTQ5QWdFR0NDcUdTTTQ5QXdFSEEwSUFCTWRIeDcyTApidEFJcWdQeVNyNHFqZUZEUEdzUURwQnNkaStlSm1iSXVNaG9NeHNYRWNCcklUWUZUb3g1eUZkdVVQTGNrQWs3CkhlamVPbEZibC90TTVnNmpSVEJETUE0R0ExVWREd0VCL3dRRUF3SUJCakFTQmdOVkhSTUJBZjhFQ0RBR0FRSC8KQWdFQk1CMEdBMVVkRGdRV0JCU3piS2dGZzlMbkx6aytBOVZSVXdUeUI2M3BBVEFLQmdncWhrak9QUVFEQWdOSApBREJFQWlBSzRnOUJ2S0l6cm90QWcvSHQrME53QmI5U0ZGVmN3QlY4ak94ajgwd3p2d0lnSEs2UEdLUjUvc2VNCm9EUVpyTE8vTm9XRXNIQWRQcDdoTWN0SGJ5eTc3d2c9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0KCg=="
+    privateKeySecretRef:
+      name: step-ca-acme-account-key
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: traefik

@@ -4,6 +4,13 @@ kind: ConfigMap
 metadata:
   name: step-certificates-config
 data:
+  # TODO: could set durations for acme provisioner:
+  #  "claims": {
+  #    "minTLSCertDuration": "24h",
+  #    "maxTLSCertDuration": "8760h",  // 1 year
+  #    "defaultTLSCertDuration": "2160h"  // 90 days (Let's Encrypt default)
+  #  }
+  # TODO: requireEAB *could* be enabled for better security, but it would require manual steps to create the EAB credentials for each ACME account
   ca.json: |
     {
       "root": "/home/step/certs/root_ca.crt",
@@ -40,6 +47,13 @@ data:
               "y": "trQDJDTcN_zzeuCJ_cQfA5MY41P2_xtE7vKe6xIhgZE"
             },
             "encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJlbmMiOiJBMjU2R0NNIiwicDJjIjo2MDAwMDAsInAycyI6InZvUmJjSXZOMWJvUWJLRDRzWC1lZWcifQ.VOZjqUd9r_yOw5UUKlt70Okj0S-MyD5QQbVWPI9u6Vliln-wamVJfA.qlEcR8mw1thF2LSn.MWUm3BAdcBpjS-SECXxcXBVVrQC-re-NKlr8tih2jINEsn7Gng13fSf1EEBKxrZrg6Nc2jBXdRgjtL6w4AUj2EKAfoGxo8FeZLp6mLzG7_z9kdaGmIM1gIAJHoHXRnGVlmNue66jUd6iwxGoYEU0Un8ZQ9ir7iBtoVeWvmy2LSkdwTeN629hKb3QkUF-baKQ57_QIeS4uBfVVfQqT-g9ZnWmxmzWreOaNKj_SpQyd1VdM_BvOaAZAMG4kvSKPhCQIvJ_FWAn2y8UqHQjITzao4OJ_ShEsiouH5VZR05g6jGUAetdS801PwD_XRMOWMINSXU29XDSU9mYqCjdVXg.lgwvVhIc1satTKgvBJ38KQ"
+          },
+          {
+            "type": "ACME",
+            "name": "elda",
+            "forceCN": false,
+            "requireEAB": false,
+            "challenges": ["http-01"]
           }
         ],
         "policy": {
