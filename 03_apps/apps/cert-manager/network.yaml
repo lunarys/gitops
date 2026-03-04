@@ -6,3 +6,16 @@ preset:
   egress:
     toKubeApi: true
     toNamespace: step-ca  # cert-manager needs to call step-ca to initiate the ACME challenge
+    rules:
+      # cert-manager self-check: verifies the ACME challenge is reachable before presenting to step-ca
+      - toEndpoints:
+          - matchLabels:
+              io.kubernetes.pod.namespace: traefik
+        toPorts:
+          - ports:
+              - port: "80"
+                protocol: TCP
+            rules:
+              http:
+                - method: GET
+                  path: ^/.well-known/acme-challenge/
