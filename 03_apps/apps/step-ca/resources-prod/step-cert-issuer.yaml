@@ -14,6 +14,10 @@ spec:
     privateKeySecretRef:
       name: step-ca-acme-account-key
     solvers:
-      - http01:
+      - http01:  # https://cert-manager.io/docs/configuration/acme/http01/
           ingress:
             ingressClassName: traefik
+            ingressTemplate:
+              metadata:
+                annotations:
+                  traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd"
