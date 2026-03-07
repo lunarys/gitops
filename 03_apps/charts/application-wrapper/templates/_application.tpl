@@ -100,6 +100,12 @@ spec:
       targetRevision: {{ include "apps-wrapper.targetRevision" . }}
       path: '{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}resources'
   {{- end }}
+  {{- if include "apps-wrapper.hasEnvResources" . }}
+    # env-specific additional resources
+    - repoURL: {{ include "apps-wrapper.repoUrl" . }}
+      targetRevision: {{ include "apps-wrapper.targetRevision" . }}
+      path: '{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}{{ include "apps-wrapper.targetResourcesDir" .root }}'
+  {{- end }}
   syncPolicy:
     automated:
       enabled: {{ .settings.settings.autoSync }}

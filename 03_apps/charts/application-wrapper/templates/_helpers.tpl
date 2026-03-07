@@ -56,6 +56,17 @@ true
 {{- end }}
 {{- end }}
 
+{{- define "apps-wrapper.hasEnvResources" -}}
+{{- $envDir := include "apps-wrapper.targetResourcesDir" .root -}}
+{{- if $envDir -}}
+{{- range $filename, $_ := .settings.files }}
+{{- if hasPrefix (printf "%s/" $envDir) $filename }}
+true
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
 {{- define "apps-wrapper.hasPrivateSettings" -}}
 {{- if .settings.settings.privateSettings -}}
 true
