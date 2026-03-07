@@ -91,7 +91,7 @@ EOF
   prompt CA_NAME           "CA display name"               "step-ca.svc.elda"
   prompt CA_DNS            "CA DNS names (comma-separated)" "$default_dns"
   prompt PROVISIONER_NAME  "JWK provisioner name"           "$default_provisioner"
-  prompt ALLOWED_DOMAINS   "Name Constraint domains (comma-separated, e.g. .elda,.local)" ".elda"
+  prompt ALLOWED_DOMAINS   "Name Constraint domains (comma-separated, e.g. .elda,.local)" ".elda,.local"
   prompt CURVE             "EC curve [P-256 / P-384]"       "P-384"
 
   [[ "$CURVE" == "P-256" || "$CURVE" == "P-384" ]] || die "Curve must be P-256 or P-384"

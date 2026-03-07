@@ -40,13 +40,13 @@ data:
             "key": {
               "use": "sig",
               "kty": "EC",
-              "kid": "RT23HqjnaZjGEmCOsehPTzDhAIxPSH-Ov4NaiU2AsR8",
+              "kid": "qLrMMyjF8zHR7TXXuXaaMnJGBIfcOBPRQNInW46LjgY",
               "crv": "P-256",
               "alg": "ES256",
-              "x": "HHr7dLu9HWTiXMel-wt1EbbiJieKlJrSWDC44QtFzso",
-              "y": "HbimK6g41bmKgKGuUz5xLvOgOX8X6x9EHyGnCEgUAYc"
+              "x": "c3j0J-R393EYgTCFJ33JGduKnpdjTsvHrreURwh95DM",
+              "y": "yPwqcMOJqQh9TeDtpzZ2qjfozbz1rSNRb0zi3pjm6M8"
             },
-            "encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoiTGVJS25BVUFzVENLb2xfaXJ1eFJWZyJ9.eD8EzVOl5c28RQLTjMhVYx4mATO2_95QhMr8yIR6bsQyA3C5F2YEzQ.YI2tMRm-f1U986Qh.cKXePShLAVZwAfOTdzMFo2WYd8TtferI3FLTgTGXekgw24Bgks66xNGLrTWGEY7mOGBdKoWaFb_N0t5lvM2nG_UACuqdnH2B9rFZeaQHx-D5-u9G_hm_uZFWEFeGnIpAgzu0_V_GtRWk0Ur49LozTbs8TkSiFuDD1UGTq-BgOvtNYn_YJpL3umX-eW1N84Xifizeg3HUS7OyPwNagr8UGsNFXw1VyWrtSKFzeMwwkxfr1MOSnzK5-0P3XdhMLBfoxLry6XM6Af_qlV1-1_SZA1yy35avLyGXgkCHc9T2ZCnx-9iSQ6xLGY__MJGEfrdhMiC_IwgVbmMY0GOr86k.VFQG7X8HZrUKK1JRYWPIwQ"
+            "encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoielQ2SjljazJuSHUxYW13RkNLRTRuUSJ9.M22DrcCoq8UrFgfXLnkEYDFzAQ4QFDlweS6IKn8U_N4Ms2V3WlzsLQ.DzxXan3F4HDZByks.uHDazPC979-_1pts9LAZXcIJsxbUAMjxRUhFPC7EEbKQpOPjWULSxprSSIKwSZUpzq07m0ZsLqtXwTO0wANYeVMAwTHg0N4WTLruwHvUoXAqNQbGbK6CWuuGv9FKmaPnU-RqUM4X1OYxoxt6GM14wmTXzfnbjj3PGpDjQcKcxMImWQEqbnRwg72SIDnJcw3CnjYAjzuHkJm2FcVdMywjOAK_3J-F_SLZyA2cBlD--jL4WqVxlQ7CV37nIbkiptpvYX74Qbrvb7wxv3RKPyAaXmeNkU6MxiA3X5VRFacxcdBI8wEtUExEYmxGJe_HxLLj97enUeTfS8USvnTNlKg.xnvgljEG48RzjZ6MxSbHyQ"
           },
           {
             "type": "ACME",
@@ -85,6 +85,6 @@ data:
     {
       "ca-url": "https://step-ca.svc.elda",
       "ca-config": "/home/step/config/ca.json",
-      "fingerprint": "4418168f9e790a07e2c121b2cdcceca56cff3e4434de80ff797684da009aa273",
+      "fingerprint": "fe7757d31e247d35e7e7b8eb85e1bff767fca9ba925978102bd2b03d459d854b",
       "root": "/home/step/certs/root_ca.crt"
     }
