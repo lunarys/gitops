@@ -111,8 +111,8 @@ EOF
     prompt_secret PROV_PASSWORD "Provisioner password"
     [[ -n "$CA_PASSWORD" && -n "$PROV_PASSWORD" ]] || die "Passwords cannot be empty"
   else
-    CA_PASSWORD=$(openssl rand -base64 50)
-    PROV_PASSWORD=$(openssl rand -base64 50)
+    CA_PASSWORD=$(openssl rand -base64 50 | tr -d '\n')
+    PROV_PASSWORD=$(openssl rand -base64 50 | tr -d '\n')
     echo "  Generated random passwords."
   fi
 
