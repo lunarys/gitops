@@ -302,32 +302,22 @@ TMPL
 ║                 BITWARDEN — REQUIRED MANUAL UPDATES              ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-Update the following 4 vault items. The UUIDs are the existing
+Update the following vault items. The UUIDs are the existing
 items — update them in-place (do not create new ones).
 
 ────────────────────────────────────────────────────────────────────
-  Item UUID : 7b82f671-dbbe-4b80-9bd3-b3dd00aecf20
   Item name : step-certificates-ca-password
   Field     : password
   Value     :
 $CA_PASSWORD
 
 ────────────────────────────────────────────────────────────────────
-  Item UUID : 707ff9d9-d84b-42e2-93a2-b3e000f93a12
   Item name : step-certificates-provisioner-password
   Field     : password
   Value     :
 $PROV_PASSWORD
 
 ────────────────────────────────────────────────────────────────────
-  Item UUID : 97afa041-d828-4557-8c97-b3e000e9f71d
-  Item name : step-certificates-secrets  (root CA private key)
-  Field     : root_ca_key  (notes / custom field)
-  Value     :
-$root_key
-
-────────────────────────────────────────────────────────────────────
-  Item UUID : 91a2e43d-5fba-478a-b436-b3e000e9b7ed
   Item name : step-certificates-secrets  (intermediate CA private key)
   Field     : intermediate_ca_key  (notes / custom field)
   Value     :
@@ -335,12 +325,23 @@ $intermediate_key
 
 ══════════════════════════════════════════════════════════════════
 
+OFFLINE BACKUP — do NOT sync into cluster:
+
+────────────────────────────────────────────────────────────────────
+  Item name : step-certificates-secrets  (root CA private key)
+  Field     : root_ca_key  (notes / custom field)
+  Value     :
+$root_key
+
+══════════════════════════════════════════════════════════════════
+
 Next steps:
-  1. Update the 4 Bitwarden items above (passwords + private keys)
-  2. Review:  git diff
-  3. Commit and push to trigger ArgoCD sync
-  4. step-ca pod will restart with the new PKI
-  5. Force cert-manager renewal if needed:
+  1. Update the 3 deployed Bitwarden items above (passwords + intermediate key)
+  2. Store root CA key in Bitwarden as offline DR backup only
+  3. Review:  git diff
+  4. Commit and push to trigger ArgoCD sync
+  5. step-ca pod will restart with the new PKI
+  6. Force cert-manager renewal if needed:
        kubectl delete certificaterequest -A --all
 
 EOF
