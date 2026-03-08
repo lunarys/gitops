@@ -152,7 +152,7 @@ EOF
   # Write a complete root-CA template that includes both the CA profile fields
   # (self-signed, isCA, keyUsage) and the Name Constraints extension.
   # .Subject is populated by step from the first CLI argument.
-  cat > "$workdir/nc-template.json" << TMPL
+  cat > "$workdir/nc-root-template.json" << TMPL
 {
   "subject": {{ toJson .Subject }},
   "issuer": {{ toJson .Subject }},
@@ -160,6 +160,22 @@ EOF
   "basicConstraints": {
     "isCA": true,
     "maxPathLen": 1
+  },
+  "nameConstraints": {
+    "critical": true,
+    "permittedDNSDomains": [$nc_json_array]
+  }
+}
+TMPL
+
+  # Intermediate CA template: issuer is derived from --ca; maxPathLen 0 (cannot sign further CAs)
+  cat > "$workdir/nc-intermediate-template.json" << TMPL
+{
+  "subject": {{ toJson .Subject }},
+  "keyUsage": ["certSign", "crlSign"],
+  "basicConstraints": {
+    "isCA": true,
+    "maxPathLen": 0
   },
   "nameConstraints": {
     "critical": true,
@@ -180,16 +196,14 @@ TMPL
       /home/step/root_ca_key
       --kty EC
       --crv "$CURVE"
-      --template /home/step/nc-template.json
+      --template /home/step/nc-root-template.json
       --password-file /home/step/ca-password
       --not-after 87600h
   )
 
   # Phase 2: init CA using existing root (generates intermediate + provisioner + config)
-  # -t allocates a pseudo-TTY so step ca init can open /dev/tty for interactive prompts
   local -a init_cmd=(
     $DOCKER run --rm
-    -t
     -v "$workdir:/home/step"
     "$STEP_CA_IMAGE"
     step ca init
@@ -206,11 +220,33 @@ TMPL
       --no-db
   )
 
+  # Phase 3: replace intermediate CA with one that also carries Name Constraints.
+  # Phase 2's intermediate is deleted on the host before this runs so there is no overwrite prompt.
+  local -a create_intermediate_cmd=(
+    $DOCKER run --rm
+    -v "$workdir:/home/step"
+    "$STEP_CA_IMAGE"
+    step certificate create "$CA_NAME Intermediate CA"
+      /home/step/certs/intermediate_ca.crt
+      /home/step/secrets/intermediate_ca_key
+      --kty EC
+      --crv "$CURVE"
+      --template /home/step/nc-intermediate-template.json
+      --ca /home/step/root_ca.crt
+      --ca-key /home/step/root_ca_key
+      --ca-password-file /home/step/ca-password
+      --password-file /home/step/ca-password
+      --not-after 43800h
+  )
+
   echo "  Phase 1 — root CA with Name Constraints:"
   echo "    ${create_root_cmd[*]}"
   echo ""
   echo "  Phase 2 — CA init using existing root:"
   echo "    ${init_cmd[*]}"
+  echo ""
+  echo "  Phase 3 — intermediate CA with Name Constraints (replaces step ca init's output):"
+  echo "    ${create_intermediate_cmd[*]}"
   echo ""
   read -r -p "  Proceed? [y/N]: " ok
   [[ "$ok" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 0; }
@@ -221,6 +257,9 @@ TMPL
 
   "${create_root_cmd[@]}"
   "${init_cmd[@]}"
+  # Remove Phase 2's intermediate so Phase 3 can write to the same paths without an overwrite prompt
+  rm "$workdir/certs/intermediate_ca.crt" "$workdir/secrets/intermediate_ca_key"
+  "${create_intermediate_cmd[@]}"
 
   # Delete password files immediately
   rm -f "$workdir/ca-password" "$workdir/prov-password"

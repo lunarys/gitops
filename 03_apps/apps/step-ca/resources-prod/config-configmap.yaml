@@ -39,13 +39,13 @@ data:
             "key": {
               "use": "sig",
               "kty": "EC",
-              "kid": "qLrMMyjF8zHR7TXXuXaaMnJGBIfcOBPRQNInW46LjgY",
+              "kid": "snnD6m3Vmc-4QUjixPDD6g62Hrft-Jbs_T8vdBvRWZU",
               "crv": "P-256",
               "alg": "ES256",
-              "x": "c3j0J-R393EYgTCFJ33JGduKnpdjTsvHrreURwh95DM",
-              "y": "yPwqcMOJqQh9TeDtpzZ2qjfozbz1rSNRb0zi3pjm6M8"
+              "x": "YtjPVrJHnew6D8NDQOkAG4toiwoTg-z-5CYe0DKMEgI",
+              "y": "gnzo4fRjVEmu5gMNgt7KCjxEppG0BAoprDhxtj0i8ao"
             },
-            "encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoielQ2SjljazJuSHUxYW13RkNLRTRuUSJ9.M22DrcCoq8UrFgfXLnkEYDFzAQ4QFDlweS6IKn8U_N4Ms2V3WlzsLQ.DzxXan3F4HDZByks.uHDazPC979-_1pts9LAZXcIJsxbUAMjxRUhFPC7EEbKQpOPjWULSxprSSIKwSZUpzq07m0ZsLqtXwTO0wANYeVMAwTHg0N4WTLruwHvUoXAqNQbGbK6CWuuGv9FKmaPnU-RqUM4X1OYxoxt6GM14wmTXzfnbjj3PGpDjQcKcxMImWQEqbnRwg72SIDnJcw3CnjYAjzuHkJm2FcVdMywjOAK_3J-F_SLZyA2cBlD--jL4WqVxlQ7CV37nIbkiptpvYX74Qbrvb7wxv3RKPyAaXmeNkU6MxiA3X5VRFacxcdBI8wEtUExEYmxGJe_HxLLj97enUeTfS8USvnTNlKg.xnvgljEG48RzjZ6MxSbHyQ"
+            "encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoiUEtWVVlrSmtSWnRfb014UDlWOXZTQSJ9.MYhdj1Ym1Jf79d3dYUnnjfWoDxf8mbC6HTBm6ioed7sWCTWEOCz7ng.3t288I354EvpSLzR.TwwCovz-ytapWBmInOgXEQ1ZddKEybFhvuvOomnruqH3btlDo7L2fmyIdlMLSXtI8tFOh0LRbMcZWo3ZhIWi7IK65z0M1QyAwLBx1aHt941WPP2xb8cYPJNj6Vk6vlfdp3clluXkb9RuOa28s7qqY9c2moQtb3ZdYFyvGkhHv2nIas2tm0kCpLv8nQYPlxXvCeYArUrxbSaMZwIER5SEal1_HGTKCtZAz7a54xfUxBWIhRvwbEkZaUkQqnw01K4G75fJdh6cyQbSY3j4J4DRwLibbETZbSXwv2o1izi2sAMLEcTUUIrnzja4pSk1tIeqIPSeIVltPxxNOVb-tvQ.-z-46U9BdTzG6UaiEZbeWw"
           },
           {
             "type": "ACME",
@@ -84,6 +84,6 @@ data:
     {
       "ca-url": "https://step-ca.svc.elda",
       "ca-config": "/home/step/config/ca.json",
-      "fingerprint": "fe7757d31e247d35e7e7b8eb85e1bff767fca9ba925978102bd2b03d459d854b",
+      "fingerprint": "0c30f22d8c099109ef0b6704f3f06dfd72d2c8f9831560a1c157ce3333fa7ab9",
       "root": "/home/step/certs/root_ca.crt"
     }
