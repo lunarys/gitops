@@ -4,12 +4,6 @@ kind: ConfigMap
 metadata:
   name: step-certificates-config
 data:
-  # TODO: could set durations for acme provisioner:
-  #  "claims": {
-  #    "minTLSCertDuration": "24h",
-  #    "maxTLSCertDuration": "8760h",  // 1 year
-  #    "defaultTLSCertDuration": "2160h"  // 90 days (Let's Encrypt default)
-  #  }
   # TODO: requireEAB *could* be enabled for better security, but it would require manual steps to create the EAB credentials for each ACME account
   ca.json: |-
     {
@@ -33,6 +27,11 @@ data:
       },
       "authority": {
         "enableAdmin": false,
+        "claims": {
+          "minTLSCertDuration": "10m",
+          "maxTLSCertDuration": "2160h",
+          "defaultTLSCertDuration": "1080h"
+        },
         "provisioners": [
           {
             "type": "JWK",
