@@ -17,7 +17,8 @@ spec:
       - http01: # https://cert-manager.io/docs/configuration/acme/http01/
           ingress:
             ingressClassName: traefik
-            ingressTemplate:
-              metadata:
-                annotations:
-                  traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd"
+            #ingressTemplate:
+            #  metadata:
+            #    annotations:
+            #      # TODO: does not allow access from within the cluster...
+            #      traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd"
