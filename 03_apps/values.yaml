@@ -5,7 +5,7 @@ mainRepo: https://github.com/lunarys/gitops.git
 privateRepo: https://github.com/lunarys/gitops-private.git
 privateRepoEnabled: true
 # -- The helm repository where my base helm charts are stored.
-mainHelmRepo: oci://registry.gitlab.com/juulun/helm-charts/charts
+mainHelmRepo: oci://ghcr.io/lunarys/charts
 # -- The helm repository where the application-wrapper helm chart is stored.
 wrapperHelmRepo: oci://ghcr.io/lunarys
 
@@ -15,12 +15,12 @@ targetRevision: main
 # - The helm chart within the `mainHelmRepo` that is used to render secrets.
 secretsChart: "externalsecrets"
 # - The version of the `secretsChart` to use by default.
-secretsChartVersion: "2.10.1"
+secretsChartVersion: "3.0.1"
 
 # -- The helm chart within the `mainHelmRepo` that is used to render network policies
 networkPolicyChart: "networkpolicy"
 # -- The version of the `networkPolicyChart` to use by default.
-networkPolicyChartVersion: "2.10.1"
+networkPolicyChartVersion: "3.0.1"
 
 # -- The values file to use for the application in the respective cluster, e.g. `values-test.yaml`.
 # In addition to the default `values.yaml` file.
