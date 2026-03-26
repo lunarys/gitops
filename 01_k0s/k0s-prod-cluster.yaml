@@ -22,6 +22,15 @@ spec:
       noTaints: true
       installFlags:
         - "--kubelet-extra-args=--node-ip=10.0.1.41,fda0:f54f:5876::1:41"
+    - ssh:
+        address: 10.0.1.42
+        user: ju
+        port: 22
+        keyPath: ~/.ssh/id_ed25519
+      role: controller+worker
+      noTaints: true
+      installFlags:
+        - "--kubelet-extra-args=--node-ip=10.0.1.42,fda0:f54f:5876::1:42"
   k0s:
     version: v1.35.1+k0s.0
     config: {} # <-- merged from ClusterConfig
