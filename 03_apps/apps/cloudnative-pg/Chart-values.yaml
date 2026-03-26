@@ -11,7 +11,7 @@ clusterPreviousGeneration: "001"
 strictAntiAffinity: true
 
 postgres:
-  instances: 2
+  instances: 3
   clusterNameOverride: ""
 
 backup:
