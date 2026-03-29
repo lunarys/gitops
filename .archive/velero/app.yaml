@@ -1,6 +1,0 @@
-helm:
-  chart: velero
-  version: 10.0.8
-  repo: https://vmware-tanzu.github.io/helm-charts
-
-additionalResources: true
