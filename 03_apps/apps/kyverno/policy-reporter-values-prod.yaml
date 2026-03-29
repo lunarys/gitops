@@ -8,3 +8,4 @@ ui:
     tls:
       - hosts: 
           - kyverno.svc.elda
+        secretName: policy-reporter-internal-cert
