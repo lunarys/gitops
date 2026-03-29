@@ -1,2 +1,5 @@
 preset:
   namespaceIsolation: true
+  egress:
+    toNetworkLabels:
+      - custom.network/postgresdb

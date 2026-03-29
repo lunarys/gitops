@@ -52,3 +52,6 @@ global:
         secretKeyRef:
           name: authentik-secrets
           key: secret_key
+
+  deploymentAnnotations:
+    custom.network/postgresdb: egress
