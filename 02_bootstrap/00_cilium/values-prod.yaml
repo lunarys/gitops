@@ -12,3 +12,4 @@ cilium:
         tls:
           - hosts: 
               - hubble.svc.elda
+            secretName: hubble-ui-internal-cert
