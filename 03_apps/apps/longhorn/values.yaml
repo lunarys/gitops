@@ -43,6 +43,10 @@ longhorn:
 
     annotations:
       traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd"
+      cert-manager.io/cluster-issuer: step-ca-internal
+
+    tls: true
+    tlsSecret: longhorn-internal-cert
 
   # https://longhorn.io/docs/1.8.0/snapshots-and-backups/backup-and-restore/create-a-backup
   defaultBackupStore:
