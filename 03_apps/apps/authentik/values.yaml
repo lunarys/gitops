@@ -21,6 +21,8 @@ authentik:
     user: file:///mnt/pgcreds/username
     password: file:///mnt/pgcreds/password
 
+  disable_update_check: false
+  disable_startup_analytics: true
   error_reporting:
     enabled: false
 

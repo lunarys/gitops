@@ -3,3 +3,8 @@ preset:
   egress:
     toNetworkLabels:
       - custom.network/postgresdb
+    toFQDNs:
+      # version check
+      - version.goauthentik.io
+      # startup analytics, probably
+      # - goauthentik.io
