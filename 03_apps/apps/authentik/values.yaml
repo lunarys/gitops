@@ -53,5 +53,5 @@ global:
           name: authentik-secrets
           key: secret_key
 
-  podAnnotations:
+  podLabels:
     custom.network/postgresdb: egress
