@@ -4,8 +4,13 @@ server:
     enabled: true
     annotations:
       traefik.ingress.kubernetes.io/router.middlewares: traefik-common-internal-access-allowlist@kubernetescrd
+      cert-manager.io/cluster-issuer: step-ca-internal
     hosts:
       - authentik.svc.elda
+    tls:
+      - hosts: 
+          - authentik.svc.elda
+        secretName: authentik-internal-cert
 
 authentik:
   postgresql:
