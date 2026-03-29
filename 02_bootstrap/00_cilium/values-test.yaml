@@ -9,3 +9,6 @@ cilium:
       ingress:
         hosts:
           - hubble.test.svc.elda
+        tls:
+          - hosts: 
+              - hubble.test.svc.elda

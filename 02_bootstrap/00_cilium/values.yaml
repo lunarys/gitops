@@ -59,3 +59,8 @@ cilium:
         enabled: true
         annotations:
           traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd"
+          cert-manager.io/cluster-issuer: step-ca-internal
+        tls:
+          - hosts: 
+              - <overwrite>
+            secretName: hubble-ui-internal-cert
