@@ -5,3 +5,6 @@ ui:
         paths:
           - path: /
             pathType: Prefix
+    tls:
+      - hosts: 
+          - kyverno.test.svc.elda

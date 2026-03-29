@@ -8,8 +8,13 @@ ui:
     className: traefik
     annotations:
       traefik.ingress.kubernetes.io/router.middlewares: traefik-common-internal-access-allowlist@kubernetescrd
+      cert-manager.io/cluster-issuer: step-ca-internal
     hosts:
       - host: <overwrite>
         paths:
           - path: /
             pathType: Prefix
+    tls:
+      - hosts: 
+          - <overwrite>
+        secretName: policy-reporter-internal-cert
