@@ -1,0 +1,54 @@
+# -> https://github.com/goauthentik/helm/blob/main/charts/authentik/README.md
+server:
+  ingress:
+    enabled: true
+    annotations:
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-common-internal-access-allowlist@kubernetescrd
+    hosts:
+      - authentik.svc.elda
+
+authentik:
+  postgresql:
+    # https://docs.goauthentik.io/install-config/configuration/
+    name: file:///mnt/pgcreds/dbname
+    host: file:///mnt/pgcreds/host
+    port: file:///mnt/pgcreds/port
+    user: file:///mnt/pgcreds/username
+    password: file:///mnt/pgcreds/password
+
+  error_reporting:
+    enabled: false
+
+
+additionalObjects:
+  - apiVersion: postgres.crds.lunarys.lab/v1alpha1
+    kind: PostgresDatabase
+    metadata:
+      name: authentik
+    spec:
+      secretName: authentik-pgcreds
+      deletionPolicy: Retain
+
+
+# "needed for managed outposts" - so not needed right now?
+serviceAccount:
+  create: false
+
+
+global:
+  volumeMounts:
+    - name: authentik-pgcreds
+      mountPath: /mnt/pgcreds
+      readOnly: true
+
+  volumes:
+    - name: authentik-pgcreds
+      secret:
+        secretName: authentik-pgcreds
+
+  env:
+    - name: AUTHENTIK_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: authentik-secrets
+          key: secret_key
