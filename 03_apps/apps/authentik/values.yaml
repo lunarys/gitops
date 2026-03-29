@@ -53,5 +53,5 @@ global:
           name: authentik-secrets
           key: secret_key
 
-  deploymentAnnotations:
+  podAnnotations:
     custom.network/postgresdb: egress
