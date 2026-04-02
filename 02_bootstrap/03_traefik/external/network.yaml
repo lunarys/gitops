@@ -23,6 +23,7 @@ preset:
                 - method: GET
                   path: "^/.well-known/acme-challenge/.*"
   egress:
+    toKubeApi: true
     toNetworkLabels:
       - custom.network/external-ingress
     # sometimes requests from traefik to my dev machine are blocked e.g. on ports 57273 or 57269
