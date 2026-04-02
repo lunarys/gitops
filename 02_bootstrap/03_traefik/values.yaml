@@ -21,8 +21,8 @@ traefik:
 
   providers:
     kubernetesCRD:
-      # this is required to configure traefik based on its crds
-      enabled: false
+      # this is required to configure traefik based on its crds, e.g. also Middlewares
+      enabled: true
 
     kubernetesIngress:
       enabled: true
