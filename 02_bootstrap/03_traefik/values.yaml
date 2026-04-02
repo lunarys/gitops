@@ -10,6 +10,15 @@ traefik:
     traefik:
       expose:
         default: false  # API port not exposed via Service in production
+    web:
+      http:
+        middlewares:
+          - "traefik-common-internal-access-allowlist@kubernetescrd"
+    websecure:
+      http:
+        middlewares:
+          - "traefik-common-internal-access-allowlist@kubernetescrd"
+
 
   ingressRoute:
     dashboard:
@@ -35,11 +44,5 @@ traefik:
     general:
       level: INFO
 
-  # https://community.traefik.io/t/traefik-ingress-not-getting-loadbalancer-ip/17445/3
-  #additionalArguments:
-  #  - "--providers.kubernetesingress.ingressendpoint.publishedservice=default/traefik"
-
-  #service:
-  #  type: LoadBalancer
-  #  spec:
-  #    externalTrafficPolicy: Local
+autoscale:
+  enabled: false

@@ -1,0 +1,17 @@
+ingress:
+  enabled: false  # dashboard disabled in production; enabled in values-test.yaml
+  host: ""
+
+traefik:
+  deployment: 
+    replicas: 2
+    podLabels:
+      custom.network/external-ingress: egress
+
+  ingressClass:
+    isDefaultClass: false
+    name: traefik-external
+
+  providers:
+    kubernetesIngress:
+      ingressClass: traefik-external

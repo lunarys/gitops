@@ -1,0 +1,12 @@
+ingress:
+  enabled: false  # dashboard disabled in production; enabled in values-test.yaml
+  host: "traefik-external.svc.elda"
+
+traefik:
+  deployment: 
+    replicas: 2  # todo: remove for autoscale
+
+  service:
+    type: LoadBalancer
+    annotations:
+      lbipam.cilium.io/ips: "10.0.4.10"

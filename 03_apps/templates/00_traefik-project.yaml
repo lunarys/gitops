@@ -10,6 +10,8 @@ spec:
   destinations:
     - namespace: traefik
       server: {{ .Values.server }}
+    - namespace: traefik-external
+      server: {{ .Values.server }}
   clusterResourceWhitelist:
     - group: '*'
       kind: '*'

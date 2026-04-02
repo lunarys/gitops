@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik-external
+spec:
+  destination:
+    namespace: traefik-external
+    server: {{ .Values.server }}
+  project: traefik-project
+  sources:
+    - helm:
+        version: v3
+        skipCrds: true
+        valueFiles:
+          - values.yaml
+          {{- if include "apps-wrapper.targetValuesFile" $ }}
+          - {{ include "apps-wrapper.targetValuesFile" $ }}
+          {{- end }}
+          - external/values.yaml
+          {{- if include "apps-wrapper.targetValuesFile" $ }}
+          - external/{{ include "apps-wrapper.targetValuesFile" $ }}
+          {{- end }}
+      path: 02_bootstrap/03_traefik
+      repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.targetRevision }}
+    # network policy
+    - repoURL: {{ .Values.mainHelmRepo | trimPrefix "oci://" }}
+      chart: {{ .Values.networkPolicyChart }}
+      targetRevision: {{ .Values.networkPolicyChartVersion }}
+      helm:
+        skipCrds: true
+        valueFiles:
+          - '$repo/02_bootstrap/03_traefik/external/network.yaml'
+    - repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.targetRevision }}
+      ref: repo
+  syncPolicy:
+    automated:
+      enabled: false
+      selfHeal: true
+      # This setting is excluded when disabled, as it leads to OutOfSync after a Sync of the Application resources for some reason
+      #prune: false

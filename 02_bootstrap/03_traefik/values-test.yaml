@@ -10,7 +10,7 @@ traefik:
 
   api:
     dashboard: true
-    insecure: true  # not for production
+    insecure: true  # not for production - maybe could be prevented by using the `ingressRoute` setting instead of the custom ingress?
 
   service:
     type: LoadBalancer
