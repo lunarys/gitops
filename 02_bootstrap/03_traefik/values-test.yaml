@@ -2,6 +2,16 @@ ingress:
   enabled: true
   host: traefik.test.svc.elda
 
+traefik:
+  ports:
+    traefik:
+      expose:
+        default: true  # expose API port in Service for test cluster only, required for the dashboard
+
+  api:
+    dashboard: true
+    insecure: true  # not for production
+
   service:
     type: LoadBalancer
     annotations:

@@ -1,5 +1,5 @@
 ingress:
-  enabled: true
+  enabled: false  # dashboard disabled in production; enabled in values-test.yaml
   host: ""
 
 traefik:
@@ -8,19 +8,21 @@ traefik:
 
   ports:
     traefik:
-      expose: 
-        # use this to make traefik dashboard available via the service
-        default: true  # TODO: turn off in production
+      expose:
+        default: false  # API port not exposed via Service in production
 
   ingressRoute:
     dashboard:
-      enabled: false  # enabling this requires traefik crds and the IngressRoute is weird
-      #matchRule: "Host(`traefik.test.svc.elda`)"
+      enabled: false
+
+  api:
+    dashboard: false  # enabled in values-test.yaml
+    insecure: false
 
   providers:
     kubernetesCRD:
       # this is required to configure traefik based on its crds
-      enabled: true
+      enabled: false
 
     kubernetesIngress:
       enabled: true
