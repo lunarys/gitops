@@ -10,7 +10,7 @@ service:
   targetPort: 9987
   protocol: UDP
   externalIPs:
-    - 10.0.4.10
+    - 10.0.4.201
 
 services:
   admin:
