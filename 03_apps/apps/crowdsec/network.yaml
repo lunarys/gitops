@@ -5,6 +5,7 @@ preset:
     fromNamespaces:
       - traefik-external
   egress:
+    toKubeApi: true
     toFQDNs:
       # https://docs.crowdsec.net/docs/next/configuration/network_management/
       - api.crowdsec.net
