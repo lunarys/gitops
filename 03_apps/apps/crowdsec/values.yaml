@@ -57,6 +57,11 @@ lapi:
         secretKeyRef:
           name: crowdsec-pgcreds
           key: host
+    - name: DB_PORT
+      valueFrom:
+        secretKeyRef:
+          name: crowdsec-pgcreds
+          key: port
 
   persistentVolume:
     data:
@@ -84,6 +89,7 @@ config:
       password: ${DB_PASSWORD}
       db_name: ${DB_NAME}
       host: ${DB_HOST}
+      port: ${DB_PORT}
       flush:
         bouncers_autodelete:
           api_key: 1h
