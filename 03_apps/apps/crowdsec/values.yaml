@@ -93,7 +93,8 @@ config:
           enabled: true
           token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
           allowed_ranges:
-            - "10.245.0.0/16"
+            - "10.243.0.0/16"  # test cluster
+            - "10.245.0.0/16"  # prod cluster
     # Using a database is strongly encouraged.
     db_config:
       type: postgresql
