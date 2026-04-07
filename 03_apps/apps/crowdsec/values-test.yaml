@@ -1,0 +1,6 @@
+lapi:
+  env:
+    - name: ENROLL_INSTANCE_NAME
+      value: "k8s-test-cluster"
+    - name: ENROLL_TAGS
+      value: "k8s test"

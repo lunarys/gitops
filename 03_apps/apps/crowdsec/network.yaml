@@ -1,0 +1,14 @@
+preset:
+  namespaceIsolation: true
+  ingress:
+    fromIngressController: true  # Traefik bouncer plugin -> LAPI
+    fromNamespaces:
+      - traefik-external
+  egress:
+    toFQDNs:
+      # https://docs.crowdsec.net/docs/next/configuration/network_management/
+      - api.crowdsec.net
+      - blocklists.api.crowdsec.net
+      - papi.api.crowdsec.net
+    toNetworkLabels:
+      - custom.network/postgresdb

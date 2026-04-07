@@ -1,0 +1,7 @@
+apiVersion: postgres.crds.lunarys.lab/v1alpha1
+kind: PostgresDatabase
+metadata:
+  name: crowdsec
+spec:
+  secretName: crowdsec-pgcreds
+  deletionPolicy: Retain
