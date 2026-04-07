@@ -41,8 +41,10 @@ traefik:
   logs:
     access:
       enabled: true
+      format: json
     general:
       level: INFO
+      format: json
 
 autoscale:
   enabled: false
