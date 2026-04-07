@@ -12,6 +12,7 @@ enabled:
 
   - cert-manager
   - kyverno
+  - crowdsec
   - cloudnative-pg
 
   - authentik
