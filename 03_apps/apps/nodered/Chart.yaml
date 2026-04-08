@@ -1,6 +1,6 @@
 apiVersion: v2
 name: nodered
-description: A Helm chart for nodered with mongodb
+description: A Helm chart for nodered
 type: application
 version: 0.1.0
 appVersion: "0.1.0"
@@ -9,11 +9,3 @@ dependencies:
     version: 3.0.2
     repository: oci://ghcr.io/lunarys/charts
     alias: nodered
-  - name: generic-service
-    version: 3.0.2
-    repository: oci://ghcr.io/lunarys/charts
-    alias: mongodb
-  - name: generic-service
-    version: 3.0.2
-    repository: oci://ghcr.io/lunarys/charts
-    alias: mongo-express
