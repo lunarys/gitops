@@ -11,5 +11,9 @@ preset:
       - api.crowdsec.net
       - blocklists.api.crowdsec.net
       - papi.api.crowdsec.net
+      # agent failed without these
+      - version.crowdsec.net
+      - cdn-hub.crowdsec.net
+      - hub-data.crowdsec.net
     toNetworkLabels:
       - custom.network/postgresdb
