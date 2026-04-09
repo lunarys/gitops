@@ -10,7 +10,7 @@ agent:
 
   env:
     - name: COLLECTIONS
-      value: "crowdsecurity/traefik crowdsecurity/http-cve-exploits"
+      value: "crowdsecurity/traefik crowdsecurity/http-cve"
 
 appsec:
   enabled: false  # TODO
