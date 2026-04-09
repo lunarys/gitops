@@ -7,6 +7,7 @@ agent:
     - namespace: traefik-external
       podName: traefik-external-*
       program: traefik
+      poll_without_inotify: true  # TODO: yes or no? a warning in the agent logs recommends to set this to true
 
   env:
     - name: COLLECTIONS
