@@ -26,6 +26,11 @@ env:
         name: crowdsec-secrets
         key: web_ui_password
 
+  # override baked-in image values to disable update check (server/config.ts: updateCheckEnabled = Boolean(VITE_COMMIT_HASH || VITE_VERSION))
+  # https://github.com/TheDuffman85/crowdsec-web-ui/blob/9d79dc5c6784e79c513c25b741c4571807a8ac2f/server/config.ts#L125
+  VITE_COMMIT_HASH: ""
+  VITE_VERSION: ""
+
 livenessProbe:
   enabled: true
   http:
