@@ -14,7 +14,7 @@ service:
 
 env:
   TZ: "Europe/Berlin"
-  CROWDSEC_URL: "http://crowdsec:8080"
+  CROWDSEC_URL: "http://crowdsec-service:8080"
   CROWDSEC_USER:
     valueFrom:
       secretKeyRef:
