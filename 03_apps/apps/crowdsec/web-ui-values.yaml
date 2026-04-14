@@ -1,0 +1,62 @@
+# app: https://github.com/TheDuffman85/crowdsec-web-ui?tab=readme-ov-file
+# example helm: https://github.com/zekker6/helm-charts/blob/main/charts/apps/crowdsec-web-ui/values.yaml
+ingress:
+  host: crowdsec.svc.elda
+  accessControl:
+    externalAccessAllowed: false
+
+image:
+  name: ghcr.io/theduffman85/crowdsec-web-ui
+  tag: 2026.4.9
+
+service:
+  targetPort: 3000
+
+env:
+  TZ: "Europe/Berlin"
+  CROWDSEC_URL: "http://crowdsec:8080"
+  CROWDSEC_USER:
+    valueFrom:
+      secretKeyRef:
+        name: crowdsec-secrets
+        key: web_ui_user
+  CROWDSEC_PASSWORD:
+    valueFrom:
+      secretKeyRef:
+        name: crowdsec-secrets
+        key: web_ui_password
+
+livenessProbe:
+  enabled: true
+  http:
+    path: /api/health
+    port: 3000
+
+readinessProbe:
+  enabled: true
+  http:
+    path: /api/health
+    port: 3000
+
+longhornstorage:
+  volumes:
+    data:
+      size: "200Mi"
+      variant: "auto-delete"  # persists alerts and decisions locally in /app/data/crowdsec.db to reduce memory usage and support historical data - should be fine to rebuild
+      mount:
+        path: "/app/data"
+
+networkpolicy:
+  enabled: true
+  preset:
+    useChartEndpointSelector: true
+    namespaceIsolation: false
+    egress:
+      rules:
+        - toEndpoints:
+            - matchLabels:
+                k8s-app: crowdsec
+                type: lapi
+          toPorts:
+            - port: 8080
+              protocol: TCP

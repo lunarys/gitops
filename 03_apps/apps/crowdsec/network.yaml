@@ -1,4 +1,10 @@
+# TODO: selector
+
 preset:
+  endpointSelector:
+    matchLabels:
+      k8s-app: crowdsec
+
   namespaceIsolation: true
   ingress:
     fromIngressController: true  # Traefik bouncer plugin -> LAPI

@@ -44,6 +44,17 @@ lapi:
           name: crowdsec-secrets          
           key: enroll_instance_name
 
+    - name: WEB_UI_USER
+      valueFrom:
+        secretKeyRef:
+          name: crowdsec-secrets
+          key: web_ui_user
+    - name: WEB_UI_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: crowdsec-secrets
+          key: web_ui_password
+
     - name: DB_USER
       valueFrom:
         secretKeyRef:
@@ -69,6 +80,14 @@ lapi:
         secretKeyRef:
           name: crowdsec-pgcreds
           key: port
+
+  lifecycle:
+    postStart:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - cscli machines add "$WEB_UI_USER" --password "$WEB_UI_PASSWORD" --force 2>/dev/null || true
 
   persistentVolume:
     data:
