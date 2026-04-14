@@ -58,5 +58,6 @@ networkpolicy:
                 k8s-app: crowdsec
                 type: lapi
           toPorts:
-            - port: 8080
-              protocol: TCP
+            - ports:
+                - port: 8080
+                  protocol: TCP
