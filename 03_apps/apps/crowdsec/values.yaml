@@ -2,8 +2,11 @@
 # https://github.com/crowdsecurity/helm-charts/blob/main/charts/crowdsec/README.md
 container_runtime: containerd
 
+# General introduction to concepts: https://docs.crowdsec.net/docs/next/concepts
+
 agent:
   acquisition:
+    # ? https://docs.crowdsec.net/docs/next/log_processor/data_sources/victorialogs/
     - namespace: traefik-external
       podName: traefik-external-*
       program: traefik
@@ -13,8 +16,32 @@ agent:
     - name: COLLECTIONS
       value: "crowdsecurity/traefik crowdsecurity/http-cve"
 
+# https://docs.crowdsec.net/docs/next/appsec/intro/
+# https://docs.crowdsec.net/docs/next/appsec/quickstart/traefik
+# https://docs.crowdsec.net/docs/next/appsec/configuration/
+# https://docs.crowdsec.net/docs/next/log_processor/data_sources/appsec/
 appsec:
-  enabled: false  # TODO
+  enabled: true
+  
+  acquisitions:
+    - source: appsec
+      listen_addr: 127.0.0.1:7422
+      path: /
+      appsec_configs:
+        # https://app.crowdsec.net/hub/author/crowdsecurity/waf-configurations/appsec-default
+        - crowdsecurity/appsec-default
+        # TODO? https://app.crowdsec.net/hub/author/firix/log-parsers/authentik-logs
+      labels:
+        type: appsec
+
+  #configs:
+  #rules:
+
+  env:
+    - name: COLLECTIONS
+      # https://app.crowdsec.net/hub/author/crowdsecurity/collections/appsec-virtual-patching
+      # https://app.crowdsec.net/hub/author/crowdsecurity/collections/appsec-generic-rules
+      value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
 
 lapi:
   podLabels:
