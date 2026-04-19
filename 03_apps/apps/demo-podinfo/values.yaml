@@ -1,7 +1,9 @@
 ingress:
   host: demo.test.svc.elda
-  accessControl:
-    externalAccessAllowed: false
+
+  external:
+    enabled: true
+    host: demo.ext.test.svc.elda
 
 image:
   name: ghcr.io/stefanprodan/podinfo
@@ -12,7 +14,7 @@ service:
 
 
 autoscale:
-  enabled: true
+  enabled: false
   preset:
     switch:
       enabled: true
@@ -23,6 +25,8 @@ networkpolicy:
   enabled: true
   preset:
     namespaceIsolation: true
+    ingress:
+      fromNamespace: "traefik-external"
 
 # From https://github.com/stefanprodan/podinfo/blob/902e62b5f3f732885b9b53f5afec3ea4a4f556de/charts/podinfo/templates/deployment.yaml
 readinessProbe:
