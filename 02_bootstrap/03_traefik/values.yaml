@@ -13,11 +13,11 @@ traefik:
     web:
       http:
         middlewares:
-          - "traefik-common-internal-access-allowlist@kubernetescrd"
+          - "traefik-common-internal-access-allowlist-with-cluster@kubernetescrd"
     websecure:
       http:
         middlewares:
-          - "traefik-common-internal-access-allowlist@kubernetescrd"
+          - "traefik-common-internal-access-allowlist-with-cluster@kubernetescrd"
 
 
   ingressRoute:
