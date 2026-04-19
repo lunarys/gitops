@@ -4,6 +4,8 @@ ingress:
   external:
     enabled: true
     host: demo.ext.test.svc.elda
+    tls:
+      enabled: false
 
 image:
   name: ghcr.io/stefanprodan/podinfo
