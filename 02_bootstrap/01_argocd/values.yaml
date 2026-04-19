@@ -7,7 +7,7 @@ argo-cd:
   server:
     ingress:
       enabled: true
-      ingressClassName: "" 
+      ingressClassName: "traefik" 
       annotations:
         traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd"
         cert-manager.io/cluster-issuer: step-ca-internal

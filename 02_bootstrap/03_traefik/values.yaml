@@ -35,6 +35,7 @@ traefik:
 
     kubernetesIngress:
       enabled: true
+      ingressClass: traefik
       publishedService:
         enabled: true  # required for argo to not show ingresses as progressing
 
