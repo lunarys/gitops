@@ -16,3 +16,4 @@ enabled:
   # testing only
   - hello-world
   - hello-world-simple
+  - demo-podinfo
