@@ -17,6 +17,7 @@ spec:
       api: "https://get.geojs.io/v1/ip/country/{ip}"
       #allowUnknownCountries: false
       #unknownCountryApiResponse: "nil"
+      cacheSize: 50 # not sure about what number to use - number of addresses kept in cache
       excludedPathPatterns:
         - "^[^/]+/.well-known/acme-challenge/"
       countries:
