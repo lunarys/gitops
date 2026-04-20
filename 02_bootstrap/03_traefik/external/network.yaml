@@ -26,8 +26,6 @@ preset:
     toKubeApi: true
     toNetworkLabels:
       - custom.network/external-ingress
-    toNamespaces:
-      - crowdsec  # TODO: could switch to network labels for this as well
     toFQDNs:
       - plugins.traefik.io
     # sometimes requests from traefik to my dev machine are blocked e.g. on ports 57273 or 57269

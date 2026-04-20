@@ -43,9 +43,13 @@ appsec:
       # https://app.crowdsec.net/hub/author/crowdsecurity/collections/appsec-generic-rules
       value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
 
+  podLabels:
+    custom.network/external-ingress: ingress  # the bouncer plugin for traefik for external ingress needs to access LAPI and AppSec
+
 lapi:
   podLabels:
     custom.network/postgresdb: egress
+    custom.network/external-ingress: ingress
 
   env:
     - name: BOUNCER_KEY_traefik
