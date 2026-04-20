@@ -15,3 +15,26 @@ traefik:
   providers:
     kubernetesIngress:
       ingressClass: traefik-external
+
+  experimental:
+    plugins:
+      crowdsec-bouncer-traefik-plugin:
+        moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+        version: v1.5.1
+
+  volumes:
+    - name: crowdsec-bouncer-key
+      mountPath: /mnt/crowdsec
+      type: secret
+
+  ports:
+    web:
+      http:
+        middlewares:
+          #- "traefik-common-security-headers@kubernetescrd"
+          - "traefik-common-crowdsec-bouncer@kubernetescrd"
+    websecure:
+      http:
+        middlewares:
+          #- "traefik-common-security-headers@kubernetescrd"
+          - "traefik-common-crowdsec-bouncer@kubernetescrd"

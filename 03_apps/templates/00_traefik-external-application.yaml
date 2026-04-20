@@ -23,6 +23,18 @@ spec:
       path: 02_bootstrap/03_traefik
       repoURL: {{ .Values.mainRepo }}
       targetRevision: {{ .Values.targetRevision }}
+    # secrets
+    - repoURL: {{ .Values.mainHelmRepo }}
+      chart: {{ .Values.secretsChart }}
+      targetRevision: {{ .Values.secretsChartVersion }}
+      helm:
+        skipCrds: true
+        valueFiles:
+          - '$repo/02_bootstrap/03_traefik/external/secrets.yaml'
+          {{- if include "apps-wrapper.targetSecretsFile" $ }}
+          - '$repo/02_bootstrap/03_traefik/external/{{ include "apps-wrapper.targetSecretsFile" $ }}'
+          {{- end }}
+        ignoreMissingValueFiles: true
     # network policy
     - repoURL: {{ .Values.mainHelmRepo | trimPrefix "oci://" }}
       chart: {{ .Values.networkPolicyChart }}
