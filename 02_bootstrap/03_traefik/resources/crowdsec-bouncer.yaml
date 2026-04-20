@@ -9,7 +9,7 @@ spec:
       enabled: true
       crowdsecLapiScheme: http
       crowdsecLapiHost: crowdsec-service.crowdsec.svc.cluster.local:8080
-      crowdsecLapiKey: /mnt/crowdsec/api_key
+      crowdsecLapiKeyFile: /mnt/crowdsec/api_key
       cacheBannedIP: true
 
       crowdsecAppsecEnabled: true
