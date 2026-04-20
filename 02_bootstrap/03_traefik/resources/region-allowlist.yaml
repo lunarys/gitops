@@ -1,0 +1,21 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: common-region-allowlist
+spec:
+  plugin:
+    geoblock:
+      allowLocalRequests: true
+      #silentStartUp: false
+      #allowLocalRequests: false
+      #logLocalRequests: false
+      #logAllowedRequests: false
+      #logApiRequests: false
+      #allowUnknownCountries: false
+      blackListMode: false
+      #addCountryHeader: false
+      #ipDatabaseCachePath: "/var/lib/geoblock/ip-cache.db"
+      excludedPathPatterns:
+        - "^[^/]+/.well-known/acme-challenge/"
+      countries:
+        - "DE"

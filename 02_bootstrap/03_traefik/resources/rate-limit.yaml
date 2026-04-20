@@ -1,0 +1,15 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  # Apply to public-facing ingresses via annotation:
+  # traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-rate-limit@kubernetescrd"
+  name: common-rate-limit
+spec:
+  rateLimit:
+    # 50 requests/second average per source IP, burst up to 100
+    average: 50
+    burst: 100
+    period: 1s
+    sourceCriterion:
+      ipStrategy:
+        depth: 1  # use direct client IP (adjust if behind additional proxies)

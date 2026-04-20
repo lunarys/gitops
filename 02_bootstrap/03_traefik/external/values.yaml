@@ -21,6 +21,9 @@ traefik:
       crowdsec-bouncer-traefik-plugin:
         moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
         version: v1.5.1
+      geoblock:
+        moduleName: "github.com/PascalMinder/geoblock"
+        version: v0.3.7  # TODO: update mechanism
 
   volumes:
     - name: crowdsec-bouncer-key
@@ -31,10 +34,14 @@ traefik:
     web:
       http:
         middlewares:
-          #- "traefik-common-security-headers@kubernetescrd"
+          - "traefik-common-rate-limit@kubernetescrd"
           - "traefik-common-crowdsec-bouncer@kubernetescrd"
+          - "traefik-common-region-allowlist@kubernetescrd" # deliberately set geoblock after crowdsec to observe what crowdsec is doing
+          - "traefik-common-security-headers@kubernetescrd"
     websecure:
       http:
         middlewares:
-          #- "traefik-common-security-headers@kubernetescrd"
+          - "traefik-common-rate-limit@kubernetescrd"
           - "traefik-common-crowdsec-bouncer@kubernetescrd"
+          - "traefik-common-region-allowlist@kubernetescrd"
+          - "traefik-common-security-headers@kubernetescrd"

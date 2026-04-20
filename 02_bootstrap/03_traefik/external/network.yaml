@@ -28,6 +28,8 @@ preset:
       - custom.network/external-ingress
     toFQDNs:
       - plugins.traefik.io
+      - get.geojs.io  # geoblock plugin needs to fetch GeoIP data from here (in theory, could be configured to another provider or self-hosted)
+
     # sometimes requests from traefik to my dev machine are blocked e.g. on ports 57273 or 57269
     #  TODO: allow this for now
     #toLocalSubnet: true
