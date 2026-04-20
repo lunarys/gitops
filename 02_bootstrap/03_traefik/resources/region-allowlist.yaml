@@ -11,10 +11,12 @@ spec:
       #logLocalRequests: false
       #logAllowedRequests: false
       #logApiRequests: false
-      #allowUnknownCountries: false
       blackListMode: false
       #addCountryHeader: false
       #ipDatabaseCachePath: "/var/lib/geoblock/ip-cache.db"
+      api: "https://get.geojs.io/v1/ip/country/{ip}"
+      #allowUnknownCountries: false
+      #unknownCountryApiResponse: "nil"
       excludedPathPatterns:
         - "^[^/]+/.well-known/acme-challenge/"
       countries:
