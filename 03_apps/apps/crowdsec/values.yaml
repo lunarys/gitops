@@ -25,7 +25,7 @@ appsec:
   
   acquisitions:
     - source: appsec
-      listen_addr: 127.0.0.1:7422
+      listen_addr: 0.0.0.0:7422
       path: /
       appsec_configs:
         # https://app.crowdsec.net/hub/author/crowdsecurity/waf-configurations/appsec-default
