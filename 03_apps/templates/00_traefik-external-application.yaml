@@ -24,7 +24,7 @@ spec:
       repoURL: {{ .Values.mainRepo }}
       targetRevision: {{ .Values.targetRevision }}
     # secrets
-    - repoURL: {{ .Values.mainHelmRepo }}
+    - repoURL: {{ .root.Values.mainHelmRepo | trimPrefix "oci://" }}
       chart: {{ .Values.secretsChart }}
       targetRevision: {{ .Values.secretsChartVersion }}
       helm:
