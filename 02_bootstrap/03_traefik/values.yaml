@@ -1,3 +1,7 @@
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
 ingress:
   enabled: false  # dashboard disabled in production; enabled in values-test.yaml
   host: ""
