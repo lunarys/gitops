@@ -6,4 +6,5 @@ spec:
   ipAllowList:
     sourceRange:
       - 10.0.0.0/20
+      - 10.243.0.0/16 # test cluster - TODO: should only include the relevant cluster? unify cluster ips?
       - 10.245.0.0/16 # prod cluster
