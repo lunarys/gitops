@@ -5,6 +5,11 @@ preset:
     fromKubeApi: true
   egress:
     toKubeApi: true
+    toFQDNs:
+      - acme-v02.api.letsencrypt.org
+      - acme-staging-v02.api.letsencrypt.org
+      - step-ca.svc.elda  # cert-manager in the test cluster calls step-ca via the internal domain name (not cluster-internal, but local subnet)
+    
     toNamespace: step-ca  # cert-manager needs to call step-ca to initiate the ACME challenge
     rules:
       # cert-manager self-check: verifies the ACME challenge is reachable before presenting to step-ca
