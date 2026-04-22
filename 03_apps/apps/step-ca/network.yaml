@@ -1,11 +1,13 @@
 preset:
   namespaceIsolation: true
   ingress:
-    fromIngressController: false  # TODO: not enabled yet, but will be required to respond to ACME challenges from outside the cluster
     fromNamespace: cert-manager  # cert-manager initiates the ACME challenge without going through traefik
+    fromLocalSubnet: true # required to receive ACME requests from outside the cluster
+      # /|\ TODO: could be more restrictive and only allow port 9000
   egress:
     toKubeApi: true
-    toLocalSubnet: false # TODO: not enabled yet, but will be required to respond to ACME challenges from outside the cluster
+    toLocalSubnet: true # required to respond to ACME challenges from outside the cluster
+      # /|\ TODO: could also be limited to port 80 and path /.well-known/acme-challenge/*
     rules:
       # step-ca needs to call cert-manager via traefik to check for the ACME challenge response
       - toEndpoints:
