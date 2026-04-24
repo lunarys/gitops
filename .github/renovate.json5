@@ -34,7 +34,7 @@
                 'depName': chart, \
                 'currentValue': version, \
                 'registryUrl': ($isHttp ? $repo : undefined), \
-                'packageName': ($isHttp ? chart : ($repo & '/' & chart)) \
+                'packageName': ($isHttp ? chart : ($substringAfter($repo, 'oci://') & '/' & chart)) \
               } \
             )"
           ]
