@@ -26,21 +26,17 @@
           fileFormat: "yaml",
           managerFilePatterns: ["/(^|/)apps/.+/(.*-)?app.yaml$/"],
           matchStrings: [
-            "helm.{ \
-              'datasource': 'helm', \
-              'depName': chart, \
-              'currentValue': version, \
-              'registryUrl': ( \
-                $exists(repo) and $type(repo)='string' and $match(repo, /^https?:\\/\\//) \
-                  ? repo \
-                  : undefined \
-              ), \
-              'packageName': ( \
-                $exists(repo) and $type(repo)='string' and $match(repo, /^https?:\\/\\//) \
-                  ? chart \
-                  : ($replace(repo, /^oci:\\/\\//, '') & '/' & chart) \
-              ) \
-            }"
+            "helm.( \
+              $repo := $exists(repo) and $type(repo)='string' ? repo : 'oci://ghcr.io/lunarys/charts'; \
+              $isHttp := $match($repo, /^https?:\\/\\//); \
+              { \
+                'datasource': ($isHttp ? 'helm' : 'docker'), \
+                'depName': chart, \
+                'currentValue': version, \
+                'registryUrl': ($isHttp ? $repo : undefined), \
+                'packageName': ($isHttp ? chart : ($repo & '/' & chart)) \
+              } \
+            )"
           ]
         },
         {
