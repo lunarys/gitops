@@ -9,7 +9,7 @@ ingress:
 
 image:
   name: ghcr.io/stefanprodan/podinfo
-  tag: 6.11.1
+  tag: 6.11.2
 
 service:
   targetPort: 9898
