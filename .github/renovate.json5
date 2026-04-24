@@ -44,18 +44,18 @@
             fileFormat: "yaml",
             managerFilePatterns: ["03_apps/values.yaml"],
             matchStrings: [
-                "{\"currentValue\": secretsChartVersion, \"packageName\": mainHelmRepo & '/' & secretsChart, 'depName': secretsChart}"
+                "{\"currentValue\": secretsChartVersion, \"packageName\": $substringAfter(mainHelmRepo, 'oci://') & '/' & secretsChart, 'depName': secretsChart}"
             ],
-            datasourceTemplate: "helm"
+            datasourceTemplate: "docker"
         },
         {
             customType: "jsonata",
             fileFormat: "yaml",
             managerFilePatterns: ["03_apps/values.yaml"],
             matchStrings: [
-                "{\"currentValue\": networkPolicyChartVersion, \"packageName\": mainHelmRepo & '/' & networkPolicyChart, 'depName': networkPolicyChart}"
+                "{\"currentValue\": networkPolicyChartVersion, \"packageName\": $substringAfter(mainHelmRepo, 'oci://') & '/' & networkPolicyChart, 'depName': networkPolicyChart}"
             ],
-            datasourceTemplate: "helm"
+            datasourceTemplate: "docker"
         }
     ]
 }
