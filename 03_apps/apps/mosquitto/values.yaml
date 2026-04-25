@@ -27,6 +27,8 @@ networkpolicy:
       fromNamespaces: 
         - "home-assistant"
         - "nodered"
+      fromNetworkLabels:
+        - custom.network/mqtt-client
 
 externalsecrets:
   secrets:

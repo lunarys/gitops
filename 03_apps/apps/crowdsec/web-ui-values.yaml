@@ -57,6 +57,8 @@ networkpolicy:
     useChartEndpointSelector: true
     namespaceIsolation: false
     egress:
+      toNetworkLabels:
+        - custom.network/mqtt-client
       rules:
         - toEndpoints:
             - matchLabels:
