@@ -24,3 +24,13 @@ preset:
               http:
                 - method: GET
                   path: "^/.well-known/acme-challenge/.*"
+      - toEntities:
+          - world  # needs to access via the external hostname/ip address
+        toPorts:
+          - ports:
+              - port: "80"
+                protocol: TCP
+            rules:
+              http:
+                - method: GET
+                  path: "^/.well-known/acme-challenge/.*"
