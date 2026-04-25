@@ -12,7 +12,7 @@ spec:
     solvers:
       - http01:
           ingress:
-            class: traefik-external
+            ingressClassName: traefik-external
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -27,4 +27,4 @@ spec:
     solvers:
       - http01:
           ingress:
-            class: traefik-external
+            ingressClassName: traefik-external
