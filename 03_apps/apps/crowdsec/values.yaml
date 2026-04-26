@@ -118,7 +118,10 @@ lapi:
         command:
           - /bin/sh
           - -c
-          - cscli machines add "$WEB_UI_USER" --password "$WEB_UI_PASSWORD" --force 2>/dev/null || true
+          - |
+            cscli bouncers prune --force 2>/dev/null || true;
+            cscli machines prune --force 2>/dev/null || true;
+            cscli machines add "$WEB_UI_USER" --password "$WEB_UI_PASSWORD" --force 2>/dev/null || true;
 
   persistentVolume:
     data:
@@ -154,8 +157,10 @@ config:
       db_name: ${DB_NAME}
       host: ${DB_HOST}
       port: ${DB_PORT}
-      flush:
-        bouncers_autodelete:
-          api_key: 1h
-        agents_autodelete:
-          login_password: 1h
+      #flush:
+         # bouncers autodelete seems to have deleted bouncers that were still active
+      #  bouncers_autodelete:
+      #    api_key: 1h
+         # agents autodelete seems to have the webui token that was still needed
+      #  agents_autodelete:
+      #    login_password: 1h
