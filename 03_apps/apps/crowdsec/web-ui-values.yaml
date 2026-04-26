@@ -59,6 +59,8 @@ networkpolicy:
     egress:
       toNetworkLabels:
         - custom.network/mqtt-client
+      toFQDNs:
+        - services.nvd.nist.gov  # checking for recent CVEs - might only be required when creating a notification channel?
       rules:
         - toEndpoints:
             - matchLabels:
