@@ -1,0 +1,56 @@
+ingress:
+  host: dashboard.svc.elda
+
+image:
+  name: lscr.io/linuxserver/heimdall
+  tag: 2.7.6
+
+service:
+  targetPort: 80
+
+env:
+  TZ: Europe/Berlin
+  PUID: "1000"
+  PGID: "1000"
+
+longhornstorage:
+  volumes:
+    config:
+      size: 50Mi
+      variant: retain
+      mount:
+        path: /config
+
+podSecurityContextPreset:
+  runAsNonRoot: false  # s6-overlay init runs as root before dropping to PUID/PGID
+  runAsUser: 0
+  fsGroup: 1000
+
+containerSecurityContextPreset:
+  capabilities:
+    drop:
+      - ALL
+    add:
+      - SETGID  # drop from root to PGID after init
+      - SETUID  # drop from root to PUID after init
+      - CHOWN   # set /config ownership to PUID:PGID on first start
+
+networkpolicy:
+  enabled: true
+  preset:
+    namespaceIsolation: true
+    egress:
+      toNetworkLabels:
+        - custom.network/heimdall-integrated
+
+livenessProbe:
+  enabled: true
+  http:
+    path: /
+    port: 80
+
+readinessProbe:
+  enabled: true
+  http:
+    path: /
+    port: 80
