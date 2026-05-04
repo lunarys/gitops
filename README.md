@@ -30,24 +30,18 @@ a few components are bootstrapped in order:
 
 - **Orchestration** — [ArgoCD](https://argo-cd.readthedocs.io/) manages all deployments.
 Changes to this repo are reconciled automatically into the cluster.
-
 - **Networking** — [Cilium](https://cilium.io/) as the CNI with eBPF-based network policies
 and L2 load balancing. [Traefik](https://traefik.io/) handles ingress — a separate internal
 instance (IP allowlist) and an external instance (CrowdSec, rate limiting, GeoBlock).
-
 - **Storage** — [Longhorn](https://longhorn.io/) for replicated block storage,
 [local-path-provisioner](https://github.com/rancher/local-path-provisioner) for node-local volumes,
 and [csi-driver-smb](https://github.com/kubernetes-csi/csi-driver-smb) for NAS mounts.
-
 - **Databases** — [CloudNativePG](https://cloudnative-pg.io/) operator for PostgreSQL.
-
 - **Secrets** — [External Secrets](https://external-secrets.io/) pulls secrets from Bitwarden
 at deploy time. No secrets are stored in git.
-
 - **TLS** — [step-ca](https://smallstep.com/docs/step-ca/) acts as an internal CA;
 [cert-manager](https://cert-manager.io/) handles certificate lifecycle and Let's Encrypt
 for public-facing services.
-
 - **Security** — [CrowdSec](https://www.crowdsec.net/) for threat detection,
 [Kyverno](https://kyverno.io/) for policy enforcement.
 
