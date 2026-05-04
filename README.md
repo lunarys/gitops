@@ -2,7 +2,7 @@
 
 Personal homelab Kubernetes cluster — a space for experimenting and running self-hosted workloads.
 Managed declaratively via GitOps: everything in this repo is what runs in the cluster.
-There are small exception I don't want to make public. 
+There are small exceptions I don't want to make public. 
 These are placed in a quite similar, private repository.
 
 ## Repository Structure
