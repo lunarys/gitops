@@ -104,7 +104,7 @@ CHART="$(yq ".helm.chart" "$APPFILE")"
 VERSION="$(yq ".helm.version" "$APPFILE")"
 REPOSITORY="$(yq ".helm.repo" "$APPFILE")"
 if [ "$REPOSITORY" = "null" ] || [ -z "$REPOSITORY" ]; then
-  REPOSITORY="oci://registry.gitlab.com/juulun/helm-charts/charts"
+  REPOSITORY="oci://ghcr.io/lunarys/charts"
 fi
 
 # Check for argo settings and use them if available
