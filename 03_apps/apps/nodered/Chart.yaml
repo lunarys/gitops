@@ -6,6 +6,6 @@ version: 0.1.0
 appVersion: "0.1.0"
 dependencies:
   - name: generic-service
-    version: 4.2.1
+    version: 4.3.0
     repository: oci://ghcr.io/lunarys/charts
     alias: nodered
