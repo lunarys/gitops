@@ -104,5 +104,6 @@ networkpolicy:
     ingress:
       fromNetworkLabels:
         - custom.network/jellyfin-tools
+        - custom.network/heimdall-integrated
     egress:
       toWorld: true  # needs to load metadata

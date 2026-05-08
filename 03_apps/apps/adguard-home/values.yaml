@@ -68,6 +68,7 @@ networkpolicy:
       fromNamespace: adguard-sync
       fromNetworkLabels:
         - custom.network/homeassistant-integrated
+        - custom.network/heimdall-integrated
     egress:
       toWorld: true
 
