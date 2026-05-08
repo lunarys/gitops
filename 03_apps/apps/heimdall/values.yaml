@@ -2,6 +2,8 @@ ingress:
   host: dashboard.svc.elda
 
 image:
+  # https://github.com/linuxserver/Heimdall
+  # https://github.com/linuxserver/docker-heimdall
   name: lscr.io/linuxserver/heimdall
   tag: 2.7.6
 
@@ -26,6 +28,11 @@ podSecurityContextPreset:
   runAsUser: 0
   fsGroup: 1000
 
+
+# TODO: access local ca HTTPS endpoints...
+# https://github.com/linuxserver/Heimdall#self-signed-certificates-and-local-cas
+
+
 containerSecurityContextPreset:
   capabilities:
     drop:
@@ -34,12 +41,19 @@ containerSecurityContextPreset:
       - SETGID  # drop from root to PGID after init
       - SETUID  # drop from root to PUID after init
       - CHOWN   # set /config ownership to PUID:PGID on first start
+      - DAC_OVERRIDE  # sed writes to abc-owned .env on every start
+      - NET_BIND_SERVICE  # nginx listens on port 80 (and is not exposed via settings)
+      # ls.io init tries to make nginx config group writable and fails without this
+      # but the permission is actually not needed and the image still starts
+      #- FOWNER
 
 networkpolicy:
   enabled: true
   preset:
     namespaceIsolation: true
     egress:
+      toFQDNs:
+        - appslist.heimdall.site  # fetch the list of supported apps
       toNetworkLabels:
         - custom.network/heimdall-integrated
 
