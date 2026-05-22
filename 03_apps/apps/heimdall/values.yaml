@@ -20,6 +20,7 @@ longhornstorage:
     config:
       size: 200Mi
       variant: encrypted  # unencrypted credentials in the db...
+      pvName: "pvc-99e17d16-75ff-4e5e-9aee-28914ff6b3db"
       mount:
         path: /config
 
