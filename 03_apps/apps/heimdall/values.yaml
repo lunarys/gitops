@@ -18,7 +18,7 @@ env:
 longhornstorage:
   volumes:
     config:
-      size: 50Mi
+      size: 200Mi
       variant: encrypted  # unencrypted credentials in the db...
       mount:
         path: /config
