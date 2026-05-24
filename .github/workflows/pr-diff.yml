@@ -27,6 +27,9 @@ jobs:
           ref: ${{ github.base_ref }}
           path: base
 
+      - name: Fetch base branch
+        run: git -C pr fetch origin ${{ github.base_ref }}
+
       - name: Install helm
         uses: azure/setup-helm@v4
 
@@ -38,10 +41,11 @@ jobs:
       - name: Detect changed app directories
         id: changed-apps
         run: |
-          changed=$(git -C pr diff --name-only origin/${{ github.base_ref }}...HEAD \
+          raw_diff=$(git -C pr diff --name-only origin/${{ github.base_ref }}...HEAD)
+          changed=$(echo "$raw_diff" \
             | grep -E '^(03_apps/apps/|02_bootstrap/)' \
             | sed -E 's|(03_apps/apps/[^/]+)/.*|\1|; s|(02_bootstrap/[^/]+)/.*|\1|' \
-            | sort -u)
+            | sort -u || true)
           echo "apps<<EOF" >> "$GITHUB_OUTPUT"
           echo "$changed" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
