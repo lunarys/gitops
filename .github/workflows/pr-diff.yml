@@ -30,8 +30,6 @@ jobs:
 
       - name: Install helm
         uses: azure/setup-helm@v4
-        with:
-          version: '3.13.0'
 
       - name: Install yq
         run: |
