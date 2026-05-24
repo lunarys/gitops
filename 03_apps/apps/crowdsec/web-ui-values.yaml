@@ -7,7 +7,7 @@ ingress:
 
 image:
   name: ghcr.io/theduffman85/crowdsec-web-ui
-  tag: 2026.4.12
+  tag: 2026.5.6
 
 service:
   targetPort: 3000
