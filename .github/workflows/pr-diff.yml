@@ -113,13 +113,8 @@ jobs:
           body_json=$(python3 -c "import json; print(json.dumps(open('/tmp/comment.md').read()))")
           existing_id=$(curl -sf -H "Authorization: token $GH_TOKEN" \
             "$API_URL/repos/$REPO/issues/$PR_NUMBER/comments" \
-            | python3 -c '
-import sys, json
-marker = "<!-- pr-diff-comment -->"
-comments = json.load(sys.stdin)
-ids = [str(c["id"]) for c in comments if marker in c.get("body", "")]
-print(ids[0] if ids else "")
-' 2>/dev/null || echo "")
+            | python3 -c "import sys,json; cs=json.load(sys.stdin); ids=[str(c['id']) for c in cs if '<!-- pr-diff-comment -->' in c.get('body','')]; print(ids[0] if ids else '')" \
+            2>/dev/null || echo "")
 
           if [ -n "$existing_id" ]; then
             curl -sf -X PATCH \
