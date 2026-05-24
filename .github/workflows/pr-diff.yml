@@ -27,21 +27,21 @@ jobs:
           ref: ${{ github.base_ref }}
           path: base
 
-      - name: Fetch base branch
-        run: git -C pr fetch origin ${{ github.base_ref }}
-
       - name: Install helm
         uses: azure/setup-helm@v4
+        with:
+          version: '3.13.0'
 
       - name: Install yq
         run: |
-          wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          chmod +x /usr/local/bin/yq
+          wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
+            && chmod +x /usr/local/bin/yq || true
 
       - name: Detect changed app directories
         id: changed-apps
         run: |
-          raw_diff=$(git -C pr diff --name-only origin/${{ github.base_ref }}...HEAD)
+          base_sha=$(git -C base rev-parse HEAD)
+          raw_diff=$(git -C pr diff --name-only "${base_sha}...HEAD")
           changed=$(echo "$raw_diff" \
             | grep -E '^(03_apps/apps/|02_bootstrap/)' \
             | sed -E 's|(03_apps/apps/[^/]+)/.*|\1|; s|(02_bootstrap/[^/]+)/.*|\1|' \
@@ -107,14 +107,30 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
+          API_URL: ${{ github.api_url }}
         run: |
           marker="<!-- pr-diff-comment -->"
-          existing_id=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" \
-            --jq ".[] | select(.body | contains(\"$marker\")) | .id" | head -1)
+          body_json=$(python3 -c "import json; print(json.dumps(open('/tmp/comment.md').read()))")
+          existing_id=$(curl -sf -H "Authorization: token $GH_TOKEN" \
+            "$API_URL/repos/$REPO/issues/$PR_NUMBER/comments" \
+            | python3 -c '
+import sys, json
+marker = "<!-- pr-diff-comment -->"
+comments = json.load(sys.stdin)
+ids = [str(c["id"]) for c in comments if marker in c.get("body", "")]
+print(ids[0] if ids else "")
+' 2>/dev/null || echo "")
 
           if [ -n "$existing_id" ]; then
-            gh api "repos/$REPO/issues/comments/$existing_id" \
-              -X PATCH -f body="$(cat /tmp/comment.md)"
+            curl -sf -X PATCH \
+              -H "Authorization: token $GH_TOKEN" \
+              -H "Content-Type: application/json" \
+              "$API_URL/repos/$REPO/issues/comments/$existing_id" \
+              -d "{\"body\": $body_json}"
           else
-            gh pr comment "$PR_NUMBER" --body-file /tmp/comment.md
+            curl -sf -X POST \
+              -H "Authorization: token $GH_TOKEN" \
+              -H "Content-Type: application/json" \
+              "$API_URL/repos/$REPO/issues/$PR_NUMBER/comments" \
+              -d "{\"body\": $body_json}"
           fi
