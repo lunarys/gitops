@@ -45,30 +45,31 @@ jobs:
         id: changed-apps
         run: |
           base_sha=$(git -C base rev-parse HEAD)
-          raw_diff=$(git -C pr diff --name-only "${base_sha}...HEAD")
-          changed_dirs=$(echo "$raw_diff" \
-            | grep -E '^(03_apps/apps/|02_bootstrap/)' \
-            | sed -E 's|(03_apps/apps/[^/]+)/.*|\1|; s|(02_bootstrap/[^/]+)/.*|\1|' \
-            | sort -u || true)
 
-          # For each changed directory, discover all apps (plain + prefixed) by scanning
-          # both PR and base sides so additions and removals are both included.
-          # Output format: "dir prefix" per line, empty prefix for app.yaml/Chart.yaml apps.
+          # For each changed file, map it to a (dir, prefix) pair.
+          # A file belongs to a prefix if its name starts with "<prefix>-", where the prefix
+          # is identified by a <prefix>-app.yaml file on either side of the diff.
+          # Files that don't match any prefix belong to the unprefixed app (empty prefix).
           apps=""
-          while IFS= read -r dir; do
-            [ -z "$dir" ] && continue
-            for side in "pr/$dir" "base/$dir"; do
-              [ -d "$side" ] || continue
-              if [ -f "$side/app.yaml" ] || [ -f "$side/Chart.yaml" ]; then
-                apps+="$dir "$'\n'
+          while IFS= read -r changed_file; do
+            [ -z "$changed_file" ] && continue
+
+            dir=$(echo "$changed_file" | sed -E 's|(03_apps/apps/[^/]+)/.*|\1|; s|(02_bootstrap/[^/]+)/.*|\1|')
+            filename=$(basename "$changed_file")
+
+            # Find the longest matching prefix from *-app.yaml files on both sides
+            matched_prefix=""
+            for app_file in pr/$dir/*-app.yaml base/$dir/*-app.yaml; do
+              [ -f "$app_file" ] || continue
+              candidate=$(basename "$app_file" -app.yaml)
+              if [[ "$filename" == "${candidate}-"* ]] && [ ${#candidate} -gt ${#matched_prefix} ]; then
+                matched_prefix="$candidate"
               fi
-              for app_file in "$side"/*-app.yaml; do
-                [ -f "$app_file" ] || continue
-                prefix="$(basename "$app_file" -app.yaml)"
-                apps+="$dir $prefix"$'\n'
-              done
             done
-          done <<< "$changed_dirs"
+
+            apps+="$dir $matched_prefix"$'\n'
+          done < <(git -C pr diff --name-only "${base_sha}...HEAD" \
+            | grep -E '^(03_apps/apps/|02_bootstrap/)')
 
           # Deduplicate while preserving insertion order
           apps="$(echo "$apps" | awk 'NF && !seen[$0]++')"

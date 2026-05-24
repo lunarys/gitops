@@ -209,7 +209,7 @@ elif [ -f "Chart.yaml" ]; then
     echo "helm dependency build ."
     echo "helm upgrade --install \"$RELEASE_NAME\" . --create-namespace --namespace \"$NAMESPACE\" $values_file_option"
   elif [ "$TEMPLATE_ONLY" = true ]; then
-    helm dependency build . 2>/dev/null || helm dependency update .
+    { helm dependency build . 2>/dev/null || helm dependency update .; } >&2
     helm template "$RELEASE_NAME" . --namespace "$NAMESPACE" $values_file_option
   else
     helm dependency build . 2>/dev/null || helm dependency update .
