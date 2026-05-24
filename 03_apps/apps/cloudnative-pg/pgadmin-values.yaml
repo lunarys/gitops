@@ -5,7 +5,7 @@
 image:
   # https://github.com/pgadmin-org/pgadmin4
   name: dpage/pgadmin4
-  tag: 9.14.0
+  tag: 9.15.0
 
 ingress:
   host: <overwrite>
