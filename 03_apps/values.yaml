@@ -15,7 +15,7 @@ targetRevision: main
 # - The helm chart within the `mainHelmRepo` that is used to render secrets.
 secretsChart: "externalsecrets"
 # - The version of the `secretsChart` to use by default.
-secretsChartVersion: "4.2.1"
+secretsChartVersion: "4.3.0"
 
 # -- The helm chart within the `mainHelmRepo` that is used to render network policies
 networkPolicyChart: "networkpolicy"
