@@ -130,10 +130,12 @@ APPNAME="$(echo "$DIRNAME" | sed 's/^[0-9][0-9]*_//')"
 # Build values file options (use relative paths since we've already cd'd into DIRECTORY)
 values_file_option=""
 
+# Add base values.yaml if it exists
 if [ -f "${PREFIX:+${PREFIX}-}values.yaml" ]; then
     values_file_option="-f ${PREFIX:+${PREFIX}-}values.yaml"
 fi
 
+# Add environment-specific values file if specified
 if [ -n "$ENVIRONMENT" ] && [ -f "${PREFIX:+${PREFIX}-}values-${ENVIRONMENT}.yaml" ]; then
     values_file_option="$values_file_option -f ${PREFIX:+${PREFIX}-}values-${ENVIRONMENT}.yaml"
 fi
@@ -151,8 +153,11 @@ if [ -f "$APPFILE" ]; then
     REPOSITORY="oci://ghcr.io/lunarys/charts"
   fi
 
+  # Check for argo settings and use them if available
   ARGO_NAMESPACE="$(yq ".argo.namespace" "$APPFILE")"
   ARGO_APPNAME="$(yq ".argo.appName" "$APPFILE")"
+
+  # Use argo settings if they exist, otherwise use defaults
   if [ "$ARGO_NAMESPACE" != "null" ] && [ -n "$ARGO_NAMESPACE" ]; then
     NAMESPACE="$ARGO_NAMESPACE"
   else
@@ -185,7 +190,7 @@ if [ -f "$APPFILE" ]; then
     fi
   elif [ "$DRY_RUN" = true ]; then
     echo "Dry run mode - would execute:"
-    echo "helm install \"$RELEASE_NAME\" $location --version \"$VERSION\" --create-namespace --namespace \"$NAMESPACE\" $values_file_option"
+    echo "helm upgrade --install \"$RELEASE_NAME\" $location --version \"$VERSION\" --create-namespace --namespace \"$NAMESPACE\" $values_file_option"
   elif [ "$TEMPLATE_ONLY" = true ]; then
     helm template "$RELEASE_NAME" $location --version "$VERSION" --namespace "$NAMESPACE" $values_file_option
   else
