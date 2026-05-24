@@ -65,8 +65,8 @@ jobs:
             app_name="$(basename "$app_dir")"
 
             # Render both sides; ignore helm errors (e.g. app only exists on one side)
-            bash pr/scripts/install.sh   --template --env prod --include-all -d "pr/$app_dir"   > /tmp/new.yaml 2>/dev/null || true
-            bash base/scripts/install.sh --template --env prod --include-all -d "base/$app_dir" > /tmp/old.yaml 2>/dev/null || true
+            bash pr/scripts/install.sh   --template --env prod -d "pr/$app_dir"   > /tmp/new.yaml 2>/dev/null || true
+            bash base/scripts/install.sh --template --env prod -d "base/$app_dir" > /tmp/old.yaml 2>/dev/null || true
 
             diff_output=$(diff -u /tmp/old.yaml /tmp/new.yaml || true)
             [ -z "$diff_output" ] && continue
