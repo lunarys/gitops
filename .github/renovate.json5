@@ -57,5 +57,11 @@
             ],
             datasourceTemplate: "docker"
         }
+    ],
+    "packageRules": [
+        {
+            "matchManagers": ["github-actions"],
+            "groupName": "GitHub Actions"
+        }
     ]
 }
