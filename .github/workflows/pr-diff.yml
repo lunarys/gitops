@@ -94,9 +94,12 @@ jobs:
             app_name="${prefix:-$(basename "$app_dir")}"
             app_file="${prefix:+${prefix}-}app.yaml"
 
-            # Render both sides; ignore helm errors (e.g. app only exists on one side)
-            bash pr/scripts/install.sh   --template --env prod --include-all -d "pr/$app_dir"   $prefix_flag > /tmp/new.yaml 2>/dev/null || true
-            bash base/scripts/install.sh --template --env prod --include-all -d "base/$app_dir" $prefix_flag > /tmp/old.yaml 2>/dev/null || true
+            # Render both sides; if stdout is empty (e.g. helm failed), fall back to stderr so
+            # the error message shows up in the diff rather than silently producing no content.
+            bash pr/scripts/install.sh   --template --env prod --include-all -d "pr/$app_dir"   $prefix_flag > /tmp/new.yaml 2>/tmp/new-err.txt || true
+            [ -s /tmp/new.yaml ] || cat /tmp/new-err.txt > /tmp/new.yaml
+            bash base/scripts/install.sh --template --env prod --include-all -d "base/$app_dir" $prefix_flag > /tmp/old.yaml 2>/tmp/old-err.txt || true
+            [ -s /tmp/old.yaml ] || cat /tmp/old-err.txt > /tmp/old.yaml
 
             diff_output=$(diff -u /tmp/old.yaml /tmp/new.yaml || true)
             [ -z "$diff_output" ] && continue
