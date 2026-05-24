@@ -1,0 +1,116 @@
+name: PR Helm Diff
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '03_apps/apps/**'
+      - '02_bootstrap/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  helm-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          path: pr
+          fetch-depth: 0
+
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+          path: base
+
+      - name: Install helm
+        uses: azure/setup-helm@v4
+
+      - name: Install yq
+        run: |
+          wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          chmod +x /usr/local/bin/yq
+
+      - name: Detect changed app directories
+        id: changed-apps
+        run: |
+          changed=$(git -C pr diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep -E '^(03_apps/apps/|02_bootstrap/)' \
+            | sed -E 's|(03_apps/apps/[^/]+)/.*|\1|; s|(02_bootstrap/[^/]+)/.*|\1|' \
+            | sort -u)
+          echo "apps<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$changed" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "Changed app directories:"
+          echo "$changed"
+
+      - name: Generate diffs
+        id: diffs
+        env:
+          CHANGED_APPS: ${{ steps.changed-apps.outputs.apps }}
+        run: |
+          comment_body="## Helm Template Diff\n<!-- pr-diff-comment -->\n\n"
+          has_diff=false
+
+          while IFS= read -r app_dir; do
+            [ -z "$app_dir" ] && continue
+            app_name="$(basename "$app_dir")"
+
+            # Render both sides; ignore helm errors (e.g. app only exists on one side)
+            bash pr/scripts/install.sh   --template --env prod --include-all -d "pr/$app_dir"   > /tmp/new.yaml 2>/dev/null || true
+            bash base/scripts/install.sh --template --env prod --include-all -d "base/$app_dir" > /tmp/old.yaml 2>/dev/null || true
+
+            diff_output=$(diff -u /tmp/old.yaml /tmp/new.yaml || true)
+            [ -z "$diff_output" ] && continue
+
+            has_diff=true
+            changed_lines=$(echo "$diff_output" | grep -c '^[+-]' || true)
+
+            # Extract version change from app.yaml if available (Chart.yaml apps have no single version to show)
+            version_hint=""
+            if [ -f "base/$app_dir/app.yaml" ] && [ -f "pr/$app_dir/app.yaml" ]; then
+              old_version=$(yq '.helm.version' "base/$app_dir/app.yaml" 2>/dev/null || echo "")
+              new_version=$(yq '.helm.version' "pr/$app_dir/app.yaml" 2>/dev/null || echo "")
+              if [ -n "$old_version" ] && [ "$old_version" != "null" ] && [ "$old_version" != "$new_version" ]; then
+                version_hint=" — \`$old_version\` → \`$new_version\`"
+              fi
+            fi
+
+            # Truncate very large diffs
+            diff_display="$diff_output"
+            if [ "$(echo "$diff_output" | wc -l)" -gt 200 ]; then
+              diff_display="$(echo "$diff_output" | head -200)"$'\n''... (truncated, diff exceeds 200 lines)'
+            fi
+
+            comment_body+="### \`$app_name\`$version_hint\n"
+            comment_body+="<details><summary>$changed_lines changed lines</summary>\n\n"
+            comment_body+="\`\`\`diff\n$diff_display\n\`\`\`\n\n</details>\n\n"
+          done <<< "$CHANGED_APPS"
+
+          if [ "$has_diff" = false ]; then
+            comment_body+="_No rendered resource changes detected._\n"
+          fi
+
+          # Write to file to avoid length issues with env vars
+          printf "%b" "$comment_body" > /tmp/comment.md
+
+      - name: Post or update PR comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          marker="<!-- pr-diff-comment -->"
+          existing_id=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" \
+            --jq ".[] | select(.body | contains(\"$marker\")) | .id" | head -1)
+
+          if [ -n "$existing_id" ]; then
+            gh api "repos/$REPO/issues/comments/$existing_id" \
+              -X PATCH -f body="$(cat /tmp/comment.md)"
+          else
+            gh pr comment "$PR_NUMBER" --body-file /tmp/comment.md
+          fi
