@@ -41,20 +41,43 @@ jobs:
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Detect changed app directories
+      - name: Detect changed apps
         id: changed-apps
         run: |
           base_sha=$(git -C base rev-parse HEAD)
           raw_diff=$(git -C pr diff --name-only "${base_sha}...HEAD")
-          changed=$(echo "$raw_diff" \
+          changed_dirs=$(echo "$raw_diff" \
             | grep -E '^(03_apps/apps/|02_bootstrap/)' \
             | sed -E 's|(03_apps/apps/[^/]+)/.*|\1|; s|(02_bootstrap/[^/]+)/.*|\1|' \
             | sort -u || true)
+
+          # For each changed directory, discover all apps (plain + prefixed) by scanning
+          # both PR and base sides so additions and removals are both included.
+          # Output format: "dir prefix" per line, empty prefix for app.yaml/Chart.yaml apps.
+          apps=""
+          while IFS= read -r dir; do
+            [ -z "$dir" ] && continue
+            for side in "pr/$dir" "base/$dir"; do
+              [ -d "$side" ] || continue
+              if [ -f "$side/app.yaml" ] || [ -f "$side/Chart.yaml" ]; then
+                apps+="$dir "$'\n'
+              fi
+              for app_file in "$side"/*-app.yaml; do
+                [ -f "$app_file" ] || continue
+                prefix="$(basename "$app_file" -app.yaml)"
+                apps+="$dir $prefix"$'\n'
+              done
+            done
+          done <<< "$changed_dirs"
+
+          # Deduplicate while preserving insertion order
+          apps="$(echo "$apps" | awk 'NF && !seen[$0]++')"
+
           echo "apps<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$changed" >> "$GITHUB_OUTPUT"
+          echo "$apps" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
-          echo "Changed app directories:"
-          echo "$changed"
+          echo "Changed apps (dir prefix):"
+          echo "$apps"
 
       - name: Generate diffs
         id: diffs
@@ -64,13 +87,15 @@ jobs:
           comment_body="## Helm Template Diff\n<!-- pr-diff-comment -->\n\n"
           has_diff=false
 
-          while IFS= read -r app_dir; do
+          while IFS=' ' read -r app_dir prefix; do
             [ -z "$app_dir" ] && continue
-            app_name="$(basename "$app_dir")"
+            prefix_flag="${prefix:+--prefix $prefix}"
+            app_name="${prefix:-$(basename "$app_dir")}"
+            app_file="${prefix:+${prefix}-}app.yaml"
 
             # Render both sides; ignore helm errors (e.g. app only exists on one side)
-            bash pr/scripts/install.sh   --template --env prod --include-all -d "pr/$app_dir"   > /tmp/new.yaml 2>/dev/null || true
-            bash base/scripts/install.sh --template --env prod --include-all -d "base/$app_dir" > /tmp/old.yaml 2>/dev/null || true
+            bash pr/scripts/install.sh   --template --env prod --include-all -d "pr/$app_dir"   $prefix_flag > /tmp/new.yaml 2>/dev/null || true
+            bash base/scripts/install.sh --template --env prod --include-all -d "base/$app_dir" $prefix_flag > /tmp/old.yaml 2>/dev/null || true
 
             diff_output=$(diff -u /tmp/old.yaml /tmp/new.yaml || true)
             [ -z "$diff_output" ] && continue
@@ -80,9 +105,9 @@ jobs:
 
             # Extract version change from app.yaml if available (Chart.yaml apps have no single version to show)
             version_hint=""
-            if [ -f "base/$app_dir/app.yaml" ] && [ -f "pr/$app_dir/app.yaml" ]; then
-              old_version=$(yq '.helm.version' "base/$app_dir/app.yaml" 2>/dev/null || echo "")
-              new_version=$(yq '.helm.version' "pr/$app_dir/app.yaml" 2>/dev/null || echo "")
+            if [ -f "base/$app_dir/$app_file" ] && [ -f "pr/$app_dir/$app_file" ]; then
+              old_version=$(yq '.helm.version' "base/$app_dir/$app_file" 2>/dev/null || echo "")
+              new_version=$(yq '.helm.version' "pr/$app_dir/$app_file" 2>/dev/null || echo "")
               if [ -n "$old_version" ] && [ "$old_version" != "null" ] && [ "$old_version" != "$new_version" ]; then
                 version_hint=" — \`$old_version\` → \`$new_version\`"
               fi
