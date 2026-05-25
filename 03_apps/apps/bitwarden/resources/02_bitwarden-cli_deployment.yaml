@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: bitwarden-cli
-          image: ghcr.io/lunarys/bitwarden-cli:2025.8.0
+          image: ghcr.io/charlesthomas/bitwarden-cli:2026.4.1@sha256:defc4195eaae29d36396b0910ce37c78211d62b1a9f3447dfed2d0317fa4836b
           imagePullPolicy: IfNotPresent
           env:
             - name: BW_HOST
