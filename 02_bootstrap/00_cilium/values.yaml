@@ -51,8 +51,7 @@ cilium:
     tls:
       auto:
         # Prevent sync loop with argocd: https://github.com/cilium/cilium/issues/14550
-        # TODO: could be changed to certmanager?
-        method: "cronJob"
+        method: "cert-manager"
     ui:
       enabled: true
       ingress:
