@@ -72,6 +72,11 @@ networkpolicy:
     egress:
       toWorld: true
 
+# adguard seems to have a db lock on sqlite, so it can't start while the other pod is still running
+update:
+  strategy:
+    type: Recreate
+
 livenessProbe:
   enabled: true
   http:
