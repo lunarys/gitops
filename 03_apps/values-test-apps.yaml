@@ -6,7 +6,6 @@ enabled:
   - smb-driver
   - keda
 
-  - adguard-home
   - cert-manager
   - kyverno
   - crowdsec
