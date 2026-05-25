@@ -1,7 +1,7 @@
 ingress:
   host: jellyfin.svc.elda
-  accessControl:
-    externalAccessAllowed: false
+  traefik:
+    httpsRedirect: false
 
 image:
   name: ghcr.io/jellyfin/jellyfin
