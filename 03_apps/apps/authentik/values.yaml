@@ -17,7 +17,8 @@ authentik:
     # https://docs.goauthentik.io/install-config/configuration/
     name: file:///mnt/pgcreds/dbname
     host: file:///mnt/pgcreds/host
-    port: file:///mnt/pgcreds/port
+    # - https://github.com/goauthentik/authentik/issues/22580
+    #port: file:///mnt/pgcreds/port
     user: file:///mnt/pgcreds/username
     password: file:///mnt/pgcreds/password
 
