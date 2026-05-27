@@ -17,7 +17,7 @@ authentik:
     # https://docs.goauthentik.io/install-config/configuration/
     name: file:///mnt/pgcreds/dbname
     host: file:///mnt/pgcreds/host
-    # - https://github.com/goauthentik/authentik/issues/22580
+    # The worker seems to have an issue with parsing the port number as a string - invalid type. Maybe this helps. (authentik 2026.5.0)
     #port: file:///mnt/pgcreds/port
     user: file:///mnt/pgcreds/username
     password: file:///mnt/pgcreds/password
