@@ -33,7 +33,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v5
         with:
-          version: '3.13.0'
+          version: '3.21.2'
           
       - name: Lint Helm chart
         run: |
@@ -54,7 +54,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v5
         with:
-          version: '3.13.0'
+          version: '3.21.2'
           
       - name: Get chart info
         id: chart-info
@@ -106,7 +106,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v5
         with:
-          version: '3.13.0'
+          version: '3.21.2'
           
       - name: Download packaged chart
         uses: actions/download-artifact@v8
