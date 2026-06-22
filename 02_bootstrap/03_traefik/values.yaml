@@ -43,13 +43,13 @@ traefik:
       publishedService:
         enabled: true  # required for argo to not show ingresses as progressing
 
-  logs:
-    access:
-      enabled: true
-      format: json
-    general:
-      level: INFO
-      format: json
+  log:
+    level: INFO
+    format: json
+    
+  accessLog:
+    enabled: true
+    format: json      
 
 autoscale:
   enabled: false
