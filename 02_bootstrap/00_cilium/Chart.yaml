@@ -25,6 +25,6 @@ appVersion: "1.18.6"
 
 dependencies:
   - name: cilium
-    version: 1.19.4
+    version: 1.19.5
     repository: https://helm.cilium.io/
 
