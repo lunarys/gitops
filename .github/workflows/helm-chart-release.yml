@@ -28,12 +28,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         
       - name: Set up Helm
         uses: azure/setup-helm@v5
         with:
-          version: '3.13.0'
+          version: '4.2.2'
           
       - name: Lint Helm chart
         run: |
@@ -49,12 +49,12 @@ jobs:
       chart-exists: ${{ steps.check-release.outputs.exists }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         
       - name: Set up Helm
         uses: azure/setup-helm@v5
         with:
-          version: '3.13.0'
+          version: '4.2.2'
           
       - name: Get chart info
         id: chart-info
@@ -101,12 +101,12 @@ jobs:
       packages: write  # For publishing to GitHub Container Registry
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         
       - name: Set up Helm
         uses: azure/setup-helm@v5
         with:
-          version: '3.13.0'
+          version: '4.2.2'
           
       - name: Download packaged chart
         uses: actions/download-artifact@v8
@@ -169,7 +169,7 @@ jobs:
     if: needs.helm-package.outputs.chart-exists == 'false' || github.event.inputs.force_publish == 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         
       - name: Download packaged chart
         uses: actions/download-artifact@v8
