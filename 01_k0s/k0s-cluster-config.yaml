@@ -37,6 +37,16 @@ spec:
     nodeLocalLoadBalancing:  # <-- does not work with "single" node cluster, but works with a single controller+worker node 
       enabled: true
       type: EnvoyProxy
+  controllerManager:
+    extraArgs:
+      # Disable the node-ipam controller. Cilium owns IPAM (cluster-pool mode), so the
+      # node's .spec.podCIDRs are unused by the datapath. On this dual-stack node they were
+      # allocated IPv6-first, but --cluster-cidr is IPv4-first (primaryAddressFamily: IPv4),
+      # and node-ipam's RangeAllocator matches families strictly by index -> it tries to fit
+      # fd00::/117 into 10.244.0.0/16, the controller fails to init, and the *entire*
+      # kube-controller-manager crash-loops (taking down ReplicaSet, EndpointSlice, etc.).
+      # Surfaced by the k0s v1.36.1 upgrade.
+      allocate-node-cidrs: "false"
   # Removed and replaced with Pod Security Standards: https://docs.k0sproject.io/stable/podsecurity/
   #podSecurityPolicy:
   #  defaultPolicy: 00-k0s-privileged
