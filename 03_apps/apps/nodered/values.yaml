@@ -51,7 +51,7 @@ nodered:
           port: 2062
         hmip-xmlrpc:
           port: 2063
-      externalIPs:
+      loadBalancerIPs:
         - 10.0.4.7
 
   longhornstorage:

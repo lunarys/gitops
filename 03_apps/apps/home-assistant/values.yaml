@@ -30,7 +30,7 @@ services:
         port: 21063
       hmip-callback:
         port: 38087
-    externalIPs:
+    loadBalancerIPs:
       - 10.0.4.6
 
 

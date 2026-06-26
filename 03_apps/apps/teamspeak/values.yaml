@@ -9,8 +9,7 @@ service:
   port: 9987
   targetPort: 9987
   protocol: UDP
-  externalIPs:
-    - 10.0.4.201
+  type: LoadBalancer  # dynamic IP from the default LB pool (no fixed address needed)
 
 services:
   admin:
