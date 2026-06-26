@@ -28,6 +28,6 @@ dependencies:
     version: 41.0.0 
     repository: https://traefik.github.io/charts
   - name: autoscale
-    version: 4.3.0
+    version: 4.4.0
     repository: oci://ghcr.io/lunarys/charts
     condition: autoscale.enabled
