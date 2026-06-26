@@ -20,5 +20,7 @@ spec:
 
   # https://docs.cilium.io/en/latest/network/l2-announcements/#ip-types
   # https://kubernetes.io/docs/concepts/services-networking/service/#external-ips
-  externalIPs: true
+  # Service.spec.externalIPs is deprecated (removed in k8s v1.43) and no longer
+  # used anywhere — the chart now provisions LoadBalancer IPs via Cilium LB-IPAM.
+  externalIPs: false
   loadBalancerIPs: true

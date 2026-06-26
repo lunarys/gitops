@@ -8,6 +8,6 @@ longhornstorage:
 
 services:
   dns:
-    externalIPs:
+    loadBalancerIPs:
       - 10.0.4.2
       - fda0:f54f:5876::4:2

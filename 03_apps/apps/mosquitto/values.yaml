@@ -8,7 +8,7 @@ image:
 service:
   port: 1883
   targetPort: 1883
-  externalIPs:
+  loadBalancerIPs:
     - 10.0.4.5
 
 longhornstorage:
