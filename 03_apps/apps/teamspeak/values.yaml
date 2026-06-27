@@ -11,6 +11,7 @@ service:
   nodePort: 31239
   protocol: UDP
   type: LoadBalancer  # dynamic IP from the default LB pool (no fixed address needed)
+  allocateLoadBalancerNodePorts: true
 
 services:
   admin:
