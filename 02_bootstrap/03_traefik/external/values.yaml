@@ -30,8 +30,13 @@ traefik:
       mountPath: /mnt/crowdsec
       type: secret
 
+  service:
+    spec: 
+      allocateLoadBalancerNodePorts: true
+
   ports:
     web:
+      nodePort: 31255
       http:
         middlewares:
           - "traefik-common-rate-limit@kubernetescrd"
@@ -39,6 +44,7 @@ traefik:
           - "traefik-common-region-allowlist@kubernetescrd" # deliberately set geoblock after crowdsec to observe what crowdsec is doing
           - "traefik-common-security-headers@kubernetescrd"
     websecure:
+      nodePort: 31060
       http:
         middlewares:
           - "traefik-common-rate-limit@kubernetescrd"

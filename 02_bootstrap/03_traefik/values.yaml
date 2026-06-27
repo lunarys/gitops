@@ -23,6 +23,9 @@ traefik:
         middlewares:
           - "traefik-common-internal-access-allowlist-with-cluster@kubernetescrd"
 
+  service:
+    spec: 
+      allocateLoadBalancerNodePorts: false
 
   ingressRoute:
     dashboard:
