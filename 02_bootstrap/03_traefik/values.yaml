@@ -24,6 +24,10 @@ traefik:
           - "traefik-common-internal-access-allowlist-with-cluster@kubernetescrd"
 
   service:
+    labels:
+      custom.network/lb-pool: static
+    annotations:
+      lbipam.cilium.io/ips: "10.0.4.200"
     spec: 
       allocateLoadBalancerNodePorts: false
 

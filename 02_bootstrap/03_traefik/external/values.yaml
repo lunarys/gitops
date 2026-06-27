@@ -33,6 +33,8 @@ traefik:
   service:
     spec: 
       allocateLoadBalancerNodePorts: true
+    annotations:
+      lbipam.cilium.io/ips: "10.0.4.201"
 
   ports:
     web:
