@@ -1,4 +1,4 @@
 helm:
   chart: postgresdb-user-operator
-  version: 0.3.6
+  version: 0.3.7
   repo: oci://ghcr.io/lunarys/charts
