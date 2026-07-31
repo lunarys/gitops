@@ -6,6 +6,26 @@ on:
     paths:
       - '03_apps/apps/**'
       - '02_bootstrap/**'
+  # Callable from other repositories that follow the same app-directory
+  # convention (app.yaml / <prefix>-app.yaml plus values files per app dir).
+  workflow_call:
+    inputs:
+      app-roots:
+        description: >-
+          Space-separated directories whose immediate subdirectories are apps,
+          relative to the repository root.
+        type: string
+        default: '03_apps/apps 02_bootstrap'
+      environment:
+        description: Environment to render, i.e. which values-<env>.yaml is used.
+        type: string
+        default: prod
+      scripts-ref:
+        description: >-
+          When set, scripts/install.sh is taken from lunarys/gitops at this ref
+          for both sides of the diff, instead of from the calling repository.
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -28,6 +48,14 @@ jobs:
           ref: ${{ github.base_ref }}
           path: base
 
+      - name: Checkout install script
+        if: inputs.scripts-ref != ''
+        uses: actions/checkout@v7
+        with:
+          repository: lunarys/gitops
+          ref: ${{ inputs.scripts-ref }}
+          path: tools
+
       - name: Install helm
         uses: azure/setup-helm@v5
 
@@ -41,8 +69,13 @@ jobs:
 
       - name: Detect changed apps
         id: changed-apps
+        env:
+          APP_ROOTS: ${{ inputs.app-roots || '03_apps/apps 02_bootstrap' }}
         run: |
           base_sha=$(git -C base rev-parse HEAD)
+
+          # Path filter for the diff: any file below one of the app roots.
+          roots_re=$(printf '%s\n' $APP_ROOTS | sed 's|/*$|/|' | paste -sd'|' -)
 
           # For each changed file, map it to a (dir, prefix) pair.
           # A file belongs to a prefix if its name starts with "<prefix>-", where the prefix
@@ -52,7 +85,21 @@ jobs:
           while IFS= read -r changed_file; do
             [ -z "$changed_file" ] && continue
 
-            dir=$(echo "$changed_file" | sed -E 's|(03_apps/apps/[^/]+)/.*|\1|; s|(02_bootstrap/[^/]+)/.*|\1|')
+            # An app dir is exactly one level below a root, so loose files
+            # directly inside a root (e.g. 02_bootstrap/bootstrap.sh) are skipped.
+            dir=""
+            for root in $APP_ROOTS; do
+              root="${root%/}"
+              case "$changed_file" in
+                "$root"/*)
+                  rest="${changed_file#"$root"/}"
+                  case "$rest" in */*) dir="$root/${rest%%/*}" ;; esac
+                  break
+                  ;;
+              esac
+            done
+            [ -z "$dir" ] && continue
+
             filename=$(basename "$changed_file")
 
             # Find the longest matching prefix from *-app.yaml files on both sides
@@ -67,7 +114,7 @@ jobs:
 
             apps+="$dir $matched_prefix"$'\n'
           done < <(git -C pr diff --name-only "${base_sha}...HEAD" \
-            | grep -E '^(03_apps/apps/|02_bootstrap/)')
+            | grep -E "^($roots_re)" || true)
 
           # Deduplicate while preserving insertion order
           apps="$(echo "$apps" | awk 'NF && !seen[$0]++')"
@@ -82,11 +129,23 @@ jobs:
         id: diffs
         env:
           CHANGED_APPS: ${{ steps.changed-apps.outputs.apps }}
+          ENVIRONMENT: ${{ inputs.environment || 'prod' }}
+          SCRIPTS_REF: ${{ inputs.scripts-ref }}
         run: |
           # One comment file per affected app under /tmp/comments/<slug>.md.
           # The post step upserts one PR comment per file and deletes stale ones.
           rm -rf /tmp/comments && mkdir -p /tmp/comments
           has_diff=false
+
+          # With an external script both sides render through the same install.sh,
+          # so the diff shows app changes only; in-repo, each side uses its own.
+          if [ -n "$SCRIPTS_REF" ]; then
+            new_script=tools/scripts/install.sh
+            old_script=tools/scripts/install.sh
+          else
+            new_script=pr/scripts/install.sh
+            old_script=base/scripts/install.sh
+          fi
 
           # Per-app diff caps. GitHub rejects a comment body over 65536 chars, so
           # each app's diff is bounded to stay well under that on its own.
@@ -105,9 +164,9 @@ jobs:
 
             # Render both sides; if stdout is empty (e.g. helm failed), fall back to stderr so
             # the error message shows up in the diff rather than silently producing no content.
-            bash pr/scripts/install.sh   --template --env prod --include-all -d "pr/$app_dir"   $prefix_flag > /tmp/new.yaml 2>/tmp/new-err.txt || true
+            bash "$new_script" --template --env "$ENVIRONMENT" --include-all -d "pr/$app_dir"   $prefix_flag > /tmp/new.yaml 2>/tmp/new-err.txt || true
             [ -s /tmp/new.yaml ] || cat /tmp/new-err.txt > /tmp/new.yaml
-            bash base/scripts/install.sh --template --env prod --include-all -d "base/$app_dir" $prefix_flag > /tmp/old.yaml 2>/tmp/old-err.txt || true
+            bash "$old_script" --template --env "$ENVIRONMENT" --include-all -d "base/$app_dir" $prefix_flag > /tmp/old.yaml 2>/tmp/old-err.txt || true
             [ -s /tmp/old.yaml ] || cat /tmp/old-err.txt > /tmp/old.yaml
 
             diff_output=$(diff -u /tmp/old.yaml /tmp/new.yaml || true)
