@@ -5,8 +5,10 @@ fullnameOverride: step-certificates
 service:
   targetPort: 9000
   type: LoadBalancer
-  loadBalancerIPs:
-    - 10.0.4.8  # expose step-ca directly as it serves HTTPS itself and traefik can't verify the root CA
+  annotations:
+    lbipam.cilium.io/ips: "10.0.4.8" # expose step-ca directly as it serves HTTPS itself and traefik can't verify the root CA
+  labels:
+    custom.network/lb-pool: static
 
 ca:
   db:
