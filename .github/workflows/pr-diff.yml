@@ -83,14 +83,25 @@ jobs:
         env:
           CHANGED_APPS: ${{ steps.changed-apps.outputs.apps }}
         run: |
-          comment_body="## Helm Template Diff\n<!-- pr-diff-comment -->\n\n"
+          # One comment file per affected app under /tmp/comments/<slug>.md.
+          # The post step upserts one PR comment per file and deletes stale ones.
+          rm -rf /tmp/comments && mkdir -p /tmp/comments
           has_diff=false
+
+          # Per-app diff caps. GitHub rejects a comment body over 65536 chars, so
+          # each app's diff is bounded to stay well under that on its own.
+          MAX_DIFF_LINES=1000
+          MAX_DIFF_CHARS=60000
 
           while IFS=' ' read -r app_dir prefix; do
             [ -z "$app_dir" ] && continue
             prefix_flag="${prefix:+--prefix $prefix}"
             app_name="${prefix:-$(basename "$app_dir")}"
             app_file="${prefix:+${prefix}-}app.yaml"
+
+            # Stable per-app slug (also the comment marker key). Non-alphanumerics
+            # collapse to '-'; the dir keeps it unique across the two source trees.
+            slug=$(printf '%s' "$app_dir${prefix:+-$prefix}" | tr -c 'a-zA-Z0-9' '-' | tr -s '-' | sed 's/^-//; s/-$//')
 
             # Render both sides; if stdout is empty (e.g. helm failed), fall back to stderr so
             # the error message shows up in the diff rather than silently producing no content.
@@ -115,23 +126,31 @@ jobs:
               fi
             fi
 
-            # Truncate very large diffs
+            # Bound the diff by line count, then by byte count, so a single huge
+            # app can never push its comment past GitHub's hard limit.
             diff_display="$diff_output"
-            if [ "$(echo "$diff_output" | wc -l)" -gt 200 ]; then
-              diff_display="$(echo "$diff_output" | head -200)"$'\n''... (truncated, diff exceeds 200 lines)'
+            if [ "$(printf '%s\n' "$diff_output" | wc -l)" -gt "$MAX_DIFF_LINES" ]; then
+              diff_display="$(printf '%s\n' "$diff_output" | head -n "$MAX_DIFF_LINES")"$'\n'"... (truncated, diff exceeds $MAX_DIFF_LINES lines)"
+            fi
+            if [ "${#diff_display}" -gt "$MAX_DIFF_CHARS" ]; then
+              diff_display="$(printf '%s' "$diff_display" | head -c "$MAX_DIFF_CHARS")"$'\n'"... (truncated, diff exceeds $MAX_DIFF_CHARS chars)"
             fi
 
-            comment_body+="### \`$app_name\`$version_hint\n"
-            comment_body+="<details><summary>$changed_lines changed lines</summary>\n\n"
-            comment_body+="\`\`\`diff\n$diff_display\n\`\`\`\n\n</details>\n\n"
+            # Build with real newlines (no printf %b) so backslashes/percent signs
+            # in the diff are never reinterpreted.
+            {
+              printf '%s\n\n' "## Helm Template Diff — \`$app_name\`$version_hint"
+              printf '%s\n\n' "<details><summary>$changed_lines changed lines</summary>"
+              printf '%s\n' '```diff'
+              printf '%s\n' "$diff_display"
+              printf '%s\n\n' '```'
+              printf '%s\n' '</details>'
+            } > "/tmp/comments/$slug.md"
           done <<< "$CHANGED_APPS"
 
           if [ "$has_diff" = false ]; then
-            comment_body+="_No rendered resource changes detected._\n"
+            printf '%s\n\n%s\n' "## Helm Template Diff" "_No rendered resource changes detected._" > /tmp/comments/__no_diff__.md
           fi
-
-          # Write to file to avoid length issues with env vars
-          printf "%b" "$comment_body" > /tmp/comment.md
 
       - name: Post or update PR comment
         env:
@@ -139,24 +158,74 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
           API_URL: ${{ github.api_url }}
+          COMMENTS_DIR: /tmp/comments
         run: |
-          marker="<!-- pr-diff-comment -->"
-          body_json=$(python3 -c "import json; print(json.dumps(open('/tmp/comment.md').read()))")
-          existing_id=$(curl -sf -H "Authorization: token $GH_TOKEN" \
-            "$API_URL/repos/$REPO/issues/$PR_NUMBER/comments" \
-            | python3 -c "import sys,json; cs=json.load(sys.stdin); ids=[str(c['id']) for c in cs if '<!-- pr-diff-comment -->' in c.get('body','')]; print(ids[0] if ids else '')" \
-            2>/dev/null || echo "")
+          python3 - <<'PY'
+          import json, os, glob, urllib.request, urllib.error
 
-          if [ -n "$existing_id" ]; then
-            curl -sf -X PATCH \
-              -H "Authorization: token $GH_TOKEN" \
-              -H "Content-Type: application/json" \
-              "$API_URL/repos/$REPO/issues/comments/$existing_id" \
-              -d "{\"body\": $body_json}"
-          else
-            curl -sf -X POST \
-              -H "Authorization: token $GH_TOKEN" \
-              -H "Content-Type: application/json" \
-              "$API_URL/repos/$REPO/issues/$PR_NUMBER/comments" \
-              -d "{\"body\": $body_json}"
-          fi
+          api    = os.environ["API_URL"].rstrip("/")
+          repo   = os.environ["REPO"]
+          pr     = os.environ["PR_NUMBER"]
+          token  = os.environ["GH_TOKEN"]
+          cdir   = os.environ["COMMENTS_DIR"]
+
+          MARKER_PREFIX = "<!-- pr-diff-comment"          # matches new per-app and legacy markers
+          def marker(slug): return f"<!-- pr-diff-comment:{slug} -->"
+
+          def call(method, url, payload=None):
+              data = json.dumps(payload).encode() if payload is not None else None
+              req = urllib.request.Request(url, data=data, method=method)
+              req.add_header("Authorization", f"token {token}")
+              req.add_header("Accept", "application/vnd.github+json")
+              if data is not None:
+                  req.add_header("Content-Type", "application/json")
+              with urllib.request.urlopen(req) as resp:
+                  raw = resp.read()
+                  return json.loads(raw) if raw else None
+
+          # Desired comments: one per file, keyed by slug (filename without .md).
+          desired = {}
+          for path in sorted(glob.glob(os.path.join(cdir, "*.md"))):
+              slug = os.path.splitext(os.path.basename(path))[0]
+              with open(path) as f:
+                  desired[slug] = f"{marker(slug)}\n{f.read()}"
+
+          # Existing pr-diff comments on the PR, keyed by slug ("" = legacy no-slug marker).
+          existing = {}
+          page = 1
+          while True:
+              batch = call("GET", f"{api}/repos/{repo}/issues/{pr}/comments?per_page=100&page={page}")
+              if not batch:
+                  break
+              for c in batch:
+                  body = c.get("body", "")
+                  if MARKER_PREFIX not in body:
+                      continue
+                  slug = ""
+                  m = body.split("<!-- pr-diff-comment:", 1)
+                  if len(m) == 2:
+                      slug = m[1].split(" -->", 1)[0].strip()
+                  existing.setdefault(slug, []).append(c["id"])
+              page += 1
+
+          # Upsert each desired comment; reuse one existing id per slug if present.
+          for slug, body in desired.items():
+              ids = existing.get(slug, [])
+              if ids:
+                  cid = ids.pop(0)
+                  call("PATCH", f"{api}/repos/{repo}/issues/comments/{cid}", {"body": body})
+                  print(f"updated  {slug} (#{cid})")
+              else:
+                  new = call("POST", f"{api}/repos/{repo}/issues/{pr}/comments", {"body": body})
+                  print(f"created  {slug} (#{new['id']})")
+
+          # Whatever ids remain are orphans: legacy comments, slugs no longer
+          # present, and duplicates (the reused id was popped during upsert).
+          for slug, ids in existing.items():
+              for cid in ids:
+                  try:
+                      call("DELETE", f"{api}/repos/{repo}/issues/comments/{cid}")
+                      print(f"deleted  {slug or '(legacy)'} (#{cid})")
+                  except urllib.error.HTTPError as e:
+                      print(f"skip delete #{cid}: {e}")
+          PY
