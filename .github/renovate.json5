@@ -62,6 +62,13 @@
         {
             "matchManagers": ["github-actions"],
             "groupName": "GitHub Actions"
+        },
+        {
+            // Helm datasource doesn't expose the chart's source repo, so point
+            // Renovate at the upstream GitHub repo for changelogs/release notes.
+            "matchDatasources": ["helm"],
+            "matchPackageNames": ["csi-driver-smb"],
+            "sourceUrl": "https://github.com/kubernetes-csi/csi-driver-smb"
         }
     ]
 }
