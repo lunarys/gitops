@@ -14,13 +14,20 @@ service:
 
 env:
   TZ: "Europe/Berlin"
-  CROWDSEC_URL: "http://crowdsec-service:8080"
-  CROWDSEC_USER:
+
+  # Since v2026.7.16 the app persists LAPI config into /app/data/config.yaml on first boot
+  # and then ignores the legacy CROWDSEC_URL/CROWDSEC_USER/CROWDSEC_PASSWORD vars for good
+  # (data/ is a persistent volume here, so that freeze would stick). Use the CONFIG_ env
+  # override mechanism (added in v2026.7.17) instead, which is re-applied in memory on every
+  # start, so secret rotations here keep taking effect.
+  CONFIG_INSTANCE_LAPI_URL: "http://crowdsec-service:8080"
+  CONFIG_INSTANCE_LAPI_AUTH_TYPE: "password"
+  CONFIG_INSTANCE_LAPI_AUTH_USERNAME:
     valueFrom:
       secretKeyRef:
         name: crowdsec-secrets
         key: web_ui_user
-  CROWDSEC_PASSWORD:
+  CONFIG_INSTANCE_LAPI_AUTH_PASSWORD:
     valueFrom:
       secretKeyRef:
         name: crowdsec-secrets
