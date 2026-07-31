@@ -1,6 +1,6 @@
 helm:
   chart: cert-manager
-  version: v1.20.2
+  version: v1.21.1
   repo: oci://quay.io/jetstack/charts
 
 settings:
