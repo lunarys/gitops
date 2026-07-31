@@ -17,7 +17,7 @@ This document describes the security model for this k8s cluster (k0s + Cilium + 
 ## Access Control Model
 
 ### Internal services (default)
-All services are internal-only by default. Route via the internal Traefik ingress class (`traefik`) — the IP allowlist (`common-internal-access-allowlist-with-cluster`, covering `10.0.0.0/20` and cluster-internal IPs) is applied automatically as an entrypoint default; no per-ingress annotation needed.
+All services are internal-only by default. Route via the internal Traefik ingress class (`traefik`) — the IP allowlist (`common-internal-access-allowlist-with-cluster`, covering the LAN — `10.0.0.0/20` and IPv6 ULA `fda0:f54f:5876::/48` — plus cluster-internal IPs) is applied automatically as an entrypoint default; no per-ingress annotation needed.
 It can be restricted futher (disallow general in-cluster access) by using the `common-internal-access-allowlist` middleware.
 
 ### Public services (opt-in)
@@ -51,8 +51,8 @@ Public services additionally need:
 
 | Middleware | Applied by | Purpose |
 |-----------|-----------|---------|
-| `common-internal-access-allowlist-with-cluster` | internal Traefik (entrypoint default) | IP allowlist (10.0.0.0/20, 192.168.178.0/23 + cluster CIDR) |
-| `common-internal-access-allowlist` | internal Traefik (optional, per-ingress) | IP allowlist without cluster CIDR |
+| `common-internal-access-allowlist-with-cluster` | internal Traefik (entrypoint default) | IP allowlist (LAN `10.0.0.0/20` + ULA `fda0:f54f:5876::/48`, plus cluster CIDRs `10.243.0.0/16`, `10.245.0.0/16`) |
+| `common-internal-access-allowlist` | internal Traefik (optional, per-ingress) | IP allowlist, LAN only (`10.0.0.0/20` + ULA `fda0:f54f:5876::/48`), no cluster CIDR |
 | `common-rate-limit` | external Traefik (entrypoint default) | Rate limiting |
 | `common-crowdsec-bouncer` | external Traefik (entrypoint default) | CrowdSec IP reputation check |
 | `common-region-allowlist` | external Traefik (entrypoint default) | GeoBlock by region |
