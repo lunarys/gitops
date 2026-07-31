@@ -11,7 +11,7 @@ enabled:
   - adguard-sync
 
   - cert-manager
-  - kyverno
+  #- kyverno
   - crowdsec
   - cloudnative-pg
 

@@ -7,7 +7,7 @@ enabled:
   - keda
 
   - cert-manager
-  - kyverno
+  #- kyverno
   - crowdsec
 
   - cloudnative-pg
