@@ -64,6 +64,17 @@
             "groupName": "GitHub Actions"
         },
         {
+            // n8n publishes its beta line to the registry as plain semver tags
+            // (next/beta -> 2.36.x while stable -> 2.35.x), so the docker
+            // datasource can't tell them apart. GitHub marks those releases as
+            // prereleases, so look versions up there instead and let the default
+            // ignoreUnstable filter them out. Release tags are "n8n@<version>".
+            "matchPackageNames": ["docker.n8n.io/n8nio/n8n", "ghcr.io/n8n-io/n8n"],
+            "overrideDatasource": "github-releases",
+            "overridePackageName": "n8n-io/n8n",
+            "extractVersion": "^n8n@(?<version>.+)$"
+        },
+        {
             // Helm datasource doesn't expose the chart's source repo, so point
             // Renovate at the upstream GitHub repo for changelogs/release notes.
             "matchDatasources": ["helm"],
