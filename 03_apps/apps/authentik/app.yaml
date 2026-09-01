@@ -1,4 +1,4 @@
 helm:
   chart: authentik
-  version: 2026.5.6
+  version: 2026.8.1
   repo: https://charts.goauthentik.io
