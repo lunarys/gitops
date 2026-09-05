@@ -147,6 +147,56 @@ Files can have environment suffixes:
 | `resources-prod/*.yaml` | Production-only additional manifests |
 | `resources-test/*.yaml` | Test-only additional manifests |
 | `*-test.yaml` / `*-prod.yaml` | Environment-specific overrides |
+| `<dir>/.overlay.yaml` | Declares `<dir>` as an *overlay* — see below. Tooling metadata, not a deployment input. |
+
+## Overlays
+
+An **overlay** is a subdirectory of an app directory that declares a *second release of
+the same chart*, with its values layered on top of the parent's. It exists because a
+`<prefix>-app.yaml` sibling cannot express this: a prefix *replaces* the base values,
+whereas an overlay *layers* on them.
+
+Declared by a hidden `.overlay.yaml` in the subdirectory:
+
+```yaml
+name: traefik-external     # required; must match the Argo Application that deploys it
+# namespace: <name>        # optional, defaults to `name`
+```
+
+The marker is hidden and listed in `.helmignore` because, unlike every other file in the
+directory, it is metadata read only by tooling (`install.sh --overlay`, the PR helm-diff
+workflow) and never by Argo. Argo *cannot* read it: the apps-wrapper chart globs
+`apps/*/**` within `03_apps/`, so it cannot reach `02_bootstrap/`, which is why the
+bootstrap Applications are hand-written templates.
+
+What layers and what does not:
+
+| Source | Resolution |
+|--------|-----------|
+| chart values | `values.yaml` → `values-<env>.yaml` → `<dir>/values.yaml` → `<dir>/values-<env>.yaml` |
+| `network.yaml`, `secrets.yaml`, `resources/` | from `<dir>` **alone**, never inherited from the parent |
+
+The asymmetry is deliberate and load-bearing: if `network.yaml` were inherited,
+`traefik-external` would render the internal instance's permissive policy instead of its
+own restrictive one.
+
+Deploy or render an overlay with:
+
+```bash
+scripts/install.sh -d 02_bootstrap/03_traefik --overlay external --env prod --template
+```
+
+`scripts/check-argo-coverage.py` (run by the PR diff workflow) gates the contract: every
+declared overlay must be deployed by an Application of the declared name with matching
+namespace and value files, and every Application that layers values from a subdirectory
+must have a marker. That second direction catches a forgotten `.overlay.yaml` — the
+failure mode a hidden marker makes more likely.
+
+> **One overlay exists in this repo** (`02_bootstrap/03_traefik/external` →
+> `traefik-external`). The feature is deliberately minimal; if a second one appears,
+> revisit the design rather than extending it. The endgame that would remove the concept
+> entirely is to drive `install.sh` and the PR diff off the *rendered* Argo Applications
+> instead of filename conventions, so nothing needs restating.
 
 ## Network Policy Pattern
 

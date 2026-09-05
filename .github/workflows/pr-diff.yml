@@ -26,6 +26,12 @@ on:
           for both sides of the diff, instead of from the calling repository.
         type: string
         default: ''
+      wrapper-chart:
+        description: >-
+          Helm chart that renders the Argo Applications, used to reconcile the diff's
+          view of the repo against what is actually deployed. Empty disables the check.
+        type: string
+        default: '03_apps'
 
 permissions:
   contents: read
@@ -67,6 +73,34 @@ jobs:
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
 
+      # The diff below discovers apps from filename conventions, which restate what the
+      # Argo Applications already declare. This reconciles the two, so that a unit the
+      # workflow cannot see fails the build rather than silently going undiffed.
+      - name: Check Argo coverage
+        env:
+          WRAPPER_CHART: ${{ inputs.wrapper-chart == '' && '' || (inputs.wrapper-chart || '03_apps') }}
+          APP_ROOTS: ${{ inputs.app-roots || '03_apps/apps 02_bootstrap' }}
+          ENVIRONMENT: ${{ inputs.environment || 'prod' }}
+          SCRIPTS_REF: ${{ inputs.scripts-ref }}
+        run: |
+          if [ -z "$WRAPPER_CHART" ] || [ ! -d "pr/$WRAPPER_CHART" ]; then
+            echo "No wrapper chart at 'pr/$WRAPPER_CHART' -- nothing to reconcile."
+            exit 0
+          fi
+          if [ -n "$SCRIPTS_REF" ]; then
+            install_script="$(realpath tools/scripts/install.sh)"
+            checker=tools/scripts/check-argo-coverage.py
+          else
+            install_script=scripts/install.sh
+            checker=pr/scripts/check-argo-coverage.py
+          fi
+          python3 "$checker" \
+            --repo pr \
+            --wrapper-chart "$WRAPPER_CHART" \
+            --env "$ENVIRONMENT" \
+            --app-roots "$APP_ROOTS" \
+            --install-script "$install_script"
+
       - name: Detect changed apps
         id: changed-apps
         env:
@@ -81,6 +115,12 @@ jobs:
           # A file belongs to a prefix if its name starts with "<prefix>-", where the prefix
           # is identified by a <prefix>-app.yaml file on either side of the diff.
           # Files that don't match any prefix belong to the unprefixed app (empty prefix).
+          #
+          # A third kind of unit exists: an overlay, i.e. a subdirectory declaring a second
+          # release of the same chart with its values layered on top of the parent's (see
+          # AGENTS.md). Units are emitted as dir|prefix|overlay, with at most one of the
+          # latter two set. '|' rather than a space, because 'read' collapses runs of
+          # whitespace and would shift an overlay into the prefix field.
           apps=""
           while IFS= read -r changed_file; do
             [ -z "$changed_file" ] && continue
@@ -88,17 +128,40 @@ jobs:
             # An app dir is exactly one level below a root, so loose files
             # directly inside a root (e.g. 02_bootstrap/bootstrap.sh) are skipped.
             dir=""
+            rel=""
             for root in $APP_ROOTS; do
               root="${root%/}"
               case "$changed_file" in
                 "$root"/*)
                   rest="${changed_file#"$root"/}"
-                  case "$rest" in */*) dir="$root/${rest%%/*}" ;; esac
+                  case "$rest" in
+                    */*)
+                      dir="$root/${rest%%/*}"
+                      rel="${rest#*/}"   # path within the app dir
+                      ;;
+                  esac
                   break
                   ;;
               esac
             done
             [ -z "$dir" ] && continue
+
+            # A change inside a declared overlay affects that overlay alone: the parent
+            # release does not read the overlay's files. Globbed with a literal dot,
+            # since the marker is hidden and '*' would not match it.
+            overlay=""
+            case "$rel" in
+              */*)
+                candidate="${rel%%/*}"
+                if [ -f "pr/$dir/$candidate/.overlay.yaml" ] || [ -f "base/$dir/$candidate/.overlay.yaml" ]; then
+                  overlay="$candidate"
+                fi
+                ;;
+            esac
+            if [ -n "$overlay" ]; then
+              apps+="$dir||$overlay"$'\n'
+              continue
+            fi
 
             filename=$(basename "$changed_file")
 
@@ -112,7 +175,18 @@ jobs:
               fi
             done
 
-            apps+="$dir $matched_prefix"$'\n'
+            apps+="$dir|$matched_prefix|"$'\n'
+
+            # A change to the app's own values also changes every overlay of it, because
+            # overlays layer on top of these values. Prefixed files are exempt: an overlay
+            # layers on the unprefixed base only, so <prefix>-values.yaml cannot affect it.
+            if [ -z "$matched_prefix" ]; then
+              for marker in pr/$dir/*/.overlay.yaml base/$dir/*/.overlay.yaml; do
+                [ -f "$marker" ] || continue
+                o=$(basename "$(dirname "$marker")")
+                apps+="$dir||$o"$'\n'
+              done
+            fi
           done < <(git -C pr diff --name-only "${base_sha}...HEAD" \
             | grep -E "^($roots_re)" || true)
 
@@ -122,7 +196,7 @@ jobs:
           echo "apps<<EOF" >> "$GITHUB_OUTPUT"
           echo "$apps" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
-          echo "Changed apps (dir prefix):"
+          echo "Changed apps (dir|prefix|overlay):"
           echo "$apps"
 
       - name: Generate diffs
@@ -152,21 +226,34 @@ jobs:
           MAX_DIFF_LINES=1000
           MAX_DIFF_CHARS=60000
 
-          while IFS=' ' read -r app_dir prefix; do
+          while IFS='|' read -r app_dir prefix overlay; do
             [ -z "$app_dir" ] && continue
             prefix_flag="${prefix:+--prefix $prefix}"
-            app_name="${prefix:-$(basename "$app_dir")}"
+            overlay_flag="${overlay:+--overlay $overlay}"
             app_file="${prefix:+${prefix}-}app.yaml"
+
+            # An overlay's name is declared, never derived from its directory name, so that
+            # it can be checked against the Argo Application that deploys it.
+            if [ -n "$overlay" ]; then
+              marker="pr/$app_dir/$overlay/.overlay.yaml"
+              [ -f "$marker" ] || marker="base/$app_dir/$overlay/.overlay.yaml"
+              app_name=$(yq -r '.name' "$marker")
+            else
+              app_name="${prefix:-$(basename "$app_dir")}"
+            fi
 
             # Stable per-app slug (also the comment marker key). Non-alphanumerics
             # collapse to '-'; the dir keeps it unique across the two source trees.
-            slug=$(printf '%s' "$app_dir${prefix:+-$prefix}" | tr -c 'a-zA-Z0-9' '-' | tr -s '-' | sed 's/^-//; s/-$//')
+            # Keyed off the declared name, so renaming the overlay directory does not
+            # orphan its comment. Unchanged for non-overlay units.
+            slug_key="$app_dir${prefix:+-$prefix}${overlay:+-$app_name}"
+            slug=$(printf '%s' "$slug_key" | tr -c 'a-zA-Z0-9' '-' | tr -s '-' | sed 's/^-//; s/-$//')
 
             # Render both sides; if stdout is empty (e.g. helm failed), fall back to stderr so
             # the error message shows up in the diff rather than silently producing no content.
-            bash "$new_script" --template --env "$ENVIRONMENT" --include-all -d "pr/$app_dir"   $prefix_flag > /tmp/new.yaml 2>/tmp/new-err.txt || true
+            bash "$new_script" --template --env "$ENVIRONMENT" --include-all -d "pr/$app_dir"   $prefix_flag $overlay_flag > /tmp/new.yaml 2>/tmp/new-err.txt || true
             [ -s /tmp/new.yaml ] || cat /tmp/new-err.txt > /tmp/new.yaml
-            bash "$old_script" --template --env "$ENVIRONMENT" --include-all -d "base/$app_dir" $prefix_flag > /tmp/old.yaml 2>/tmp/old-err.txt || true
+            bash "$old_script" --template --env "$ENVIRONMENT" --include-all -d "base/$app_dir" $prefix_flag $overlay_flag > /tmp/old.yaml 2>/tmp/old-err.txt || true
             [ -s /tmp/old.yaml ] || cat /tmp/old-err.txt > /tmp/old.yaml
 
             diff_output=$(diff -u /tmp/old.yaml /tmp/new.yaml || true)

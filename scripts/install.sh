@@ -14,6 +14,7 @@ UNINSTALL=false
 INCLUDE_NETWORK=false
 INCLUDE_SECRETS=false
 INCLUDE_RESOURCES=false
+OVERLAY=""
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -28,6 +29,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     -p|--prefix)
       PREFIX="$2"
+      shift 2
+      ;;
+    -o|--overlay)
+      OVERLAY="$2"
       shift 2
       ;;
     --dry-run)
@@ -71,6 +76,8 @@ while [[ $# -gt 0 ]]; do
       echo "  -d, --directory DIR       Directory containing app.yaml (default: current directory)"
       echo "  -e, --env ENVIRONMENT     Environment (test, prod, dev, etc.)"
       echo "  -p, --prefix PREFIX       App file prefix for multi-app directories (e.g. policy-reporter)"
+      echo "  -o, --overlay DIR         Render the overlay in DIR: a second release of the same chart,"
+      echo "                            with DIR/values.yaml layered on top of the base values"
       echo "      --dry-run             Print the helm command that would be run (don't execute)"
       echo "      --template            Render the Helm chart templates without installing"
       echo "      --uninstall           Uninstall the Helm release"
@@ -88,6 +95,7 @@ while [[ $# -gt 0 ]]; do
       echo "  $0 --template --env test"
       echo "  $0 --template --include-all --env prod"
       echo "  $0 -d apps/kyverno --prefix policy-reporter --env prod"
+      echo "  $0 -d 02_bootstrap/03_traefik --overlay external --env prod"
       echo "  $0 -d apps/kyverno --prefix policy-reporter --env prod --uninstall"
       exit 0
       ;;
@@ -101,7 +109,39 @@ done
 
 APPFILE="${PREFIX:+${PREFIX}-}app.yaml"
 
+# --prefix and --overlay both select "which release in this directory", but with opposite
+# value semantics: a prefix *replaces* the base values, an overlay *layers* on top of them.
+if [ -n "$PREFIX" ] && [ -n "$OVERLAY" ]; then
+  echo "Error: --prefix and --overlay are mutually exclusive" >&2
+  exit 1
+fi
+case "$OVERLAY" in
+  */*|.|..)
+    echo "Error: --overlay must be a single directory name, got '$OVERLAY'" >&2
+    exit 1
+    ;;
+esac
+
 cd "$DIRECTORY"
+
+# An overlay is declared by a hidden .overlay.yaml marker, which carries the release name.
+# Hidden, and excluded via .helmignore, because unlike every other file in the directory it
+# is metadata for tooling and is never an input to a deployment. The name is never derived
+# from the directory name -- it must match the Argo Application that deploys this overlay.
+# NOTE: one overlay exists today (traefik-external); revisit before generalizing further.
+if [ -n "$OVERLAY" ]; then
+  OVERLAY_MARKER="$OVERLAY/.overlay.yaml"
+  if [ ! -f "$OVERLAY_MARKER" ]; then
+    echo "Error: $DIRECTORY/$OVERLAY_MARKER not found -- '$OVERLAY' is not a declared overlay" >&2
+    exit 1
+  fi
+  OVERLAY_NAME="$(yq -r '.name // ""' "$OVERLAY_MARKER")"
+  if [ -z "$OVERLAY_NAME" ]; then
+    echo "Error: $DIRECTORY/$OVERLAY_MARKER must declare a 'name'" >&2
+    exit 1
+  fi
+  OVERLAY_NAMESPACE="$(yq -r '.namespace // .name' "$OVERLAY_MARKER")"
+fi
 
 # Check if environment is set, if not ask for confirmation (skip for uninstall)
 if [ "$UNINSTALL" = false ] && [ -z "$ENVIRONMENT" ]; then
@@ -140,6 +180,18 @@ if [ -n "$ENVIRONMENT" ] && [ -f "${PREFIX:+${PREFIX}-}values-${ENVIRONMENT}.yam
     values_file_option="$values_file_option -f ${PREFIX:+${PREFIX}-}values-${ENVIRONMENT}.yaml"
 fi
 
+# Overlay values layer on top of the base ones, so the order is
+# values.yaml -> values-<env>.yaml -> <overlay>/values.yaml -> <overlay>/values-<env>.yaml.
+# Note the consequence: the overlay's base values win over the parent's env-specific values.
+if [ -n "$OVERLAY" ]; then
+    if [ -f "$OVERLAY/values.yaml" ]; then
+        values_file_option="$values_file_option -f $OVERLAY/values.yaml"
+    fi
+    if [ -n "$ENVIRONMENT" ] && [ -f "$OVERLAY/values-${ENVIRONMENT}.yaml" ]; then
+        values_file_option="$values_file_option -f $OVERLAY/values-${ENVIRONMENT}.yaml"
+    fi
+fi
+
 if [ -n "$ENVIRONMENT" ]; then
   export KUBECONFIG="$HOME/.kube/config-$ENVIRONMENT"
 fi
@@ -171,14 +223,31 @@ if [ -f "$APPFILE" ]; then
     RELEASE_NAME="$APPNAME"
   fi
 
+  # An overlay is its own release in its own namespace, both taken from the marker
+  if [ -n "$OVERLAY" ]; then
+    NAMESPACE="$OVERLAY_NAMESPACE"
+    RELEASE_NAME="$OVERLAY_NAME"
+  fi
+
   if [ "$EXPERIMENTAL_HELM_CHART" == "true" ]; then
     helm_charts_dir="$(realpath "$SCRIPT_DIR/../../helm-charts")"
-    location="$helm_charts_dir"
-    values_file_option="-f $helm_charts_dir/values.yaml $values_file_option"
+    subchart_dir="$helm_charts_dir/charts/$CHART"
+    if [ -d "$subchart_dir" ]; then
+      location="$subchart_dir"
+    else
+      location="$helm_charts_dir"
+      values_file_option="-f $helm_charts_dir/values.yaml $values_file_option"
+    fi
   elif grep -q "^oci://" <<< "$REPOSITORY"; then
     location="${REPOSITORY%/}/$CHART"
   else
     location="--repo ${REPOSITORY%/} $CHART"
+  fi
+
+  # --version is invalid for local directory paths (experimental mode)
+  version_flag="--version $VERSION"
+  if [ "$EXPERIMENTAL_HELM_CHART" == "true" ]; then
+    version_flag=""
   fi
 
   if [ "$UNINSTALL" = true ]; then
@@ -190,17 +259,23 @@ if [ -f "$APPFILE" ]; then
     fi
   elif [ "$DRY_RUN" = true ]; then
     echo "Dry run mode - would execute:"
-    echo "helm upgrade --install \"$RELEASE_NAME\" $location --version \"$VERSION\" --create-namespace --namespace \"$NAMESPACE\" $values_file_option"
+    echo "helm upgrade --install \"$RELEASE_NAME\" $location $version_flag --create-namespace --namespace \"$NAMESPACE\" $values_file_option"
   elif [ "$TEMPLATE_ONLY" = true ]; then
-    helm template "$RELEASE_NAME" $location --version "$VERSION" --namespace "$NAMESPACE" $values_file_option
+    helm template "$RELEASE_NAME" $location $version_flag --namespace "$NAMESPACE" $values_file_option
   else
-    helm upgrade --install "$RELEASE_NAME" $location --version "$VERSION" --create-namespace --namespace "$NAMESPACE" $values_file_option
+    helm upgrade --install "$RELEASE_NAME" $location $version_flag --create-namespace --namespace "$NAMESPACE" $values_file_option
   fi
 
 elif [ -f "Chart.yaml" ]; then
   # Local Helm chart: the directory itself is the chart
   NAMESPACE="$APPNAME"
   RELEASE_NAME="${PREFIX:-$APPNAME}"
+
+  # An overlay is its own release in its own namespace, both taken from the marker
+  if [ -n "$OVERLAY" ]; then
+    NAMESPACE="$OVERLAY_NAMESPACE"
+    RELEASE_NAME="$OVERLAY_NAME"
+  fi
 
   if [ "$UNINSTALL" = true ]; then
     if [ "$DRY_RUN" = true ]; then
@@ -234,8 +309,17 @@ if [ "$INCLUDE_NETWORK" = true ] || [ "$INCLUDE_SECRETS" = true ] || [ "$INCLUDE
   else
     MAIN_HELM_REPO="$(yq ".mainHelmRepo" "$GLOBAL_VALUES")"
 
+    # Sidecar sources are taken from the overlay directory ALONE and are never inherited
+    # from the parent, mirroring 03_apps/templates/00_traefik-external-application.yaml.
+    # Inheriting them would be actively wrong: traefik-external would render the internal
+    # instance's permissive network policy instead of its own restrictive one.
+    SIDECAR_DIR="."
+    if [ -n "$OVERLAY" ]; then
+      SIDECAR_DIR="$OVERLAY"
+    fi
+
     if [ "$INCLUDE_NETWORK" = true ]; then
-      NETWORK_FILE="${PREFIX:+${PREFIX}-}network.yaml"
+      NETWORK_FILE="$SIDECAR_DIR/${PREFIX:+${PREFIX}-}network.yaml"
       if [ -f "$NETWORK_FILE" ]; then
         NETWORK_CHART="$(yq ".networkPolicyChart" "$GLOBAL_VALUES")"
         _NETWORK_VERSION="$(yq ".version" "$NETWORK_FILE")"
@@ -260,7 +344,7 @@ if [ "$INCLUDE_NETWORK" = true ] || [ "$INCLUDE_SECRETS" = true ] || [ "$INCLUDE
     fi
 
     if [ "$INCLUDE_SECRETS" = true ]; then
-      SECRETS_FILE="${PREFIX:+${PREFIX}-}secrets.yaml"
+      SECRETS_FILE="$SIDECAR_DIR/${PREFIX:+${PREFIX}-}secrets.yaml"
       if [ -f "$SECRETS_FILE" ]; then
         SECRETS_CHART="$(yq ".secretsChart" "$GLOBAL_VALUES")"
         _SECRETS_VERSION="$(yq ".version" "$SECRETS_FILE")"
@@ -269,8 +353,8 @@ if [ "$INCLUDE_NETWORK" = true ] || [ "$INCLUDE_SECRETS" = true ] || [ "$INCLUDE
         fi
         SECRETS_LOCATION="${MAIN_HELM_REPO%/}/$SECRETS_CHART"
         secrets_values="-f $SECRETS_FILE"
-        if [ -n "$ENVIRONMENT" ] && [ -f "${PREFIX:+${PREFIX}-}secrets-${ENVIRONMENT}.yaml" ]; then
-          secrets_values="$secrets_values -f ${PREFIX:+${PREFIX}-}secrets-${ENVIRONMENT}.yaml"
+        if [ -n "$ENVIRONMENT" ] && [ -f "$SIDECAR_DIR/${PREFIX:+${PREFIX}-}secrets-${ENVIRONMENT}.yaml" ]; then
+          secrets_values="$secrets_values -f $SIDECAR_DIR/${PREFIX:+${PREFIX}-}secrets-${ENVIRONMENT}.yaml"
         fi
         if [ "$UNINSTALL" = true ]; then
           if [ "$DRY_RUN" = true ]; then
@@ -292,21 +376,21 @@ if [ "$INCLUDE_NETWORK" = true ] || [ "$INCLUDE_SECRETS" = true ] || [ "$INCLUDE
       if [ "$UNINSTALL" = true ]; then
         : # No-op: kubectl delete would require knowing resource types/names; handle manually
       elif [ "$DRY_RUN" = true ]; then
-        if [ -d resources ]; then echo "kubectl apply -f resources/"; fi
-        if [ -n "$ENVIRONMENT" ] && [ -d "resources-${ENVIRONMENT}" ]; then
-          echo "kubectl apply -f \"resources-${ENVIRONMENT}/\""
+        if [ -d "$SIDECAR_DIR/resources" ]; then echo "kubectl apply -f $SIDECAR_DIR/resources/"; fi
+        if [ -n "$ENVIRONMENT" ] && [ -d "$SIDECAR_DIR/resources-${ENVIRONMENT}" ]; then
+          echo "kubectl apply -f \"$SIDECAR_DIR/resources-${ENVIRONMENT}/\""
         fi
       elif [ "$TEMPLATE_ONLY" = true ]; then
-        if [ -d resources ]; then
-          for f in resources/*.yaml; do [ -f "$f" ] && cat "$f"; done
+        if [ -d "$SIDECAR_DIR/resources" ]; then
+          for f in "$SIDECAR_DIR/resources/"*.yaml; do [ -f "$f" ] && cat "$f"; done
         fi
-        if [ -n "$ENVIRONMENT" ] && [ -d "resources-${ENVIRONMENT}" ]; then
-          for f in "resources-${ENVIRONMENT}/"*.yaml; do [ -f "$f" ] && cat "$f"; done
+        if [ -n "$ENVIRONMENT" ] && [ -d "$SIDECAR_DIR/resources-${ENVIRONMENT}" ]; then
+          for f in "$SIDECAR_DIR/resources-${ENVIRONMENT}/"*.yaml; do [ -f "$f" ] && cat "$f"; done
         fi
       else
-        if [ -d resources ]; then kubectl apply -f resources/; fi
-        if [ -n "$ENVIRONMENT" ] && [ -d "resources-${ENVIRONMENT}" ]; then
-          kubectl apply -f "resources-${ENVIRONMENT}/"
+        if [ -d "$SIDECAR_DIR/resources" ]; then kubectl apply -f "$SIDECAR_DIR/resources/"; fi
+        if [ -n "$ENVIRONMENT" ] && [ -d "$SIDECAR_DIR/resources-${ENVIRONMENT}" ]; then
+          kubectl apply -f "$SIDECAR_DIR/resources-${ENVIRONMENT}/"
         fi
       fi
     fi

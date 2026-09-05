@@ -1,0 +1,12 @@
+# Declares this directory as an "overlay": a second release of the parent chart
+# (02_bootstrap/03_traefik) with these values layered on top of the parent's.
+#
+# Tooling-only metadata -- read by scripts/install.sh --overlay and by the PR helm-diff
+# workflow, never by Argo. It is hidden and .helmignore'd to make that explicit, since
+# every other file here IS a deployment input. The Application that actually deploys this
+# overlay is 03_apps/templates/00_traefik-external-application.yaml; `name` must match it.
+#
+# One overlay exists in this repo. If a second one appears, revisit the design rather
+# than extending it -- see AGENTS.md.
+name: traefik-external
+# namespace: defaults to `name`

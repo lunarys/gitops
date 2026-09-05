@@ -1,0 +1,7 @@
+# Patterns to ignore when packaging this chart.
+# Files here that are NOT chart inputs: tooling metadata and docs.
+.overlay.yaml
+external/.overlay.yaml
+install.sh
+README.md
+external/README.md
