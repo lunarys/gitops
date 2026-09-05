@@ -8,3 +8,7 @@ dependencies:
   - name: longhorn
     version: 1.12.0
     repository: https://charts.longhorn.io
+
+  - name: externalsecrets
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts
