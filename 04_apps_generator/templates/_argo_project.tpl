@@ -1,30 +1,26 @@
-{{- define "apps-wrapper.project" -}}
+{{- /*
+  The previous version enumerated every Helm repository any app in the project
+  pulled from, so Argo's source allowlist would permit them. After pre-rendering
+  an Application only ever reads the gitops repo, so that loop is gone and the
+  AppProject's remaining job is namespace restriction -- which is the part that
+  was actually load-bearing.
+*/ -}}
+{{- define "apps-generator.project" -}}
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: {{ include "apps-wrapper.name" . }}-project
+  name: {{ .app.name }}-project
+  namespace: {{ .root.Values.argo.namespace }}
 spec:
-  description: Project for application {{ include "apps-wrapper.name" . }} 
+  description: Project for application {{ .app.name }}
   sourceRepos:
-    # my generic app helm charts, including subcharts for secrets, smb-storage, ...
-    - {{ .root.Values.mainHelmRepo | trimPrefix "oci://" }}
-    # this repo, containing the wrapper chart or the values.yaml file 
-    - {{ include "apps-wrapper.repoUrl" . }}
-    {{- range $app, $settings := .settings.apps }}
-      {{- if and (hasKey $settings.files "app.yaml") (index $settings.files "app.yaml" "helm" "repo") }}
-    # repo from {{ .settings.prefix }}app.yaml
-    - {{ index $settings.files "app.yaml" "helm" "repo" | trimPrefix "oci://" }}
-      {{- end }}
-    {{- end }}
+    - {{ .root.Values.mainRepo }}
   destinations:
-    {{- $server := include "apps-wrapper.server" . }}
-    - namespace: {{ include "apps-wrapper.namespace" . }}
-      server: {{ $server }}
-    {{- if index .settings "settings" "additionalNamespaces" }}
-    {{- range $ns := (index .settings "settings" "additionalNamespaces") }}
+    - namespace: {{ include "apps-generator.namespace" . }}
+      server: {{ .root.Values.argo.server }}
+    {{- range $ns := (dig "additionalNamespaces" (list) .app.settings) }}
     - namespace: {{ $ns }}
-      server: {{ $server }}
-    {{- end }}
+      server: {{ $.root.Values.argo.server }}
     {{- end }}
   clusterResourceWhitelist:
     - group: '*'

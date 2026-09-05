@@ -1,0 +1,42 @@
+{{- /*
+  Control-plane resources: per app, a Namespace, Kargo Project, ProjectConfig,
+  Warehouse, and one Stage per environment the app is enabled in.
+
+  Rendered ONCE, from the union of the two enabled lists, into
+  stage/prod/_kargo/. These live in the single Kargo control plane in the prod
+  cluster -- they are part of that cluster's desired state, which is why they
+  share the prod stage branch rather than having one of their own.
+
+  Rendering this per environment would emit each Warehouse twice with a
+  conflicting Stage set, and a prod-only app would get no Warehouse at all from
+  the test render. It would also make the prod Stage unable to decide how to
+  take Freight, since that depends on whether a test Stage exists.
+
+  Debug with:
+    helm template . -f values.yaml -f values-kargo.yaml \
+      --show-only templates/kargo-resources.yaml
+*/ -}}
+{{- include "apps-generator.validate" . }}
+{{- if eq .Values.mode "kargo" }}
+{{- $idx := include "apps-generator.scan" . | fromYaml }}
+{{- $inTestAll := dig "test" (list) $idx.enabled }}
+{{- $inProdAll := dig "prod" (list) $idx.enabled }}
+{{- range $dir, $app := $idx.apps }}
+{{- $inTest := has $dir $inTestAll }}
+{{- $inProd := has $dir $inProdAll }}
+{{- if or $inTest $inProd }}
+---
+{{ include "apps-generator.kargoProject" (dict "root" $ "app" $app) }}
+---
+{{ include "apps-generator.warehouse" (dict "root" $ "app" $app) }}
+{{- if $inTest }}
+---
+{{ include "apps-generator.stage" (dict "root" $ "app" $app "env" "test") }}
+{{- end }}
+{{- if $inProd }}
+---
+{{ include "apps-generator.stage" (dict "root" $ "app" $app "env" "prod" "upstream" $inTest) }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

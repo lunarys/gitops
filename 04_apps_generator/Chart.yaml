@@ -1,8 +1,8 @@
 apiVersion: v2
-name: apps wrapper
-description: Wraps ArgoCD applications and projects
+name: apps-generator
+description: >-
+  Generates the meta resources for every application: the Argo CD Applications
+  and AppProjects that reconcile pre-rendered manifests, and the Kargo Projects,
+  Warehouses and Stages that produce them.
 type: application
 version: 0.1.0
-dependencies:
-  - name: application-wrapper
-    version: 0.8.0

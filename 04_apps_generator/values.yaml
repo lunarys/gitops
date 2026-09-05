@@ -1,55 +1,167 @@
-# -- Path to the root of this helm chart within the git repository.
-baseDir: 03_apps
-# -- The main git repository where the apps are stored. (This repository.)
+# Generator for the meta resources.
+#
+# One chart, three renders. See `mode` below, and render.sh for how to run all
+# three locally.
+
+# -- What this render emits.
+#
+#   argo   Argo CD Application + AppProject, for ONE cluster.
+#          Rendered once per environment; `environment` selects which.
+#   kargo  Kargo Namespace + Project + ProjectConfig + Warehouse + Stages.
+#          Rendered ONCE, covering both environments at the same time.
+#
+# The split follows scope, not preference. Applications live in each cluster's
+# Argo CD. Warehouses and Stages live in the single Kargo control plane and
+# describe both environments at once -- rendering them per environment would
+# emit each Warehouse twice with a conflicting Stage set, and a prod-only app
+# would get no Warehouse at all from the test render.
+#
+# Deliberately empty by default so a render with no values file fails loudly.
+mode: ""
+
+# -- Which environment `mode: argo` renders for.
+#
+# Required when mode is argo; must be empty when mode is kargo. That cross-check
+# is what makes an argo/kargo mix-up fail instead of quietly rendering the wrong
+# kind of resource into a stage branch -- the two words differ by one character
+# and both are valid values, so nothing else would catch it.
+environment: ""
+
+# -- Directory inside THIS CHART where the app directories are assembled.
+#
+# Helm's .Files can only read within the chart directory, and the apps live in
+# a sibling directory (05_apps/). The promotion -- and render.sh -- copy them to
+# <chart>/apps/ before templating. Nothing else in the design depends on this.
+appsDir: apps
+
+# -- Path of the app tree within mainRepo.
+#
+# Distinct from appsDir: Kargo filters Freight by repository path, so Warehouse
+# includePaths must describe the layout on disk, not the assembled one.
+appRoot: 05_apps
+
+# -- The git repository holding both the authored sources and the rendered
+# manifests.
 mainRepo: https://github.com/lunarys/gitops.git
+
+# -- Branch the Warehouses watch for source changes.
+sourceBranch: main
+
+# -- Branch prefix the rendered manifests are committed to (stage/test, stage/prod).
+renderedBranchPrefix: stage/
+
+# -- Private companion repository.
+#
+# Not yet migrated to the Kargo flow; retained so the existing private
+# app-of-apps keeps working. The per-app `privateSettings` merge is gone -- no
+# app in 05_apps used it.
 privateRepo: https://github.com/lunarys/gitops-private.git
 privateRepoEnabled: true
-# -- The helm repository where my base helm charts are stored.
-mainHelmRepo: oci://ghcr.io/lunarys/charts
-# -- The helm repository where the application-wrapper helm chart is stored.
-wrapperHelmRepo: oci://ghcr.io/lunarys
 
-# -- The revision of the `mainRepo` to use.
-targetRevision: main
+# -- Kargo control plane.
+kargo:
+  # Prefix for each app's Kargo Project, and therefore for its namespace.
+  #
+  # MUST NOT be empty. 22 of 23 app directories deploy into a namespace named
+  # after the directory, and a Kargo Project creates a like-named namespace in
+  # the same (prod) cluster. Without the prefix the Project namespace and the
+  # workload namespace are the same namespace.
+  projectPrefix: kargo-app-
 
-# - The helm chart within the `mainHelmRepo` that is used to render secrets.
-secretsChart: "externalsecrets"
-# - The version of the `secretsChart` to use by default.
-secretsChartVersion: "4.6.0"
+  # The shared ClusterPromotionTask every app Stage invokes.
+  promotionTask: render-and-open-pr
 
-# -- The helm chart within the `mainHelmRepo` that is used to render network policies
-networkPolicyChart: "networkpolicy"
-# -- The version of the `networkPolicyChart` to use by default.
-networkPolicyChartVersion: "4.6.0"
+  # environment -> Kargo controller shard. A Stage runs on the shard of the
+  # cluster it changes, so a promotion never half-runs against a cluster that
+  # is powered off.
+  shards:
+    test: test
+    prod: prod
 
-# -- The values file to use for the application in the respective cluster, e.g. `values-test.yaml`.
-# In addition to the default `values.yaml` file.
-targetValuesFile: ""
-# -- The secrets file to use for the application in the respective cluster, e.g. `secrets-test.yaml`.
-# In addition to the default `secrets.yaml` file.
-targetSecretsFile: ""
-# -- The directory to use for additional resources in the respective cluster, e.g. `resources-test`.
-# Currently only applies to `cilium`.
-targetResourcesDir: ""
+# -- Argo CD.
+argo:
+  # Namespace Argo CD itself runs in, in each cluster. This is where the
+  # generated Application and AppProject resources are created -- not where the
+  # workloads land, and not the Kargo Project namespace.
+  namespace: argocd
+  # Destination cluster for every Application. Each cluster's Argo CD deploys
+  # into itself, so this is the in-cluster address in both.
+  server: https://kubernetes.default.svc
 
-# -- The namespace the ArgoCD applications and projects are created in. Must match the namespace of the ArgoCD instance.
-namespace: argocd
-# Destination kubernetes cluster.
-server: https://kubernetes.default.svc
-
-# -- Only apps listed here will be rendered. Set via `values-[env]-apps.yaml`.
-enabled: []
-
-# -- Settings that are passed to the application-wrapper chart as default settings for all apps and projects.
+# -- Defaults for every app. Override per app in <app>/settings.yaml, which is
+# merged over these deeply -- so setting one key under `kargo` keeps the rest.
+#
+# Two more are set per app only, with no default here:
+#   applicationName  overrides the directory name for every generated resource.
+#                    The directory is still what Kargo filters paths by.
+#   namespace        the workload namespace. Defaults to the app name.
 defaultSettings:
-  # -- Whether to enable automatic sync by default.
   autoSync: false
   selfHeal: true
   prune: false
-  # -- Additional namespaces that should be allowed in a project.
+  # Extra namespaces the app's AppProject may deploy into.
   additionalNamespaces: []
-  # -- Whether there are settings in the separate, private gitops repository.
-  privateSettings: false
-  # -- Whether to use server-side apply by default.
   serverSideApply: true
+  # Whether CRDs are excluded from the rendered output. Inverted into the
+  # promotion task's includeCRDs var -- under pre-rendering this is a render
+  # decision rather than an Argo sync option.
   skipCrds: true
+
+  # -- Settings with no Argo equivalent: these exist only because promotion
+  # exists, and are meaningless outside it.
+  kargo:
+    # How often the Warehouse polls the repository for new commits. Lower means
+    # a release candidate appears sooner and more git traffic; the promotion
+    # itself is manual either way, so this only moves when Freight shows up.
+    interval: 5m
+
+    # Automatic | Manual. Manual stops the Warehouse creating Freight on its
+    # own, so candidates only appear when explicitly requested -- a way to
+    # freeze one app without disabling it or touching the enabled lists.
+    freightCreationPolicy: Automatic
+
+    # How many candidate commits Kargo keeps per Warehouse.
+    discoveryLimit: 20
+
+    # Open a PR against the stage branch and block until it merges, rather than
+    # pushing straight to it. Per environment: reviewing the same chart bump
+    # twice is often not worth it in test, while prod usually is.
+    openPR:
+      test: true
+      prod: true
+
+    # Extra Warehouse excludePaths, relative to the app directory. The generator
+    # already excludes markdown at any depth and example/ + examples/; this is
+    # for the app-specific ones -- docker/, .old/, resources.disabled/ and the
+    # like, which cannot affect the rendered output but would otherwise produce
+    # a release candidate every time they change.
+    excludePaths: []
+
+    # Opt in to real verification. Without it Kargo falls back to implicit
+    # verification: Freight counts as verified once the Argo CD Application
+    # reports Healthy.
+    #
+    #   verification:
+    #     analysisTemplates:
+    #       - name: smoke-test
+    #         kind: ClusterAnalysisTemplate
+    #
+    # Note the kind. AnalysisTemplate is namespaced, so with a Project per app a
+    # plain namespaced template would have to exist in every project using it.
+    verification: {}
+
+# -- DROPPED by pre-rendering, listed so their absence is not mistaken for an
+# oversight:
+#
+#   secretsChart / secretsChartVersion
+#   networkPolicyChart / networkPolicyChartVersion
+#       Ordinary Chart.yaml dependencies of each app now, pinned per app. A
+#       platform bump is a source change to the apps that actually use it.
+#
+#   targetValuesFile / targetSecretsFile / targetResourcesDir
+#       These told Argo CD which value files to layer. Argo renders nothing any
+#       more; Kargo layers them at promotion time.
+#
+#   baseDir / mainHelmRepo / wrapperHelmRepo / targetRevision
+#       Only existed to point Argo at chart sources. An Application has one
+#       source now: a directory of plain manifests on a stage branch.

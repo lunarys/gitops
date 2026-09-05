@@ -1,122 +1,50 @@
-{{- define "apps-wrapper.application" -}}
+{{- /*
+  The previous version was 122 lines, 82 of them a multi-source block: one
+  source per chart, one for the shared externalsecrets chart, one for
+  networkpolicy, a ref-only source so those could reach value files, one for the
+  private repo, and one each for resources/ and resources-<env>/ -- every one
+  conditional on which files the app happened to have.
+
+  Pre-rendering deletes all of it. There is exactly one source: a directory of
+  plain manifests on a stage branch. Nothing here varies with the app's chart or
+  its version, so the Application resource stops changing when the app changes,
+  which is what removes the wrapper-before-app sync ordering problem.
+*/ -}}
+{{- define "apps-generator.application" -}}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ include "apps-wrapper.name" . }}
+  name: {{ .app.name }}
+  namespace: {{ .root.Values.argo.namespace }}
+  annotations:
+    # Restricts which Kargo Stage may drive this Application. Stage names are
+    # bare `test`/`prod` because the Kargo Project already namespaces them.
+    kargo.akuity.io/authorized-stage: {{ include "apps-generator.kargoProjectName" . }}:{{ .env }}
 spec:
+  project: {{ .app.name }}-project
   destination:
-    namespace: {{ include "apps-wrapper.namespace" . }}
-    server: {{ include "apps-wrapper.server" . }}
-  project: {{ .settings.project }}-project
-  sources:
-  {{- $appFilesPrefix := .settings.prefix }}
-  {{- if hasKey .settings.files "Chart.yaml" }}
-    # from Chart.yaml
-    - helm:
-        version: v3
-        {{- if .settings.settings.skipCrds }}
-        skipCrds: {{ .settings.settings.skipCrds }}
-        {{- end }}
-        valueFiles:
-          - {{ $appFilesPrefix }}values.yaml
-          {{- if include "apps-wrapper.targetValuesFile" .root }}
-          - {{ $appFilesPrefix }}{{ include "apps-wrapper.targetValuesFile" .root }}
-          {{- end }}
-          {{- if and .root.Values.privateRepoEnabled .root.Values.privateRepo (include "apps-wrapper.hasPrivateSettings" .) (include "apps-wrapper.targetValuesFile" .root) }}
-          - $privateRepo/config/{{ .settings.name }}/{{ $appFilesPrefix }}{{ include "apps-wrapper.targetValuesFile" .root }}
-          {{- end }}
-        ignoreMissingValueFiles: true
-      repoURL: {{ include "apps-wrapper.repoUrl" . }}
-      targetRevision: {{ include "apps-wrapper.targetRevision" . }}
-      path: {{ include "apps-wrapper.fullpath" . }}
-  {{- end }}
-  {{- if hasKey .settings.files "app.yaml" }}
-    # from app.yaml
-    {{- $defaultHelmRepo := .root.Values.mainHelmRepo }}
-    {{- with (index .settings.files "app.yaml") }}
-    - repoURL: {{ .helm.repo | default $defaultHelmRepo | trimPrefix "oci://" | quote }}
-      {{- if .helm.chart }}
-      chart: {{ .helm.chart | quote }}
-      {{- else if .helm.path }}
-      path: {{ .helm.path | quote }}
-      {{- else }}
-        {{ fail "Either 'helm.chart' or 'helm.path' setting is required in app.yaml" }}
-      {{- end }}
-      targetRevision: {{ .helm.version | quote }}
-    {{- end }}
-      helm:
-        #releaseName: ''
-        {{- if .settings.settings.skipCrds }}
-        skipCrds: {{ .settings.settings.skipCrds }}
-        {{- end }}
-        valueFiles:
-          - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}values.yaml'
-          {{- if include "apps-wrapper.targetValuesFile" .root }}
-          - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}{{ include "apps-wrapper.targetValuesFile" .root }}'
-          {{- end }}
-          {{- if and .root.Values.privateRepoEnabled .root.Values.privateRepo (include "apps-wrapper.hasPrivateSettings" .) (include "apps-wrapper.targetValuesFile" .root) }}
-          - $privateRepo/config/{{ .settings.project }}/{{ $appFilesPrefix }}{{ include "apps-wrapper.targetValuesFile" .root }}
-          {{- end }}
-        ignoreMissingValueFiles: true
-  {{- end }}
-  {{- if hasKey .settings.files "secrets.yaml" }}
-    # secrets
-    - repoURL: {{ .root.Values.mainHelmRepo | trimPrefix "oci://" }}
-      chart: {{ .root.Values.secretsChart }}
-      targetRevision: {{ index .settings.files "secrets.yaml" "version" | default .root.Values.secretsChartVersion }}
-      helm:
-        skipCrds: true
-        valueFiles:
-          - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}secrets.yaml'
-          {{- if include "apps-wrapper.targetSecretsFile" .root }}
-          - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}{{ include "apps-wrapper.targetSecretsFile" .root }}'
-          {{- end }}
-  {{- end }}
-  {{- if hasKey .settings.files "network.yaml" }}
-    # network policy
-    - repoURL: {{ .root.Values.mainHelmRepo | trimPrefix "oci://" }}
-      chart: {{ .root.Values.networkPolicyChart }}
-      targetRevision: {{ index .settings.files "network.yaml" "version" | default .root.Values.networkPolicyChartVersion }}
-      helm:
-        skipCrds: true
-        valueFiles:
-          - '$repo/{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}network.yaml'
-  {{- end }}
-  {{- if or (hasKey .settings.files "app.yaml") (hasKey .settings.files "secrets.yaml") (hasKey .settings.files "network.yaml") }}
-    # repo reference for values.yaml for app.yaml, network.yaml or secrets.yaml for secrets
-    - repoURL: {{ include "apps-wrapper.repoUrl" . }}
-      targetRevision: {{ include "apps-wrapper.targetRevision" . }}
-      ref: repo
-  {{- end }}
-  {{- if and .root.Values.privateRepoEnabled .root.Values.privateRepo (include "apps-wrapper.hasPrivateSettings" .) (include "apps-wrapper.targetValuesFile" .root) }}
-    # private repo for values.yaml
-    - repoURL: {{ .root.Values.privateRepo }}
-      targetRevision: {{ include "apps-wrapper.targetRevision" . }}
-      ref: privateRepo
-  {{- end }}
-  {{- if include "apps-wrapper.hasAdditionalResources" . }}
-    # additional resources
-    - repoURL: {{ include "apps-wrapper.repoUrl" . }}
-      targetRevision: {{ include "apps-wrapper.targetRevision" . }}
-      path: '{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}resources'
-  {{- end }}
-  {{- if include "apps-wrapper.hasEnvResources" . }}
-    # env-specific additional resources
-    - repoURL: {{ include "apps-wrapper.repoUrl" . }}
-      targetRevision: {{ include "apps-wrapper.targetRevision" . }}
-      path: '{{ include "apps-wrapper.fullpath" . }}/{{ $appFilesPrefix }}{{ include "apps-wrapper.targetResourcesDir" .root }}'
-  {{- end }}
+    namespace: {{ include "apps-generator.namespace" . }}
+    server: {{ .root.Values.argo.server }}
+  source:
+    repoURL: {{ .root.Values.mainRepo }}
+    # Kargo pins the exact commit via argocd-update; this is the fallback.
+    targetRevision: {{ .root.Values.renderedBranchPrefix }}{{ .env }}
+    path: {{ .app.name }}
+    directory:
+      recurse: true
   syncPolicy:
     automated:
-      enabled: {{ .settings.settings.autoSync }}
-      selfHeal: {{ .settings.settings.selfHeal }}
-      {{- if .settings.settings.prune }}
-      {{- /* This setting is excluded when disabled, as it leads to OutOfSync after a Sync of the Application resources for some reason */ -}}
-      prune: {{ .settings.settings.prune }}
+      enabled: {{ dig "autoSync" false .app.settings }}
+      selfHeal: {{ dig "selfHeal" true .app.settings }}
+      {{- if dig "prune" false .app.settings }}
+      # Excluded when disabled: an explicit `prune: false` leaves the
+      # Application permanently OutOfSync.
+      prune: true
       {{- end }}
     syncOptions:
+      # Workload namespaces are created by Argo. This is NOT true of the Kargo
+      # Project namespaces, which are emitted as explicit labelled Namespace
+      # manifests instead -- see _kargo_project.tpl.
       - CreateNamespace=true
-      {{- if hasKey .settings.settings "serverSideApply" }}
-      - ServerSideApply={{ .settings.settings.serverSideApply }}
-      {{- end }}
+      - ServerSideApply={{ dig "serverSideApply" true .app.settings }}
 {{- end }}

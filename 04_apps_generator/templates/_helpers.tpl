@@ -1,74 +1,70 @@
-{{- define "apps-wrapper.namespace" -}}
-{{- /* project is set in the apps context, but not in the project context */ -}}
-{{- $defaultNamespace := ternary .settings.project .settings.name (hasKey .settings "project") -}}
-{{ dig "settings" "namespace" $defaultNamespace .settings }}
+{{- /*
+  Every helper takes (dict "root" $ "app" <entry from apps-generator.scan>).
+*/ -}}
+
+{{- /* The workload namespace. Defaults to the application name. */ -}}
+{{- define "apps-generator.namespace" -}}
+{{ dig "namespace" .app.name .app.settings }}
 {{- end }}
 
-{{- define "apps-wrapper.fullpath" -}}
-{{ .root.Values.baseDir | trimAll "/" }}/{{ .settings.dir }}
+{{- /*
+  The app's Kargo Project, which is also its namespace in the prod cluster.
+
+  The prefix is not cosmetic: without it this collides with the workload
+  namespace, which is named after the directory for 22 of 23 apps. Kargo will
+  not adopt a namespace that lacks the kargo.akuity.io/project label, so the
+  Project would simply never initialize.
+*/ -}}
+{{- define "apps-generator.kargoProjectName" -}}
+{{ .root.Values.kargo.projectPrefix }}{{ .app.name }}
 {{- end }}
 
-{{- define "apps-wrapper.name" -}}
-{{ .settings.name }}
-{{- end }}
+{{- /*
+  Whether this app opens a PR against the stage branch for this environment.
 
-{{- define "apps-wrapper.repoUrl" -}}
-{{ .root.Values.mainRepo }}
-{{- end }}
+  Accepts either shape, because an app overriding it in settings.yaml is likely
+  to write the scalar form and a silent wrong answer here means a promotion
+  quietly bypasses review:
 
-{{- define "apps-wrapper.targetRevision" -}}
-{{ .root.Values.targetRevision }}
-{{- end }}
-
-{{- define "apps-wrapper.server" -}}
-{{ .root.Values.server }}
-{{- end }}
-
-{{- define "apps-wrapper.targetValuesFile" -}}
-{{- if .Values.targetValuesFile -}}
-{{ .Values.targetValuesFile }}
-{{- else if .Values.environment -}}
-values-{{ .Values.environment }}.yaml
+    openPR: false              -- applies to both environments
+    openPR: {test: false, prod: true}
+*/ -}}
+{{- define "apps-generator.openPR" -}}
+{{- $v := dig "kargo" "openPR" (dict) .app.settings -}}
+{{- if kindIs "bool" $v -}}
+{{ $v }}
+{{- else -}}
+{{ dig .env true $v }}
 {{- end -}}
 {{- end }}
 
-{{- define "apps-wrapper.targetSecretsFile" -}}
-{{- if .Values.targetSecretsFile -}}
-{{ .Values.targetSecretsFile }}
-{{- else if .Values.environment -}}
-secrets-{{ .Values.environment }}.yaml
+{{- /*
+  Validates the mode/environment pair. Included unconditionally by both
+  emitters, outside their mode guards, so it runs whichever render is active.
+
+  `argo` and `kargo` differ by one character and both are valid, so a swap
+  between values-argo-<env>.yaml and values-kargo.yaml would not be caught by
+  checking the mode alone. The environment cross-check catches it in both
+  directions: the argo files set an environment, the kargo file must not.
+*/ -}}
+{{- define "apps-generator.validate" -}}
+{{- $mode := .Values.mode | default "" -}}
+{{- if not (has $mode (list "argo" "kargo")) -}}
+  {{- fail (printf "values.mode must be \"argo\" or \"kargo\", got %q -- pass values-argo-<env>.yaml or values-kargo.yaml" $mode) -}}
 {{- end -}}
-{{- end }}
-
-{{- define "apps-wrapper.targetResourcesDir" -}}
-{{- if .Values.targetResourcesDir -}}
-{{ .Values.targetResourcesDir }}
-{{- else if .Values.environment -}}
-resources-{{ .Values.environment }}
+{{- if eq $mode "argo" -}}
+  {{- if not .Values.environment -}}
+    {{- fail "mode=argo requires `environment` (test or prod): Argo CD resources are rendered per cluster" -}}
+  {{- end -}}
+  {{- if not (has .Values.environment (list "test" "prod")) -}}
+    {{- fail (printf "values.environment must be \"test\" or \"prod\", got %q" .Values.environment) -}}
+  {{- end -}}
+{{- else -}}
+  {{- if .Values.environment -}}
+    {{- fail (printf "mode=kargo must not set `environment` (got %q): Kargo resources are rendered once and cover both environments" .Values.environment) -}}
+  {{- end -}}
 {{- end -}}
-{{- end }}
-
-{{- define "apps-wrapper.hasAdditionalResources" -}}
-{{- range $filename, $_ := .settings.files }}
-{{- if hasPrefix "resources/" $filename }}
-true
-{{- end }}
-{{- end }}
-{{- end }}
-
-{{- define "apps-wrapper.hasEnvResources" -}}
-{{- $envDir := include "apps-wrapper.targetResourcesDir" .root -}}
-{{- if $envDir -}}
-{{- range $filename, $_ := .settings.files }}
-{{- if hasPrefix (printf "%s/" $envDir) $filename }}
-true
-{{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
-
-{{- define "apps-wrapper.hasPrivateSettings" -}}
-{{- if .settings.settings.privateSettings -}}
-true
+{{- if not .Values.kargo.projectPrefix -}}
+  {{- fail "values.kargo.projectPrefix must not be empty: a Kargo Project creates a namespace of its own name, which would collide with the app's workload namespace" -}}
 {{- end -}}
 {{- end }}
