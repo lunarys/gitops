@@ -1,1 +1,2 @@
-fullnameOverride : "external-secrets"
+external-secrets:
+  fullnameOverride : "external-secrets"

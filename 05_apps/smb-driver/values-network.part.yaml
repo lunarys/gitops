@@ -1,0 +1,6 @@
+networkpolicy:
+  preset:
+    namespaceIsolation: true
+    egress:
+      toKubeApi: true
+      toLocalSubnet: true

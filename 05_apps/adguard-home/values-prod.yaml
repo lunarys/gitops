@@ -1,13 +1,14 @@
-ingress:
-  host: adguard.svc.elda
+adguard-home:
+  ingress:
+    host: adguard.svc.elda
 
-longhornstorage:
-  volumes:
-    confdir:
-      pvName: "pvc-71879d24-4905-4c9f-bcf7-96c29a647989"
+  longhornstorage:
+    volumes:
+      confdir:
+        pvName: "pvc-71879d24-4905-4c9f-bcf7-96c29a647989"
 
-services:
-  dns:
-    loadBalancerIPs:
-      - 10.0.4.2
-      - fda0:f54f:5876::4:2
+  services:
+    dns:
+      loadBalancerIPs:
+        - 10.0.4.2
+        - fda0:f54f:5876::4:2

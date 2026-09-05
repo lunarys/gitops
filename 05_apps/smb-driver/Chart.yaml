@@ -1,0 +1,13 @@
+apiVersion: v2
+name: smb-driver
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: csi-driver-smb
+    version: 1.20.3
+    repository: https://kubernetes-csi.github.io/csi-driver-smb
+
+  - name: networkpolicy
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts

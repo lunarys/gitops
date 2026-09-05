@@ -1,90 +1,91 @@
-# https://staging.artifacthub.io/packages/helm/k8s-at-home/adguard-home?modal=values
-# https://github.com/bjw-s-labs/helm-charts
-ingress:
-  host: <overwrite>
-  accessControl:
-    externalAccessAllowed: false
+adguard-home:
+  # https://staging.artifacthub.io/packages/helm/k8s-at-home/adguard-home?modal=values
+  # https://github.com/bjw-s-labs/helm-charts
+  ingress:
+    host: <overwrite>
+    accessControl:
+      externalAccessAllowed: false
 
 
-image:
-  name: adguard/adguardhome
-  tag: v0.107.78
+  image:
+    name: adguard/adguardhome
+    tag: v0.107.78
 
 
-service:
-  targetPort: 3000
+  service:
+    targetPort: 3000
 
-containerSecurityContextPreset:
-  #runAsNonRoot: false  # <-- needed for first start
-  capabilities:
-    drop:  # <-- drop ALL fails, exec not possible then
-      - CAP_NET_RAW
-      - CAP_SYS_ADMIN
+  containerSecurityContextPreset:
+    #runAsNonRoot: false  # <-- needed for first start
+    capabilities:
+      drop:  # <-- drop ALL fails, exec not possible then
+        - CAP_NET_RAW
+        - CAP_SYS_ADMIN
 
-#podSecurityContextPreset: # use defaults
-  #runAsNonRoot: false  # <-- needed for first start
-  #runAsUser: 0         # <-- needed for first start
+  #podSecurityContextPreset: # use defaults
+    #runAsNonRoot: false  # <-- needed for first start
+    #runAsUser: 0         # <-- needed for first start
 
-services:
-  dns:
+  services:
+    dns:
+      enabled: true
+      ports:
+        dns-tcp:
+          port: 53
+          protocol: TCP
+          targetPort: 8053
+        dns-udp:
+          port: 53
+          protocol: UDP
+          targetPort: 8053
+
+
+  longhornstorage:
+    volumes:
+      confdir:
+        size: 50Mi
+        variant: retain
+        pvName: ""
+        mount:
+          path: /opt/adguardhome/conf
+      workdir:
+        size: 1Gi
+        variant: auto-delete
+        mount:
+          path: /opt/adguardhome/work
+
+
+  env:
+    TZ: Europe/Berlin
+
+
+  networkpolicy:
     enabled: true
-    ports:
-      dns-tcp:
-        port: 53
-        protocol: TCP
-        targetPort: 8053
-      dns-udp:
-        port: 53
-        protocol: UDP
-        targetPort: 8053
+    preset:
+      namespaceIsolation: true
+      ingress:
+        fromLocalSubnet: true
+        fromCluster: false  # not necessary, dns resolution is done via the router
+        fromNamespace: adguard-sync
+        fromNetworkLabels:
+          - custom.network/homeassistant-integrated
+          - custom.network/heimdall-integrated
+      egress:
+        toWorld: true
 
+  # adguard seems to have a db lock on sqlite, so it can't start while the other pod is still running
+  update:
+    strategy:
+      type: Recreate
 
-longhornstorage:
-  volumes:
-    confdir:
-      size: 50Mi
-      variant: retain
-      pvName: ""
-      mount:
-        path: /opt/adguardhome/conf
-    workdir:
-      size: 1Gi
-      variant: auto-delete
-      mount:
-        path: /opt/adguardhome/work
+  livenessProbe:
+    enabled: true
+    http:
+      path: /login.html
+      port: 3000
 
-
-env:
-  TZ: Europe/Berlin
-
-
-networkpolicy:
-  enabled: true
-  preset:
-    namespaceIsolation: true
-    ingress:
-      fromLocalSubnet: true
-      fromCluster: false  # not necessary, dns resolution is done via the router
-      fromNamespace: adguard-sync
-      fromNetworkLabels:
-        - custom.network/homeassistant-integrated
-        - custom.network/heimdall-integrated
-    egress:
-      toWorld: true
-
-# adguard seems to have a db lock on sqlite, so it can't start while the other pod is still running
-update:
-  strategy:
-    type: Recreate
-
-livenessProbe:
-  enabled: true
-  http:
-    path: /login.html
-    port: 3000
-
-readinessProbe:
-  enabled: true
-  http:
-    path: /login.html
-    port: 3000
+  readinessProbe:
+    enabled: true
+    http:
+      path: /login.html
+      port: 3000

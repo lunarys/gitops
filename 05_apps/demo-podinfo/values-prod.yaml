@@ -1,4 +1,5 @@
-autoscale:
-  preset:
-    switch:
-      url: "http://nodered.nodered.svc/autoscaler/test-demo-podinfo"
+demo-podinfo:
+  autoscale:
+    preset:
+      switch:
+        url: "http://nodered.nodered.svc/autoscaler/test-demo-podinfo"

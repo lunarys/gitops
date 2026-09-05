@@ -1,127 +1,128 @@
-ingress:
-  host: hass.svc.elda
-  accessControl:
-    externalAccessAllowed: false
+home-assistant:
+  ingress:
+    host: hass.svc.elda
+    accessControl:
+      externalAccessAllowed: false
 
-  # currently, direct the ingress to the other service,
-  # that has all ports on the same external IP
-  serviceName: "home-assistant-integration"
-  servicePort: 8123
+    # currently, direct the ingress to the other service,
+    # that has all ports on the same external IP
+    serviceName: "home-assistant-integration"
+    servicePort: 8123
 
-image:
-  name: homeassistant/home-assistant
-  tag: 2026.7.4
+  image:
+    name: homeassistant/home-assistant
+    tag: 2026.7.4
 
-service:
-  enabled: false
-  # container.ports fails if this service is enabled, as there is a port collision with the integration service
-  targetPort: 8123
+  service:
+    enabled: false
+    # container.ports fails if this service is enabled, as there is a port collision with the integration service
+    targetPort: 8123
 
-env:
-  TZ: "Europe/Berlin"
+  env:
+    TZ: "Europe/Berlin"
 
-services:
-  integration:
+  services:
+    integration:
+      enabled: true
+      ports:
+        http:
+          port: 8123
+        homekit-bridge:
+          port: 21063
+        hmip-callback:
+          port: 38087
+      loadBalancerIPs:
+        - 10.0.4.6
+
+
+  longhornstorage:
+    volumes:
+      config:
+        size: 500Mi
+        variant: retain
+        pvName: "pvc-a2448f0d-74d1-446b-b28c-d0f1a374f81b"
+        mount:
+          path: /config
+
+
+  # store some secrets in an external store, rather than the filesystem
+  externalsecrets:
+    commonRemoteKey: "c0962728-e7f8-4cfc-a983-b39e00bb1ae0"
+    mount:
+      env: true
+    fields:
+      SECRET_HOMEMATIC_USER:
+        storeRefName: bitwarden-fields
+        remoteProperty: homematic_username
+      SECRET_HOMEMATIC_PASSWORD:
+        storeRefName: bitwarden-fields
+        remoteProperty: homematic_password
+      SECRET_JELLYFIN_APIKEY:
+        storeRefName: bitwarden-fields
+        remoteProperty: jellyfin_apikey
+      SECRET_MQTT_USER:
+        storeRefName: bitwarden-fields
+        remoteProperty: mqtt_username
+      SECRET_MQTT_PASSWORD:
+        storeRefName: bitwarden-fields
+        remoteProperty: mqtt_password
+
+
+  networkpolicy:
     enabled: true
-    ports:
-      http:
-        port: 8123
-      homekit-bridge:
-        port: 21063
-      hmip-callback:
-        port: 38087
-    loadBalancerIPs:
-      - 10.0.4.6
+    preset:
+      namespaceIsolation: true
+      ingress:
+        fromLocalSubnet: true
+        fromNamespace: nodered
+      egress:
+        toWorld: true
+        toLocalSubnet: true
+        toNamespaces:
+          - mosquitto
+        toNetworkLabels:
+          - custom.network/homeassistant-integrated
 
 
-longhornstorage:
-  volumes:
-    config:
-      size: 500Mi
-      variant: retain
-      pvName: "pvc-a2448f0d-74d1-446b-b28c-d0f1a374f81b"
-      mount:
-        path: /config
+  podSecurityContext:
+    runAsNonRoot: false  # home-assistant requires root for the s6 init thingy
+    fsGroup: 2000
+    seccompProfile:
+      type: RuntimeDefault
+
+  containerSecurityContextPreset:
+    # From https://community.home-assistant.io/t/improving-docker-security-non-root-application-configuration/399971/7
+    # Alternative? https://docs.linuxserver.io/images/docker-homeassistant
+    capabilities:
+      drop: 
+        - ALL
+      add:
+        #- CHOWN
+        #- DAC_OVERRIDE
+        #- FSETID
+        #- FOWNER
+        - SETGID  # needed on startup apparently
+        - SETUID  # needed on startup apparently
+        #- SYS_CHROOT
+        #- KILL
+        - NET_RAW  # for the 'ping' integration
+        #- NET_ADMIN
+
+  # home-assistant has a filesystem lock to only run one instance...
+  update:
+    strategy:
+      type: Recreate
 
 
-# store some secrets in an external store, rather than the filesystem
-externalsecrets:
-  commonRemoteKey: "c0962728-e7f8-4cfc-a983-b39e00bb1ae0"
-  mount:
-    env: true
-  fields:
-    SECRET_HOMEMATIC_USER:
-      storeRefName: bitwarden-fields
-      remoteProperty: homematic_username
-    SECRET_HOMEMATIC_PASSWORD:
-      storeRefName: bitwarden-fields
-      remoteProperty: homematic_password
-    SECRET_JELLYFIN_APIKEY:
-      storeRefName: bitwarden-fields
-      remoteProperty: jellyfin_apikey
-    SECRET_MQTT_USER:
-      storeRefName: bitwarden-fields
-      remoteProperty: mqtt_username
-    SECRET_MQTT_PASSWORD:
-      storeRefName: bitwarden-fields
-      remoteProperty: mqtt_password
+  livenessProbe:
+    enabled: true
+    http:
+      path: /manifest.json  # just some unauthenticated endpoint
+      port: 8123
 
-
-networkpolicy:
-  enabled: true
-  preset:
-    namespaceIsolation: true
-    ingress:
-      fromLocalSubnet: true
-      fromNamespace: nodered
-    egress:
-      toWorld: true
-      toLocalSubnet: true
-      toNamespaces:
-        - mosquitto
-      toNetworkLabels:
-        - custom.network/homeassistant-integrated
-
-
-podSecurityContext:
-  runAsNonRoot: false  # home-assistant requires root for the s6 init thingy
-  fsGroup: 2000
-  seccompProfile:
-    type: RuntimeDefault
-
-containerSecurityContextPreset:
-  # From https://community.home-assistant.io/t/improving-docker-security-non-root-application-configuration/399971/7
-  # Alternative? https://docs.linuxserver.io/images/docker-homeassistant
-  capabilities:
-    drop: 
-      - ALL
-    add:
-      #- CHOWN
-      #- DAC_OVERRIDE
-      #- FSETID
-      #- FOWNER
-      - SETGID  # needed on startup apparently
-      - SETUID  # needed on startup apparently
-      #- SYS_CHROOT
-      #- KILL
-      - NET_RAW  # for the 'ping' integration
-      #- NET_ADMIN
-
-# home-assistant has a filesystem lock to only run one instance...
-update:
-  strategy:
-    type: Recreate
-
-
-livenessProbe:
-  enabled: true
-  http:
-    path: /manifest.json  # just some unauthenticated endpoint
-    port: 8123
-
-readinessProbe:
-  enabled: true
-  http:
-    path: /manifest.json  # just some unauthenticated endpoint
-    port: 8123
+  readinessProbe:
+    enabled: true
+    http:
+      path: /manifest.json  # just some unauthenticated endpoint
+      port: 8123
 

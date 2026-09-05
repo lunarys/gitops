@@ -1,33 +1,34 @@
-# https://github.com/smallstep/helm-charts/tree/master/step-certificates
-# https://smallstep.com/docs/tutorials/acme-protocol-acme-clients/#traefik
-fullnameOverride: step-certificates
+step-certificates:
+  # https://github.com/smallstep/helm-charts/tree/master/step-certificates
+  # https://smallstep.com/docs/tutorials/acme-protocol-acme-clients/#traefik
+  fullnameOverride: step-certificates
 
-service:
-  targetPort: 9000
-  type: LoadBalancer
-  annotations:
-    lbipam.cilium.io/ips: "10.0.4.8" # expose step-ca directly as it serves HTTPS itself and traefik can't verify the root CA
-  labels:
-    custom.network/lb-pool: static # TODO: not (yet?) supported by the chart...
+  service:
+    targetPort: 9000
+    type: LoadBalancer
+    annotations:
+      lbipam.cilium.io/ips: "10.0.4.8" # expose step-ca directly as it serves HTTPS itself and traefik can't verify the root CA
+    labels:
+      custom.network/lb-pool: static # TODO: not (yet?) supported by the chart...
 
-ca:
-  db:
-    size: 100Mi
-    storageClass: longhorn  # auto-delete variant, will not be saved or restored on cluster re-install
+  ca:
+    db:
+      size: 100Mi
+      storageClass: longhorn  # auto-delete variant, will not be saved or restored on cluster re-install
 
 
-# Use pre-existing resources:
-# - ConfigMaps: created from resources/*.yaml in git
-# - Secrets: created via ExternalSecrets from Bitwarden
-existingSecrets:
-  enabled: true
-  ca: true              # Password secret exists (step-certificates-ca-password)
-  certsAsSecret: false  # Certs are in ConfigMap, not Secret
+  # Use pre-existing resources:
+  # - ConfigMaps: created from resources/*.yaml in git
+  # - Secrets: created via ExternalSecrets from Bitwarden
+  existingSecrets:
+    enabled: true
+    ca: true              # Password secret exists (step-certificates-ca-password)
+    certsAsSecret: false  # Certs are in ConfigMap, not Secret
 
-# Disable inject - we manage resources separately
-inject:
-  enabled: false
+  # Disable inject - we manage resources separately
+  inject:
+    enabled: false
 
-bootstrap:
-  enabled: false
-  configmaps: false
+  bootstrap:
+    enabled: false
+    configmaps: false

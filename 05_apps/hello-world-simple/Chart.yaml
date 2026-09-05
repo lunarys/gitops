@@ -1,0 +1,13 @@
+apiVersion: v2
+name: hello-world-simple
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: hello-world
+    version: 0.1.0
+    repository: https://helm.github.io/examples
+
+  - name: networkpolicy
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts

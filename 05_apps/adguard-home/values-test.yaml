@@ -1,12 +1,13 @@
-ingress:
-  host: adguard.test.svc.elda
+adguard-home:
+  ingress:
+    host: adguard.test.svc.elda
 
-longhornstorage:
-  volumes:
-    confdir:
-      pvName: "pvc-b9392617-9078-4eec-99a5-bb7a6a298cb9"
+  longhornstorage:
+    volumes:
+      confdir:
+        pvName: "pvc-b9392617-9078-4eec-99a5-bb7a6a298cb9"
 
-services:
-  dns:
-    externalIPs:
-      - 10.0.1.189
+  services:
+    dns:
+      externalIPs:
+        - 10.0.1.189

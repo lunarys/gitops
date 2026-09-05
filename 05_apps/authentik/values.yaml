@@ -1,65 +1,66 @@
-# -> https://github.com/goauthentik/helm/blob/main/charts/authentik/README.md
-server:
-  ingress:
-    enabled: true
-    annotations:
-      traefik.ingress.kubernetes.io/router.middlewares: traefik-common-internal-access-allowlist@kubernetescrd
-      cert-manager.io/cluster-issuer: step-ca-internal
-    hosts:
-      - authentik.svc.elda
-    tls:
-      - hosts: 
-          - authentik.svc.elda
-        secretName: authentik-internal-cert
-
 authentik:
-  postgresql:
-    # https://docs.goauthentik.io/install-config/configuration/
-    name: file:///mnt/pgcreds/dbname
-    host: file:///mnt/pgcreds/host
-    # The worker seems to have an issue with parsing the port number as a string - invalid type. Maybe this helps. (authentik 2026.5.0)
-    #port: file:///mnt/pgcreds/port
-    user: file:///mnt/pgcreds/username
-    password: file:///mnt/pgcreds/password
+  # -> https://github.com/goauthentik/helm/blob/main/charts/authentik/README.md
+  server:
+    ingress:
+      enabled: true
+      annotations:
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-common-internal-access-allowlist@kubernetescrd
+        cert-manager.io/cluster-issuer: step-ca-internal
+      hosts:
+        - authentik.svc.elda
+      tls:
+        - hosts: 
+            - authentik.svc.elda
+          secretName: authentik-internal-cert
 
-  disable_update_check: false
-  disable_startup_analytics: true
-  error_reporting:
-    enabled: false
+  authentik:
+    postgresql:
+      # https://docs.goauthentik.io/install-config/configuration/
+      name: file:///mnt/pgcreds/dbname
+      host: file:///mnt/pgcreds/host
+      # The worker seems to have an issue with parsing the port number as a string - invalid type. Maybe this helps. (authentik 2026.5.0)
+      #port: file:///mnt/pgcreds/port
+      user: file:///mnt/pgcreds/username
+      password: file:///mnt/pgcreds/password
+
+    disable_update_check: false
+    disable_startup_analytics: true
+    error_reporting:
+      enabled: false
 
 
-additionalObjects:
-  - apiVersion: postgres.crds.lunarys.lab/v1alpha1
-    kind: PostgresDatabase
-    metadata:
-      name: authentik
-    spec:
-      secretName: authentik-pgcreds
-      deletionPolicy: Retain
-
-
-# "needed for managed outposts" - so not needed right now?
-serviceAccount:
-  create: false
-
-
-global:
-  volumeMounts:
-    - name: authentik-pgcreds
-      mountPath: /mnt/pgcreds
-      readOnly: true
-
-  volumes:
-    - name: authentik-pgcreds
-      secret:
+  additionalObjects:
+    - apiVersion: postgres.crds.lunarys.lab/v1alpha1
+      kind: PostgresDatabase
+      metadata:
+        name: authentik
+      spec:
         secretName: authentik-pgcreds
+        deletionPolicy: Retain
 
-  env:
-    - name: AUTHENTIK_SECRET_KEY
-      valueFrom:
-        secretKeyRef:
-          name: authentik-secrets
-          key: secret_key
 
-  podLabels:
-    custom.network/postgresdb: egress
+  # "needed for managed outposts" - so not needed right now?
+  serviceAccount:
+    create: false
+
+
+  global:
+    volumeMounts:
+      - name: authentik-pgcreds
+        mountPath: /mnt/pgcreds
+        readOnly: true
+
+    volumes:
+      - name: authentik-pgcreds
+        secret:
+          secretName: authentik-pgcreds
+
+    env:
+      - name: AUTHENTIK_SECRET_KEY
+        valueFrom:
+          secretKeyRef:
+            name: authentik-secrets
+            key: secret_key
+
+    podLabels:
+      custom.network/postgresdb: egress

@@ -1,56 +1,57 @@
-ingress:
-  host: demo.test.svc.elda
+demo-podinfo:
+  ingress:
+    host: demo.test.svc.elda
 
-  external:
-    enabled: true
-    host: demo.ext.test.svc.elda
-    tls:
-      enabled: false
-
-image:
-  name: ghcr.io/stefanprodan/podinfo
-  tag: 6.14.1
-
-service:
-  targetPort: 9898
-
-
-autoscale:
-  enabled: false
-  preset:
-    switch:
+    external:
       enabled: true
-      url: "http://nodered.svc.elda/autoscaler/test-demo-podinfo"
+      host: demo.ext.test.svc.elda
+      tls:
+        enabled: false
+
+  image:
+    name: ghcr.io/stefanprodan/podinfo
+    tag: 6.14.1
+
+  service:
+    targetPort: 9898
 
 
-networkpolicy:
-  enabled: true
-  preset:
-    namespaceIsolation: true
-    ingress:
-      fromNetworkLabels:
-        - custom.network/external-ingress
+  autoscale:
+    enabled: false
+    preset:
+      switch:
+        enabled: true
+        url: "http://nodered.svc.elda/autoscaler/test-demo-podinfo"
 
-# From https://github.com/stefanprodan/podinfo/blob/902e62b5f3f732885b9b53f5afec3ea4a4f556de/charts/podinfo/templates/deployment.yaml
-readinessProbe:
-  exec:
-    command:
-      - podcli
-      - check
-      - http
-      - localhost:9898/readyz
 
-livenessProbe:
-  exec:
-    command:
-      - podcli
-      - check
-      - http
-      - localhost:9898/healthz
+  networkpolicy:
+    enabled: true
+    preset:
+      namespaceIsolation: true
+      ingress:
+        fromNetworkLabels:
+          - custom.network/external-ingress
 
-extraConfig:
-  volumeMounts:
-    - name: data
-      mountPath: /data
-      emptyDir:
-        sizeLimit: 100Mi
+  # From https://github.com/stefanprodan/podinfo/blob/902e62b5f3f732885b9b53f5afec3ea4a4f556de/charts/podinfo/templates/deployment.yaml
+  readinessProbe:
+    exec:
+      command:
+        - podcli
+        - check
+        - http
+        - localhost:9898/readyz
+
+  livenessProbe:
+    exec:
+      command:
+        - podcli
+        - check
+        - http
+        - localhost:9898/healthz
+
+  extraConfig:
+    volumeMounts:
+      - name: data
+        mountPath: /data
+        emptyDir:
+          sizeLimit: 100Mi

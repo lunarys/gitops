@@ -1,58 +1,59 @@
-ingress:
-  enabled: false
+teamspeak:
+  ingress:
+    enabled: false
 
-image:
-  name: docker.io/teamspeak
-  tag: 3.13.8
+  image:
+    name: docker.io/teamspeak
+    tag: 3.13.8
 
-service:
-  port: 9987
-  targetPort: 9987
-  nodePort: 31239
-  protocol: UDP
-  type: LoadBalancer  # dynamic IP from the default LB pool (no fixed address needed)
-  allocateLoadBalancerNodePorts: true
+  service:
+    port: 9987
+    targetPort: 9987
+    nodePort: 31239
+    protocol: UDP
+    type: LoadBalancer  # dynamic IP from the default LB pool (no fixed address needed)
+    allocateLoadBalancerNodePorts: true
 
-services:
-  admin:
+  services:
+    admin:
+      enabled: true
+      ports:
+        query:
+          port: 10011
+
+  networkpolicy:
     enabled: true
-    ports:
-      query:
-        port: 10011
+    preset:
+      ingress:
+        fromWorld: true
+        fromNamespace: "nodered"
+      egress:
+        toFQDNs:
+          # revocation list download, TODO: just port 443 would be sufficient
+          - ts3services.teamspeak.com
 
-networkpolicy:
-  enabled: true
-  preset:
-    ingress:
-      fromWorld: true
-      fromNamespace: "nodered"
-    egress:
-      toFQDNs:
-        # revocation list download, TODO: just port 443 would be sufficient
-        - ts3services.teamspeak.com
+  longhornstorage:
+    volumes:
+      ts3-server-data:
+        size: 50Mi
+        variant: retain
+        pvName: "pvc-35928dca-0da6-4366-a46e-f8b491b448d0"
+        mount:
+          path: "/var/ts3server"
 
-longhornstorage:
-  volumes:
-    ts3-server-data:
-      size: 50Mi
-      variant: retain
-      pvName: "pvc-35928dca-0da6-4366-a46e-f8b491b448d0"
-      mount:
-        path: "/var/ts3server"
+  env:
+    TS3SERVER_LICENSE: "accept"
 
-env:
-  TS3SERVER_LICENSE: "accept"
+  podSecurityContextPreset:
+    # user used in the official container image. required for correct file access. 
+    runAsUser: 9987
 
-podSecurityContextPreset:
-  # user used in the official container image. required for correct file access. 
-  runAsUser: 9987
+  livenessProbe:
+    enabled: true
+    tcp:
+      port: 10011 # TeamSpeak provides a TCP admin interface on port 10011 by default
 
-livenessProbe:
-  enabled: true
-  tcp:
-    port: 10011 # TeamSpeak provides a TCP admin interface on port 10011 by default
-
-readinessProbe:
-  enabled: true
-  tcp:
-    port: 10011 # TeamSpeak provides a TCP admin interface on port 10011 by default
+  readinessProbe:
+    enabled: true
+    tcp:
+      port: 10011 # TeamSpeak provides a TCP admin interface on port 10011 by default

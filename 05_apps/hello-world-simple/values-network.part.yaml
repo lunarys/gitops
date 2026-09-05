@@ -1,0 +1,3 @@
+networkpolicy:
+  preset:
+    namespaceIsolation: true

@@ -1,0 +1,12 @@
+apiVersion: v2
+name: home-assistant
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: generic-service
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts
+    # Safe for generic-service specifically: it never consults
+    # .Chart.Name, so the alias only moves the values key.
+    alias: home-assistant
