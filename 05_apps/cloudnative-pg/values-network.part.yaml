@@ -1,0 +1,76 @@
+# The three CiliumNetworkPolicies this unit needs.
+#
+# The networkpolicy chart renders ONE preset per release (.Values.preset is
+# singular), so it is declared three times under different aliases. Aliasing is
+# safe here: each preset sets an explicit `name`, and the chart takes the
+# resource name from that rather than from .Chart.Name.
+
+netpol-operator:
+  preset:
+    name: networkpolicy-cnpg
+    endpointSelector:
+      matchLabels:
+        # Selects on `name`, not `instance`. app.kubernetes.io/instance is
+        # .Release.Name, and merging three releases into one made it
+        # `cloudnative-pg` for every workload here -- an instance-based selector
+        # would match nothing, and a CiliumNetworkPolicy matching nothing leaves
+        # the pods with NO policy rather than a broken one. `name` is the
+        # subchart's own chart name, which stays distinct after the merge.
+        app.kubernetes.io/name: cloudnative-pg
+    namespaceIsolation: false
+    ingress:
+      fromIngressController: false
+      fromKubeApi: true
+    egress:
+      toKubeApi: true
+      rules:
+        - toEndpoints:
+            - {}  # everything in the namespace
+
+netpol-plugin:
+  preset:
+    name: networkpolicy-barman-cloud-plugin
+    endpointSelector:
+      matchLabels:
+        # See the note under netpol-operator: name rather than instance.
+        app.kubernetes.io/name: plugin-barman-cloud
+    namespaceIsolation: false
+    ingress:
+      fromIngressController: false
+      fromKubeApi: true
+      rules:
+        - fromEndpoints:
+            - matchLabels:
+                app.kubernetes.io/name: cloudnative-pg
+                io.kubernetes.pod.namespace: cloudnative-pg
+    egress:
+      toKubeApi: true
+
+netpol-database:
+  preset:
+    name: networkpolicy-postgresdb
+    endpointSelector:
+      matchLabels:
+        cnpg.io/podRole: instance
+    namespaceIsolation: true
+    ingress:
+      # access the database for application workloads
+      fromNetworkLabels:
+        - label: custom.network/postgresdb
+          ports:
+            - 5432
+      fromIngressController: false
+      rules:
+        - fromEndpoints:
+          - matchLabels:
+              app.kubernetes.io/instance: postgresdb-user-operator
+              io.kubernetes.pod.namespace: cloudnative-pg
+    egress:
+      toKubeApi: true
+      rules:
+        - toFQDNs:
+            - matchName: s3.svc.elda
+          toPorts:
+              - ports:
+                  - port: "80"
+                    protocol: TCP

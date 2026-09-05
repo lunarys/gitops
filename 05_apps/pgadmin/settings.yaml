@@ -1,0 +1,8 @@
+# Stays in the CloudNativePG namespace rather than defaulting to `pgadmin`.
+#
+# Split out of the cloudnative-pg directory for lifecycle reasons only -- a UI
+# has nothing to do with the operator's release cadence. Moving the workload as
+# well would be a behavioural change: the database's own policy sets
+# namespaceIsolation, and pgadmin's egress rule targets the cluster by explicit
+# namespace. Worth doing deliberately later, not as part of a restructure.
+namespace: cloudnative-pg

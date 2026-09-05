@@ -1,0 +1,7 @@
+# Stays in the CloudNativePG namespace rather than defaulting to its own.
+#
+# Not optional here: the database's network policy allows ingress from
+# `io.kubernetes.pod.namespace: cloudnative-pg`, and defaultCluster in values
+# points at that namespace. Splitting the directory is structural; moving the
+# workload would not be.
+namespace: cloudnative-pg

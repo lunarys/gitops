@@ -1,0 +1,4 @@
+postgresdb-user-operator:
+  defaultCluster:
+    namespace: cloudnative-pg
+    selector: app.kubernetes.io/name=postgresdb

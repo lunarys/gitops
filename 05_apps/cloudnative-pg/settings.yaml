@@ -1,0 +1,23 @@
+# CRDs come from both operators and must be rendered.
+skipCrds: false
+
+# EXPERIMENT -- was false, deliberately flipped.
+#
+# Before the merge, the plugin and the local chart each set serverSideApply:
+# false, with no recorded reason. Merged, one value covers everything, and the
+# operator is the one with a hard requirement: cnpg's Cluster CRD is far past
+# the 256KB last-applied-configuration annotation that client-side apply writes,
+# so it needs SSA.
+#
+# If the CRs in templates/ turn out to hit field-ownership conflicts with the
+# operator -- the most likely reason the old value was false -- the fix is
+# `argocd.argoproj.io/sync-options: ServerSideApply=false` on those four
+# templates, NOT flipping this back and breaking the CRDs.
+serverSideApply: true
+
+kargo:
+  excludePaths:
+    # Neither affects the rendered output, but both would otherwise produce a
+    # release candidate whenever they change.
+    - .old/
+    - resources.disabled/

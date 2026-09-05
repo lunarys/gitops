@@ -60,6 +60,24 @@ spec:
               value: {{ $env }}
             - name: targetBranch
               value: {{ $root.Values.renderedBranchPrefix }}{{ $env }}
+            # The exact values files this app has, in layering order, derived
+            # from the directory at render time. The task cannot work this out
+            # for itself: valuesFiles is a plain []string with no glob support,
+            # Kargo has no split(), and the task does not know the labels.
+            #
+            # Because only files that exist are listed, the task needs no
+            # ignoreMissingValueFiles -- a misnamed file is one the generator
+            # rejects outright rather than one Helm silently skips.
+            #
+            # UNVERIFIED: that a list-valued var populates a list-typed step
+            # config field. The docs call vars "static values of any type" and
+            # say results are coerced to "array" among others, but show no
+            # example. Settle this in the lab before trusting it; the fallback
+            # is a fixed file list in the task with ignoreMissingValueFiles,
+            # which loses fragments but nothing else.
+            - name: valuesFiles
+              value:
+{{ toYaml (concat (dig "base" (list) $app.valuesFiles | default (list)) (dig $env (list) $app.valuesFiles | default (list))) | indent 16 }}
             - name: namespace
               value: {{ include "apps-generator.namespace" . }}
             # skipCrds is a RENDER decision now, not an Argo sync option.

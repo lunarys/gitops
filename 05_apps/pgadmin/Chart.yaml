@@ -1,0 +1,18 @@
+apiVersion: v2
+name: pgadmin
+description: pgAdmin web UI for the CloudNativePG cluster
+type: application
+version: 0.1.0
+
+dependencies:
+  # Aliased so the values key is the app name rather than the generic chart
+  # name. Safe for this chart specifically -- generic-service never consults
+  # .Chart.Name -- and it is the pattern apps/nodered already runs in prod.
+  #
+  # networkpolicy, externalsecrets, longhornstorage and autoscale are subcharts
+  # OF generic-service, so their values nest inside this key rather than needing
+  # dependencies of their own.
+  - name: generic-service
+    alias: pgadmin
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts

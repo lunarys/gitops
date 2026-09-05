@@ -11,6 +11,7 @@ enabled:
   - crowdsec
 
   - cloudnative-pg
+  - postgresdb-user-operator
 
   # testing only
   - hello-world
