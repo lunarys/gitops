@@ -1,179 +1,181 @@
 # https://docs.crowdsec.net/docs/next/configuration/values_parameters
-# https://github.com/crowdsecurity/helm-charts/blob/main/charts/crowdsec/README.md
-container_runtime: containerd
+crowdsec:
+  # https://docs.crowdsec.net/docs/next/configuration/values_parameters
+  # https://github.com/crowdsecurity/helm-charts/blob/main/charts/crowdsec/README.md
+  container_runtime: containerd
 
-# General introduction to concepts: https://docs.crowdsec.net/docs/next/concepts
+  # General introduction to concepts: https://docs.crowdsec.net/docs/next/concepts
 
-agent:
-  acquisition:
-    # ? https://docs.crowdsec.net/docs/next/log_processor/data_sources/victorialogs/
-    - namespace: traefik-external
-      podName: traefik-external-*
-      program: traefik
-      poll_without_inotify: true  # TODO: yes or no? a warning in the agent logs recommends to set this to true
+  agent:
+    acquisition:
+      # ? https://docs.crowdsec.net/docs/next/log_processor/data_sources/victorialogs/
+      - namespace: traefik-external
+        podName: traefik-external-*
+        program: traefik
+        poll_without_inotify: true  # TODO: yes or no? a warning in the agent logs recommends to set this to true
 
-  env:
-    - name: COLLECTIONS
-      value: "crowdsecurity/traefik crowdsecurity/http-cve"
+    env:
+      - name: COLLECTIONS
+        value: "crowdsecurity/traefik crowdsecurity/http-cve"
 
-# https://docs.crowdsec.net/docs/next/appsec/intro/
-# https://docs.crowdsec.net/docs/next/appsec/quickstart/traefik
-# https://docs.crowdsec.net/docs/next/appsec/configuration/
-# https://docs.crowdsec.net/docs/next/log_processor/data_sources/appsec/
-appsec:
-  enabled: true
-  
-  acquisitions:
-    - source: appsec
-      listen_addr: 0.0.0.0:7422
-      path: /
-      appsec_configs:
-        # https://app.crowdsec.net/hub/author/crowdsecurity/waf-configurations/appsec-default
-        - crowdsecurity/appsec-default
-        # TODO? https://app.crowdsec.net/hub/author/firix/log-parsers/authentik-logs
-      labels:
-        type: appsec
+  # https://docs.crowdsec.net/docs/next/appsec/intro/
+  # https://docs.crowdsec.net/docs/next/appsec/quickstart/traefik
+  # https://docs.crowdsec.net/docs/next/appsec/configuration/
+  # https://docs.crowdsec.net/docs/next/log_processor/data_sources/appsec/
+  appsec:
+    enabled: true
+    
+    acquisitions:
+      - source: appsec
+        listen_addr: 0.0.0.0:7422
+        path: /
+        appsec_configs:
+          # https://app.crowdsec.net/hub/author/crowdsecurity/waf-configurations/appsec-default
+          - crowdsecurity/appsec-default
+          # TODO? https://app.crowdsec.net/hub/author/firix/log-parsers/authentik-logs
+        labels:
+          type: appsec
 
-  #configs:
-  #rules:
+    #configs:
+    #rules:
 
-  env:
-    - name: COLLECTIONS
-      # https://app.crowdsec.net/hub/author/crowdsecurity/collections/appsec-virtual-patching
-      # https://app.crowdsec.net/hub/author/crowdsecurity/collections/appsec-generic-rules
-      value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+    env:
+      - name: COLLECTIONS
+        # https://app.crowdsec.net/hub/author/crowdsecurity/collections/appsec-virtual-patching
+        # https://app.crowdsec.net/hub/author/crowdsecurity/collections/appsec-generic-rules
+        value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
 
-  podLabels:
-    custom.network/external-ingress: ingress  # the bouncer plugin for traefik for external ingress needs to access LAPI and AppSec
+    podLabels:
+      custom.network/external-ingress: ingress  # the bouncer plugin for traefik for external ingress needs to access LAPI and AppSec
 
-lapi:
-  podLabels:
-    custom.network/postgresdb: egress
-    custom.network/external-ingress: ingress
+  lapi:
+    podLabels:
+      custom.network/postgresdb: egress
+      custom.network/external-ingress: ingress
 
-  env:
-    - name: BOUNCER_KEY_traefik
-      valueFrom:
-        secretKeyRef:
-          name: crowdsec-secrets
-          key: bouncer_api_key
+    env:
+      - name: BOUNCER_KEY_traefik
+        valueFrom:
+          secretKeyRef:
+            name: crowdsec-secrets
+            key: bouncer_api_key
 
-    # To enroll the Security Engine to the console
-    - name: ENROLL_KEY
-      valueFrom:
-        secretKeyRef:
-          name: crowdsec-secrets
-          key: enroll_key
-    - name: ENROLL_TAGS
-      valueFrom:
-        secretKeyRef:
-          name: crowdsec-secrets
-          key: enroll_tags
-    - name: ENROLL_INSTANCE_NAME
-      valueFrom:
-        secretKeyRef:
-          name: crowdsec-secrets          
-          key: enroll_instance_name
+      # To enroll the Security Engine to the console
+      - name: ENROLL_KEY
+        valueFrom:
+          secretKeyRef:
+            name: crowdsec-secrets
+            key: enroll_key
+      - name: ENROLL_TAGS
+        valueFrom:
+          secretKeyRef:
+            name: crowdsec-secrets
+            key: enroll_tags
+      - name: ENROLL_INSTANCE_NAME
+        valueFrom:
+          secretKeyRef:
+            name: crowdsec-secrets          
+            key: enroll_instance_name
 
-    - name: WEB_UI_USER
-      valueFrom:
-        secretKeyRef:
-          name: crowdsec-secrets
-          key: web_ui_user
-    - name: WEB_UI_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: crowdsec-secrets
-          key: web_ui_password
+      - name: WEB_UI_USER
+        valueFrom:
+          secretKeyRef:
+            name: crowdsec-secrets
+            key: web_ui_user
+      - name: WEB_UI_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: crowdsec-secrets
+            key: web_ui_password
 
-    - name: DB_USER
-      valueFrom:
-        secretKeyRef:
-          name: crowdsec-pgcreds
-          key: username
-    - name: DB_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: crowdsec-pgcreds
-          key: password
-    - name: DB_NAME
-      valueFrom:
-        secretKeyRef:
-          name: crowdsec-pgcreds
-          key: dbname
-    - name: DB_HOST
-      valueFrom:
-        secretKeyRef:
-          name: crowdsec-pgcreds
-          key: host
-    - name: DB_PORT
-      valueFrom:
-        secretKeyRef:
-          name: crowdsec-pgcreds
-          key: port
+      - name: DB_USER
+        valueFrom:
+          secretKeyRef:
+            name: crowdsec-pgcreds
+            key: username
+      - name: DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: crowdsec-pgcreds
+            key: password
+      - name: DB_NAME
+        valueFrom:
+          secretKeyRef:
+            name: crowdsec-pgcreds
+            key: dbname
+      - name: DB_HOST
+        valueFrom:
+          secretKeyRef:
+            name: crowdsec-pgcreds
+            key: host
+      - name: DB_PORT
+        valueFrom:
+          secretKeyRef:
+            name: crowdsec-pgcreds
+            key: port
 
-  lifecycle:
-    postStart:
-      exec:
-        command:
-          - /bin/sh
-          - -c
-          - |
-            cscli bouncers prune --force 2>/dev/null || true;
-            cscli machines prune --force 2>/dev/null || true;
-            cscli machines add "$WEB_UI_USER" --password "$WEB_UI_PASSWORD" --force 2>/dev/null || true;
+    lifecycle:
+      postStart:
+        exec:
+          command:
+            - /bin/sh
+            - -c
+            - |
+              cscli bouncers prune --force 2>/dev/null || true;
+              cscli machines prune --force 2>/dev/null || true;
+              cscli machines add "$WEB_UI_USER" --password "$WEB_UI_PASSWORD" --force 2>/dev/null || true;
 
-  persistentVolume:
-    data:
-      enabled: false
-    config:
-      enabled: false
+    persistentVolume:
+      data:
+        enabled: false
+      config:
+        enabled: false
 
-secrets:
-  externalSecret:
-    name: crowdsec-secrets
-    csLapiSecretKey: cs_lapi_secret
-    registrationTokenKey: registration_token
+  secrets:
+    externalSecret:
+      name: crowdsec-secrets
+      csLapiSecretKey: cs_lapi_secret
+      registrationTokenKey: registration_token
 
-config:
-  config.yaml.local: |
-    api:
-      client:
-        # the log processor will remove delete itself from LAPI when stopping.    
-        unregister_on_exit: true
-      server:
-        # This is needed for agent autoregistration
-        auto_registration: # Activate if not using TLS for authentication
-          enabled: true
-          token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
-          allowed_ranges:
-            - "10.243.0.0/16"  # test cluster
-            - "10.245.0.0/16"  # prod cluster
-    # Using a database is strongly encouraged.
-    db_config:
-      type: postgresql
-      user: ${DB_USER}
-      password: ${DB_PASSWORD}
-      db_name: ${DB_NAME}
-      host: ${DB_HOST}
-      port: ${DB_PORT}
-      #flush:
-         # bouncers autodelete seems to have deleted bouncers that were still active
-      #  bouncers_autodelete:
-      #    api_key: 1h
-         # agents autodelete seems to have the webui token that was still needed
-      #  agents_autodelete:
-      #    login_password: 1h
+  config:
+    config.yaml.local: |
+      api:
+        client:
+          # the log processor will remove delete itself from LAPI when stopping.    
+          unregister_on_exit: true
+        server:
+          # This is needed for agent autoregistration
+          auto_registration: # Activate if not using TLS for authentication
+            enabled: true
+            token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
+            allowed_ranges:
+              - "10.243.0.0/16"  # test cluster
+              - "10.245.0.0/16"  # prod cluster
+      # Using a database is strongly encouraged.
+      db_config:
+        type: postgresql
+        user: ${DB_USER}
+        password: ${DB_PASSWORD}
+        db_name: ${DB_NAME}
+        host: ${DB_HOST}
+        port: ${DB_PORT}
+        #flush:
+           # bouncers autodelete seems to have deleted bouncers that were still active
+        #  bouncers_autodelete:
+        #    api_key: 1h
+           # agents autodelete seems to have the webui token that was still needed
+        #  agents_autodelete:
+        #    login_password: 1h
 
-  # https://neonode.cc/en/blog/crowdsec_progressive_ban/
-  # https://docs.crowdsec.net/u/getting_started/post_installation/profiles/
-  profiles.yaml: |
-    name: default_ip_remediation
-    #debug: true
-    filters:
-    - Alert.Remediation == true && Alert.GetScope() == "Ip"
-    decisions:
-    - type: ban
-      duration: 12h
-    duration_expr: Sprintf('%dh', 12 * (4 ^ GetDecisionsCount(Alert.GetValue())))
-    on_success: break
+    # https://neonode.cc/en/blog/crowdsec_progressive_ban/
+    # https://docs.crowdsec.net/u/getting_started/post_installation/profiles/
+    profiles.yaml: |
+      name: default_ip_remediation
+      #debug: true
+      filters:
+      - Alert.Remediation == true && Alert.GetScope() == "Ip"
+      decisions:
+      - type: ban
+        duration: 12h
+      duration_expr: Sprintf('%dh', 12 * (4 ^ GetDecisionsCount(Alert.GetValue())))
+      on_success: break

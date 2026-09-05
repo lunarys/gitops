@@ -1,0 +1,3 @@
+crowdsec-web-ui:
+  ingress:
+    host: crowdsec.test.svc.elda

@@ -1,4 +1,0 @@
-helm:
-  chart: policy-reporter
-  version: 3.9.1
-  repo: oci://ghcr.io/kyverno/charts

@@ -1,4 +1,0 @@
-helm:
-  chart: crowdsec
-  version: 0.24.0
-  repo: https://crowdsecurity.github.io/helm-charts

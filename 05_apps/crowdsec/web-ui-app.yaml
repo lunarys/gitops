@@ -1,6 +1,0 @@
-helm:
-  chart: generic-service
-  version: 4.6.0
-
-settings:
-  applicationName: crowdsec-web-ui

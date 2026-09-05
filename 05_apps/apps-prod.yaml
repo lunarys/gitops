@@ -12,7 +12,9 @@ enabled:
 
   - cert-manager
   #- kyverno
+  #- policy-reporter
   - crowdsec
+  - crowdsec-web-ui
   - cloudnative-pg
   - pgadmin
   - postgresdb-user-operator

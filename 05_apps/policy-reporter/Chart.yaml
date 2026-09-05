@@ -1,0 +1,10 @@
+apiVersion: v2
+name: policy-reporter
+description: UI and reporting for the PolicyReport resources Kyverno produces
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: policy-reporter
+    version: 3.9.1
+    repository: oci://ghcr.io/kyverno/charts

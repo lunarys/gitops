@@ -1,0 +1,16 @@
+apiVersion: v2
+name: crowdsec-web-ui
+description: Web UI for the CrowdSec security engine
+type: application
+version: 0.1.0
+
+dependencies:
+  # Aliased so the values key is the app name rather than the generic chart
+  # name -- safe for this chart, which never consults .Chart.Name, and the
+  # pattern apps/nodered already runs in prod. networkpolicy, longhornstorage
+  # and the rest are subcharts OF generic-service, so their values nest inside
+  # this key.
+  - name: generic-service
+    alias: crowdsec-web-ui
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts

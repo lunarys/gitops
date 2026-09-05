@@ -1,0 +1,2 @@
+# Kyverno ships its policy CRDs with the chart and they must be rendered.
+skipCrds: false

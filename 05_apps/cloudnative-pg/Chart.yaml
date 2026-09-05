@@ -1,7 +1,8 @@
 apiVersion: v2
-# Not named cloudnative-pg: a chart cannot comfortably depend on a subchart of
-# its own name. .Chart.Name is unused by the templates here, so this is only an
-# identity, and postgresdb is the one this directory already had.
+# Keeps the name the local chart in this directory already had. Naming it
+# cloudnative-pg would work too -- a chart may depend on a subchart of its own
+# name, as apps/longhorn does -- but .Chart.Name is unused by the templates
+# here, so there is nothing to gain from the rename.
 name: postgresdb
 description: >-
   The CloudNativePG operator, the barman-cloud backup plugin, and the PostgreSQL

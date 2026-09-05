@@ -1,0 +1,7 @@
+# Stays in the crowdsec namespace rather than defaulting to its own.
+#
+# Not optional: this app reads the `crowdsec-secrets` Secret by literal name
+# (created by crowdsec's own ExternalSecrets) and reaches LAPI at
+# http://crowdsec-service:8080 — both same-namespace references. The split is
+# for lifecycle only; the UI tracks a different upstream on its own cadence.
+namespace: crowdsec
