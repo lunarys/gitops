@@ -1,3 +1,15 @@
+
+Generator for meta-application resources:
+
+- Argo Application
+- Argo Project
+- Kargo Project
+- Kargo Stages
+- Kargo Warehouse
+
+
+---
+
 - [GitHub - justcloudnative/argocd-manages-itself: ArgoCD examples](https://github.com/justcloudnative/argocd-manages-itself)
 - [Self Managed Argo CD — App Of Everything](https://medium.com/devopsturkiye/self-managed-argo-cd-app-of-everything-a226eb100cf0)
 - [Declarative Setup - Argo CD - Declarative GitOps CD for Kubernetes](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/)

@@ -1,0 +1,62 @@
+# Same, for the TEST cluster's Argo CD.
+#
+# NOT gated on anything. Gating structural changes behind the test cluster would
+# mean an offline test cluster blocks adding or reconfiguring apps in prod.
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: argo-resources-test
+spec:
+  # Runs on the PROD shard even though it renders the test cluster's config:
+  # this step only writes git. Putting it on the test shard would make it
+  # unavailable exactly when you want to add an app while test is down.
+  #
+  # spec.shard, not the kargo.akuity.io/shard label: the Stage admission
+  # webhook derives the label from spec.shard and strips a label that doesn't
+  # match it, so setting only the label is a no-op on this Kargo version.
+  shard: prod
+  requestedFreight:
+    - origin:
+        kind: Warehouse
+        name: platform
+      sources:
+        direct: true
+  promotionTemplate:
+    spec:
+      vars:
+        - name: env
+          value: test
+      steps:
+        - uses: git-clone
+          config:
+            repoURL: ${REPO_URL}
+            checkout:
+              - commit: $${{ commitFrom("${REPO_URL}").ID }}
+                path: ./src
+              - branch: stage/$${{ vars.env }}
+                create: true
+                path: ./out
+        - uses: delete
+          config:
+            path: ./out/_platform
+            strict: false
+        - uses: helm-template
+          config:
+            path: ./src/03_apps
+            outPath: ./out/_platform/applications.yaml
+            releaseName: meta
+            valuesFiles:
+              - ./src/03_apps/values.yaml
+              - ./src/03_apps/values-argo-$${{ vars.env }}.yaml
+            buildDependencies: false
+            skipTests: true
+        - uses: git-commit
+          as: commit
+          config:
+            path: ./out
+            message: "meta(argo/$${{ vars.env }}): @ $${{ ctx.targetFreight.alias }}"
+        - uses: git-push
+          as: push
+          config:
+            path: ./out
+            targetBranch: stage/$${{ vars.env }}

@@ -1,0 +1,22 @@
+# Produces Freight when the shape of the system changes: an app added or
+# removed, a settings.yaml edited, the enabled lists changed, or the generator
+# itself modified.
+#
+# Unsharded on purpose. It is reconciled by the prod controller (shardName:prod
+# + isDefault:true), so discovery keeps running while the test cluster is off.
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Warehouse
+metadata:
+  name: platform-wrapper
+spec:
+  interval: 30s
+  freightCreationPolicy: Automatic
+  subscriptions:
+    - git:
+        repoURL: ${REPO_URL}
+        branch: main
+        commitSelectionStrategy: NewestFromBranch
+        includePaths:
+          - 03_apps/
+          - <TODO>
+        discoveryLimit: 20

@@ -1,0 +1,54 @@
+# Generates the Kargo Warehouses and Stages themselves, once, covering both
+# environments. Rendered from the union of the enabled lists -- see
+# meta/README.md for why this cannot be a per-environment render.
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: kargo-resources-prod
+spec:
+  # spec.shard, not the kargo.akuity.io/shard label: the Stage admission
+  # webhook derives the label from spec.shard and strips a label that doesn't
+  # match it, so setting only the label is a no-op on this Kargo version.
+  shard: prod
+  requestedFreight:
+    - origin:
+        kind: Warehouse
+        name: platform
+      sources:
+        direct: true
+  promotionTemplate:
+    spec:
+      steps:
+        - uses: git-clone
+          config:
+            repoURL: ${REPO_URL}
+            checkout:
+              - commit: $${{ commitFrom("${REPO_URL}").ID }}
+                path: ./src
+              - branch: stage/kargo
+                create: true
+                path: ./out
+        - uses: delete
+          config:
+            path: ./out/resources.yaml
+            strict: false
+        - uses: helm-template
+          config:
+            path: ./src/03_apps
+            outPath: ./out/resources.yaml
+            releaseName: meta
+            valuesFiles:
+              - ./src/03_apps/values.yaml
+              - ./src/03_apps/values-kargo.yaml
+            buildDependencies: false
+            skipTests: true
+        - uses: git-commit
+          as: commit
+          config:
+            path: ./out
+            message: "meta(kargo): @ $${{ ctx.targetFreight.alias }}"
+        - uses: git-push
+          as: push
+          config:
+            path: ./out
+            targetBranch: stage/kargo
