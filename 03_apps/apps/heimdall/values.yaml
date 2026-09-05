@@ -5,7 +5,7 @@ image:
   # https://github.com/linuxserver/Heimdall
   # https://github.com/linuxserver/docker-heimdall
   name: lscr.io/linuxserver/heimdall
-  tag: 2.8.1
+  tag: 2.8.3
 
 service:
   targetPort: 80
