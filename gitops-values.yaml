@@ -1,0 +1,83 @@
+# Repository-wide facts and conventions.
+#
+# Read by every chart that needs them -- 03_apps_bootstrap, 04_apps_generator
+# and 06_apps_kargo -- and always passed with `-f`, never read via .Files. It
+# therefore lives at the repository root, outside every chart, and is
+# referenced by path: from the worktree locally, or from a promotion's clone
+# as ./src/gitops-values.yaml.
+#
+# Deliberately NOT a symlink into each chart. Helm does follow symlinks (for
+# both -f and .Files.Get, and helm package embeds the target), but the link
+# dangles the moment a chart is copied without its parent -- which is exactly
+# what render.sh and the promotion's copy step do. `helm template` then fails
+# outright with "error evaluating symlink".
+
+# -- The git repository holding both the authored sources and the rendered
+# manifests.
+mainRepo: https://github.com/lunarys/gitops.git
+
+# -- Branch the Warehouses watch for source changes.
+sourceBranch: main
+
+# -- Branch prefix the rendered manifests are committed to (stage/test, stage/prod).
+renderedBranchPrefix: stage/
+
+# -- Path of the app tree within mainRepo.
+#
+# Distinct from the generator's appsDir: Kargo filters Freight by repository
+# path, so Warehouse includePaths must describe the layout on disk, not the
+# assembled one.
+appRoot: 05_apps
+
+# -- Root of the generated tree on a stage branch. Everything below it is
+# machine-written; anything beside it is not.
+#
+# The prefix is what makes the location unambiguous regardless of where the
+# stage branch is cut from: a branch descending from main carries the authored
+# tree too, so a bare `apps/` would sit alongside 05_apps with nothing marking
+# which is which.
+#
+# Apps render to <renderedRoot>/apps/<application name> -- the name, not the
+# directory, consistent with the directory only ever feeding includePaths.
+# Nesting under apps/ also makes an app-vs-meta name collision structurally
+# impossible rather than a naming rule that has to be remembered.
+renderedRoot: _rendered
+
+# -- Private companion repository.
+#
+# Not yet migrated to the Kargo flow; retained so the existing private
+# app-of-apps keeps working. The per-app `privateSettings` merge is gone -- no
+# app in 05_apps used it.
+privateRepo: https://github.com/lunarys/gitops-private.git
+privateRepoEnabled: true
+
+# -- Kargo control plane.
+kargo:
+  # Prefix for each app's Kargo Project, and therefore for its namespace.
+  #
+  # MUST NOT be empty. 22 of 23 app directories deploy into a namespace named
+  # after the directory, and a Kargo Project creates a like-named namespace in
+  # the same (prod) cluster. Without the prefix the Project namespace and the
+  # workload namespace are the same namespace.
+  projectPrefix: kargo-app-
+
+  # The shared ClusterPromotionTask every app Stage invokes. Defined by
+  # 05_apps/kargo; referenced by the Stages 04_apps_generator emits.
+  promotionTask: render-and-open-pr
+
+  # environment -> Kargo controller shard. A Stage runs on the shard of the
+  # cluster it changes, so a promotion never half-runs against a cluster that
+  # is powered off.
+  shards:
+    test: test
+    prod: prod
+
+# -- Argo CD.
+argo:
+  # Namespace Argo CD itself runs in, in each cluster. This is where the
+  # generated Application and AppProject resources are created -- not where the
+  # workloads land, and not the Kargo Project namespace.
+  namespace: argocd
+  # Destination cluster for every Application. Each cluster's Argo CD deploys
+  # into itself, so this is the in-cluster address in both.
+  server: https://kubernetes.default.svc

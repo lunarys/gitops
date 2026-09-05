@@ -2,6 +2,15 @@
 #
 # One chart, three renders. See `mode` below, and render.sh for how to run all
 # three locally.
+#
+# Repository-wide facts -- mainRepo, branch names, path conventions, the Argo
+# and Kargo topology -- are NOT here. They live in gitops-values.yaml at the
+# repository root, because 03_apps_bootstrap and 06_apps_kargo need the same
+# values and duplicating them is how they drift. Every render must pass it:
+#
+#   helm template meta 04_apps_generator -f gitops-values.yaml -f values-<mode>.yaml
+#
+# What stays below is what only the generator has an opinion about.
 
 # -- What this render emits.
 #
@@ -30,63 +39,10 @@ environment: ""
 # -- Directory inside THIS CHART where the app directories are assembled.
 #
 # Helm's .Files can only read within the chart directory, and the apps live in
-# a sibling directory (05_apps/). The promotion -- and render.sh -- copy them to
-# <chart>/apps/ before templating. Nothing else in the design depends on this.
+# a sibling directory (see appRoot in gitops-values.yaml). The promotion -- and
+# render.sh -- copy them to <chart>/apps/ before templating. Nothing else in the
+# design depends on this.
 appsDir: apps
-
-# -- Path of the app tree within mainRepo.
-#
-# Distinct from appsDir: Kargo filters Freight by repository path, so Warehouse
-# includePaths must describe the layout on disk, not the assembled one.
-appRoot: 05_apps
-
-# -- The git repository holding both the authored sources and the rendered
-# manifests.
-mainRepo: https://github.com/lunarys/gitops.git
-
-# -- Branch the Warehouses watch for source changes.
-sourceBranch: main
-
-# -- Branch prefix the rendered manifests are committed to (stage/test, stage/prod).
-renderedBranchPrefix: stage/
-
-# -- Private companion repository.
-#
-# Not yet migrated to the Kargo flow; retained so the existing private
-# app-of-apps keeps working. The per-app `privateSettings` merge is gone -- no
-# app in 05_apps used it.
-privateRepo: https://github.com/lunarys/gitops-private.git
-privateRepoEnabled: true
-
-# -- Kargo control plane.
-kargo:
-  # Prefix for each app's Kargo Project, and therefore for its namespace.
-  #
-  # MUST NOT be empty. 22 of 23 app directories deploy into a namespace named
-  # after the directory, and a Kargo Project creates a like-named namespace in
-  # the same (prod) cluster. Without the prefix the Project namespace and the
-  # workload namespace are the same namespace.
-  projectPrefix: kargo-app-
-
-  # The shared ClusterPromotionTask every app Stage invokes.
-  promotionTask: render-and-open-pr
-
-  # environment -> Kargo controller shard. A Stage runs on the shard of the
-  # cluster it changes, so a promotion never half-runs against a cluster that
-  # is powered off.
-  shards:
-    test: test
-    prod: prod
-
-# -- Argo CD.
-argo:
-  # Namespace Argo CD itself runs in, in each cluster. This is where the
-  # generated Application and AppProject resources are created -- not where the
-  # workloads land, and not the Kargo Project namespace.
-  namespace: argocd
-  # Destination cluster for every Application. Each cluster's Argo CD deploys
-  # into itself, so this is the in-cluster address in both.
-  server: https://kubernetes.default.svc
 
 # -- Defaults for every app. Override per app in <app>/settings.yaml, which is
 # merged over these deeply -- so setting one key under `kargo` keeps the rest.

@@ -64,6 +64,18 @@
     {{- fail (printf "mode=kargo must not set `environment` (got %q): Kargo resources are rendered once and cover both environments" .Values.environment) -}}
   {{- end -}}
 {{- end -}}
+{{- /*
+  The repository-wide values live in gitops-values.yaml at the repo root, not
+  in this chart, so a forgotten `-f` leaves whole blocks nil. Checked before
+  reaching into them: without this the first symptom is a nil-pointer panic
+  naming an inner key, which reads as a template bug rather than a missing
+  values file.
+*/ -}}
+{{- range $key := list "mainRepo" "appRoot" "renderedBranchPrefix" "renderedRoot" "kargo" "argo" -}}
+  {{- if not (index $.Values $key) -}}
+    {{- fail (printf "values.%s is not set -- pass the repository-wide values file: helm template ... -f gitops-values.yaml -f values-<mode>.yaml" $key) -}}
+  {{- end -}}
+{{- end -}}
 {{- if not .Values.kargo.projectPrefix -}}
   {{- fail "values.kargo.projectPrefix must not be empty: a Kargo Project creates a namespace of its own name, which would collide with the app's workload namespace" -}}
 {{- end -}}
