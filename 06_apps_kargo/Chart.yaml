@@ -1,0 +1,8 @@
+apiVersion: v2
+name: apps-kargo
+description: >-
+  The Kargo platform flow: the kargo-platform Project, the Warehouse that
+  watches the authored sources, and the Stages that render the generator's
+  output onto the stage branches.
+type: application
+version: 0.1.0
