@@ -1,0 +1,49 @@
+networkpolicy:
+  preset:
+    namespaceIsolation: true
+
+    ingress:
+      # Traefik reaches the API server. The controller accepts nothing.
+      fromIngressController: true
+
+    egress:
+      # Promotions read and write Kubernetes: Stages, Promotions and Freight
+      # here, and Argo CD Applications during argocd-update.
+      toKubeApi: true
+
+      # No host list, deliberately.
+      #
+      # A promotion renders any app in this repository, and rendering builds
+      # that app's chart dependencies -- so the set of hosts it needs is the
+      # union of every chart repository every app uses, today and tomorrow.
+      # Enumerating that here would put one app's dependency list inside
+      # another app's network policy, where it goes stale silently: a missing
+      # entry fails as a hang, not as an error naming the host.
+      #
+      # What is enforced instead is the SHAPE of the traffic. Cilium
+      # special-cases the bare pattern "*" to match every DNS name (elsewhere a
+      # star does not cross a dot), so this permits HTTPS to any name the pod
+      # RESOLVED through the DNS proxy, and nothing else:
+      #
+      #   - a connection straight to a hardcoded IP is still denied, because
+      #     that address was never learned from a lookup -- which is the path
+      #     `toWorld: true` would leave open on the one pod holding the git
+      #     credential;
+      #   - no other port is reachable at all;
+      #   - every name is logged, so what promotions actually touch is
+      #     observable rather than guessed. If this is ever narrowed to a list,
+      #     that list should come from `hubble observe`, not from grepping
+      #     other apps' Chart.yaml.
+      #
+      # This does NOT enforce "chart pulling" -- nothing can, while the payload
+      # is TLS. That needs either interception (Cilium L7 HTTP with
+      # terminatingTLS, a CA and per-host secrets) or an in-cluster pull-through
+      # registry so this pod's only egress is to it. The latter is awkward here
+      # because these repositories are a mix of OCI and classic HTTP.
+      rules:
+        - toFQDNs:
+            - matchPattern: "*"
+          toPorts:
+            - ports:
+                - port: "443"
+                  protocol: TCP

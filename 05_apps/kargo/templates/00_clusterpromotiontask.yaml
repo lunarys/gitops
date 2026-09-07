@@ -1,0 +1,220 @@
+{{- /*
+  The shared promotion task: renders ONE app for ONE environment onto that
+  environment's stage branch. Every per-app Stage the generator emits calls it;
+  nothing else does.
+
+  It lives with the Kargo install because it is not a generic task. It encodes
+  this repository's conventions -- where a render lands, how the pull request
+  branch is named, what the commit says -- and those belong with the thing that
+  is ours, not with the thing that is upstream's.
+
+  ClusterPromotionTask rather than PromotionTask: there is one Kargo Project per
+  app, and a namespaced task would have to be duplicated into every one of them.
+
+  THE CONTRACT with 04_apps_generator/templates/_kargo_stages.tpl:
+
+    - the vars below, all required, all supplied by the Stage;
+    - the workspace layout -- ./src holds the sources at the Freight's commit,
+      ./out holds the stage branch. The caller's `valuesFiles` var arrives
+      already prefixed with ./src, so this layout cannot be changed on one side
+      alone;
+    - the `commit` output, which the caller pins its argocd-update to.
+
+  UNVERIFIED, in the order they will break (lab is down):
+    1. that a list-valued var populates a list-typed config field
+       (`valuesFiles`) -- also flagged at the caller;
+    2. that `status()` inside a task takes the plain step alias, given that
+       outputs require `task.outputs[...]` because aliases are namespaced after
+       inflation;
+    3. that `kind: ClusterPromotionTask` is accepted on the task reference.
+*/ -}}
+{{- $app := include "kargo.expr" "vars.app" -}}
+{{- $env := include "kargo.expr" "vars.env" -}}
+{{- $repoURL := include "kargo.expr" "vars.repoURL" -}}
+{{- $targetBranch := include "kargo.expr" "vars.targetBranch" -}}
+{{- $promotionBranch := include "kargo.expr" "vars.promotionBranch" -}}
+{{- $namespace := include "kargo.expr" "vars.namespace" -}}
+{{- $valuesFiles := include "kargo.expr" "vars.valuesFiles" -}}
+{{- $repoPath := printf "%s/%s" (include "kargo.expr" "vars.appRoot") (include "kargo.expr" "vars.appDir") -}}
+{{- $chartPath := printf "./src/%s" $repoPath -}}
+{{- $outDir := printf "%s/%s" (include "kargo.expr" "vars.outRoot") $app -}}
+{{- /*
+  The vars arrive as strings -- the generator quotes them, since a Stage var is
+  a string field -- so they are compared to strings rather than used as booleans
+  directly. A bare `vars.includeCRDs` would put the STRING "false" in a boolean
+  field, and a non-empty string is true.
+*/ -}}
+{{- $includeCRDs := include "kargo.expr" `vars.includeCRDs == "true"` -}}
+{{- $wantPR := include "kargo.expr" `vars.openPR == "true"` -}}
+{{- $noPR := include "kargo.expr" `vars.openPR != "true"` -}}
+{{- $prOpened := include "kargo.expr" `status("open-pr") != "Skipped"` -}}
+{{- $alias := include "kargo.expr" "ctx.targetFreight.alias" -}}
+{{- $freight := include "kargo.expr" "ctx.targetFreight.name" -}}
+{{- $srcCommit := include "kargo.expr" "commitFrom(vars.repoURL).ID" -}}
+{{- $srcBranch := include "kargo.expr" "commitFrom(vars.repoURL).Branch" -}}
+{{- $rollbackLine := include "kargo.expr" `ctx.meta.promotion.rollback ? "This is a rollback." : ""` -}}
+{{- $subject := printf "chore(%s): render %s" $app $alias -}}
+{{- $prTitle := printf "chore(%s): render onto %s" $app $targetBranch -}}
+{{- $rendered := printf "Rendered %s for %s into %s/,\nreconciled by Argo CD on %s." $repoPath $env $outDir $targetBranch -}}
+{{- $provenance := printf "Freight: %s (%s)\nSource:  %s on %s" $alias $freight $srcCommit $srcBranch -}}
+apiVersion: kargo.akuity.io/v1alpha1
+kind: ClusterPromotionTask
+metadata:
+  name: {{ .Values.promotionTask.name }}
+spec:
+  # No defaults: every one is supplied by the Stage, and a var that quietly
+  # defaulted would render the wrong app rather than fail.
+  vars:
+    - name: repoURL
+    - name: app
+    - name: appDir
+    - name: appRoot
+    - name: env
+    - name: targetBranch
+    - name: promotionBranch
+    - name: outRoot
+    - name: valuesFiles
+    - name: namespace
+    - name: includeCRDs
+    - name: openPR
+  steps:
+    - uses: git-clone
+      config:
+        repoURL: '{{ $repoURL }}'
+        checkout:
+          # The Freight's commit, not the branch head: a promotion renders what
+          # was promoted, even if main has moved since.
+          - commit: '{{ include "kargo.expr" "commitFrom(vars.repoURL).ID" }}'
+            path: ./src
+          - branch: '{{ $targetBranch }}'
+            # The stage branch may not exist yet on a first promotion.
+            create: true
+            path: ./out
+    {{- /*
+      Deleted before rendering, so a resource the chart stopped emitting
+      disappears instead of lingering: the render only ever writes what exists
+      now, and without this the directory is additive forever.
+
+      strict: false because the directory does not exist the first time this
+      app is promoted.
+    */}}
+    - uses: delete
+      config:
+        path: '{{ printf "./out/%s" $outDir }}'
+        strict: false
+    - uses: helm-template
+      config:
+        path: '{{ $chartPath }}'
+        # A directory, not a file: no .yaml suffix. useReleaseName then names it
+        # after the release rather than the chart, which matters wherever
+        # applicationName overrides the directory -- with the chart name the
+        # Argo CD Application would point at a path that does not exist.
+        outPath: '{{ printf "./out/%s" (include "kargo.expr" "vars.outRoot") }}'
+        useReleaseName: true
+        releaseName: '{{ $app }}'
+        namespace: '{{ $namespace }}'
+        # Already workspace-relative, prefixed by the caller.
+        valuesFiles: '{{ $valuesFiles }}'
+        includeCRDs: '{{ $includeCRDs }}'
+        # 05_apps/.gitignore keeps charts/ out of git, so the clone has no
+        # vendored dependencies and every render fetches them. This is what the
+        # egress allowlist in values-network.part.yaml exists for.
+        buildDependencies: true
+        skipTests: true
+    - uses: git-commit
+      as: commit
+      config:
+        path: ./out
+        message: |-{{ $subject | nindent 10 }}
+          {{ $rendered | nindent 10 }}
+          {{ $provenance | nindent 10 }}
+          {{ $rollbackLine | nindent 10 }}
+    {{- /*
+      Two mutually exclusive pushes.
+
+      Without a pull request the commit goes straight onto the stage branch --
+      no force, because that branch must only ever move forward.
+
+      With one it goes to a branch of its own, fixed per app and environment and
+      force-pushed. Fixed rather than Kargo's generateTargetBranch, which names
+      a branch per Promotion: re-rendering would then always mean a second pull
+      request, with the first one's review comments stranded on it, and every
+      aborted promotion would leave a branch behind. Force-pushing a fixed
+      branch updates the pull request already under review instead --
+      git-open-pr matches an existing one on base branch, head branch and head
+      commit, and a force-push moves an open request's head onto the new commit.
+      A merged request cannot be matched by mistake: its head commit is frozen
+      at what merged.
+
+      Forcing is safe on this branch and nowhere else -- it holds nothing but
+      machine-written output, rebuilt from the stage branch every promotion.
+    */}}
+    - if: '{{ $noPR }}'
+      uses: git-push
+      as: push
+      config:
+        path: ./out
+    - if: '{{ $wantPR }}'
+      uses: git-push
+      as: push-pr
+      config:
+        path: ./out
+        targetBranch: '{{ $promotionBranch }}'
+        force: true
+    {{- /*
+      The title and description name no Freight, and cannot: this branch is
+      force-pushed and git-open-pr adopts an already-open request unchanged --
+      it looks one up and returns it, with no call that could edit either field.
+      Anything per-promotion written here would survive from the FIRST render on
+      the branch and then sit above a later one's diff. The commit is rebuilt
+      every time and carries all of it.
+    */}}
+    - if: '{{ $wantPR }}'
+      uses: git-open-pr
+      as: open-pr
+      config:
+        repoURL: '{{ $repoURL }}'
+        # Set explicitly rather than inferred from the URL.
+        provider: github
+        sourceBranch: '{{ include "kargo.expr" `outputs["push-pr"].branch` }}'
+        targetBranch: '{{ $targetBranch }}'
+        title: {{ $prTitle | quote }}
+        description: |-{{ $rendered | nindent 10 }}
+
+          Everything under that path is machine-written, so this diff *is* the change:
+          nothing renders again between merging this and the cluster acting on it. The
+          promotion is parked in `git-wait-for-pr` until this pull request is merged or
+          closed.
+
+          Which Freight this is, and which source commit it was rendered from, is in the
+          commit message rather than here: a pull request's title and body are written
+          once, when it opens, while this branch is force-pushed and this pull request
+          reused if a later render supersedes the one below.
+    {{- /*
+      One condition covers both reasons there may be no pull request to wait
+      for: openPR was false, so the step above was skipped by its own `if`; or
+      the render matched the branch exactly, in which case git-commit made no
+      commit and git-open-pr found no difference between the branches and
+      reported Skipped itself.
+    */}}
+    - if: '{{ $prOpened }}'
+      uses: git-wait-for-pr
+      as: wait-for-pr
+      config:
+        repoURL: '{{ $repoURL }}'
+        provider: github
+        prNumber: '{{ include "kargo.expr" `outputs["open-pr"].pr.id` }}'
+    {{- /*
+      What the caller pins argocd-update to: the commit the stage branch will be
+      at once this promotion is done.
+
+      With a merged pull request that is the merge commit, which exists nowhere
+      else. Otherwise it is the local HEAD of ./out, which git-commit reports --
+      either the commit it just made and pushed directly, or, when the render
+      changed nothing, the stage branch head it was already at. Syncing to that
+      is correct rather than wasteful: it re-asserts what should be deployed.
+    */}}
+    - uses: compose-output
+      as: output
+      config:
+        commit: '{{ include "kargo.expr" `status("wait-for-pr") == "Succeeded" ? task.outputs["wait-for-pr"].commit : task.outputs["commit"].commit` }}'

@@ -1,0 +1,25 @@
+apiVersion: v2
+name: kargo
+type: application
+version: 0.1.0
+
+dependencies:
+  # 1.10.0 is a hard floor, not a preference: before it, git-open-pr FAILED
+  # when there were no commits between the source and target branch instead of
+  # reporting Skipped. Every Stage in this repository -- 06_apps_kargo's and
+  # every one this chart's promotion task serves -- relies on that Skipped to
+  # survive a render that changed nothing.
+  - name: kargo
+    version: 1.11.4
+    repository: oci://ghcr.io/akuity/kargo-charts
+
+  - name: networkpolicy
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts
+
+  # 4.7.0 for `namespace` and `labels`: the git credential is a Secret in
+  # another namespace carrying kargo.akuity.io/cred-type, and neither was
+  # expressible before.
+  - name: externalsecrets
+    version: 4.7.0
+    repository: oci://ghcr.io/lunarys/charts

@@ -1,0 +1,77 @@
+# The Kargo control plane, and the two things that make it *this* repository's
+# Kargo rather than a stock one: the promotion task every app Stage invokes,
+# and the git credential every promotion clones and pushes with.
+#
+# Prod only. The test cluster runs no control plane and no controller yet, so
+# its Stages have nothing claiming their shard; they queue as Freight until one
+# exists. Adding it means a second, controller-only release there with
+# controller.shardName=test and a kubeconfig pointing back at this cluster.
+
+# -- Name of the ClusterPromotionTask defined in templates/.
+#
+# MUST equal `kargo.promotionTask` in gitops-values.yaml, which is what the
+# generator writes into every app Stage's task reference. Neither can be derived
+# from the other: an app chart is rendered with its own values files only and
+# never sees the repository-wide file. A mismatch stays silent until a promotion
+# runs and cannot find its task.
+promotionTask:
+  name: render-and-open-pr
+
+kargo:
+  api:
+    # Used for the Ingress rule, the certificate and any generated URL.
+    host: kargo.svc.elda
+
+    tls:
+      # Traefik terminates TLS; the API server itself serves plain HTTP inside
+      # the cluster. terminatedUpstream is what keeps every URL Kargo generates
+      # on https despite that.
+      enabled: false
+      terminatedUpstream: true
+
+    # Admin credentials come from the ExternalSecret in
+    # values-secrets.part.yaml. Naming an existing Secret here stops Helm
+    # generating one, which is what keeps the password hash and the signing key
+    # out of git entirely -- they are never Helm values.
+    secret:
+      name: kargo-api-credentials
+
+    ingress:
+      enabled: true
+      annotations:
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-common-internal-access-allowlist@kubernetescrd
+        cert-manager.io/cluster-issuer: step-ca-internal
+      tls:
+        enabled: true
+        # cert-manager issues it via the annotation above; the chart's own
+        # self-signed issuer would produce a certificate nothing trusts.
+        selfSignedCert: false
+        secretName: kargo-internal-cert
+
+  controller:
+    # BOTH are required, and the pair is not obvious.
+    #
+    # A controller with no shardName is the default one -- and handles ONLY
+    # resources that name no shard. Every Stage this repository generates sets
+    # spec.shard explicitly, so a default-only controller would reconcile none
+    # of them, with no error anywhere: the Stages would simply sit there.
+    #
+    # Naming the shard fixes that but gives up the default role, which
+    # 06_apps_kargo's Warehouse depends on (it is deliberately unsharded, so
+    # discovery keeps running while the test cluster is off). Setting both is
+    # the documented way to have one controller do both jobs.
+    shardName: prod
+    isDefault: true
+
+  global:
+    # One credential for every Project. The alternative is a copy of the same
+    # Secret in all 24 Project namespaces, rotated 24 times.
+    #
+    # The chart creates the namespace and, importantly, the RBAC that lets the
+    # controller read Secrets there -- the controller has no cluster-wide Secret
+    # access, only per-Project grants, so a hand-made namespace would need the
+    # Role and RoleBinding made by hand too.
+    sharedResources:
+      namespace: kargo-shared-resources
+      createNamespace: true
+      createRBAC: true

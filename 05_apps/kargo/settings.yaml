@@ -1,0 +1,13 @@
+namespace: kargo
+
+# The credential every Project shares lives in a namespace of its own, created
+# by the Kargo chart along with the RBAC that lets the controller read it. The
+# AppProject has to allow it as a destination or Argo refuses the ExternalSecret.
+additionalNamespaces:
+  - kargo-shared-resources
+
+# skipCrds is deliberately left at its default (true, i.e. includeCRDs false),
+# and it changes nothing here: Kargo ships its CRDs as a TEMPLATE
+# (templates/crds.yaml, gated by the chart's own crds.install) rather than in
+# crds/, so Helm's CRD switch never sees them and they render either way.
+# Setting it false would only pull in CRDs from dependencies that have none.

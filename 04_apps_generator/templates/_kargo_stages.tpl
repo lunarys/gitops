@@ -10,6 +10,18 @@
 {{- $root := .root -}}
 {{- $app := .app -}}
 {{- $env := .env -}}
+{{- /*
+  The promotion task renders from a clone at ./src, so every path handed to it
+  is workspace-relative. That layout is part of the task's contract with this
+  emitter, like the var names themselves -- the alternative is prefixing inside
+  the task with an expression built from map(), which would put a second
+  unverified assumption on top of the list-valued var below.
+*/ -}}
+{{- $srcDir := printf "./src/%s/%s" ($root.Values.appRoot | trimSuffix "/") $app.dir -}}
+{{- $valuesFiles := list -}}
+{{- range concat (dig "base" (list) $app.valuesFiles | default (list)) (dig $env (list) $app.valuesFiles | default (list)) -}}
+  {{- $valuesFiles = append $valuesFiles (printf "%s/%s" $srcDir .) -}}
+{{- end -}}
 apiVersion: kargo.akuity.io/v1alpha1
 kind: Stage
 metadata:
@@ -77,9 +89,20 @@ spec:
             # which loses fragments but nothing else.
             - name: valuesFiles
               value:
-{{ toYaml (concat (dig "base" (list) $app.valuesFiles | default (list)) (dig $env (list) $app.valuesFiles | default (list))) | indent 16 }}
+{{ toYaml $valuesFiles | indent 16 }}
             - name: namespace
               value: {{ include "apps-generator.namespace" . }}
+            {{- /*
+              Where the render lands, and the branch the pull request is opened
+              from. Both are conventions this repository owns and the task does
+              not: an app chart is rendered with its own values files only and
+              never sees gitops-values.yaml, so a task that derived these itself
+              would be deriving them from a second, silently divergent copy.
+            */}}
+            - name: outRoot
+              value: {{ $root.Values.renderedRoot }}/{{ $root.Values.renderedAppsDir }}
+            - name: promotionBranch
+              value: {{ $root.Values.promotionBranchPrefix }}{{ $app.name }}-{{ $env }}
             # skipCrds is a RENDER decision now, not an Argo sync option.
             - name: includeCRDs
               value: {{ not (dig "skipCrds" true $app.settings) | quote }}

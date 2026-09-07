@@ -50,11 +50,11 @@ git -- rendering is the part that breaks.
 Not yet resolved
 ----------------
 
-- **Git credentials.** Every promotion here clones and pushes, so a Secret
-  labelled `kargo.akuity.io/cred-type: git` must be visible in the
-  `kargo-apps-generator` namespace. Nothing provisions one yet -- it comes
-  either from this chart directly or from a global-credentials namespace
-  configured by `05_apps/kargo`.
+- **Git credentials.** Every promotion here clones and pushes. `05_apps/kargo`
+  provides the credential: one labelled Secret in the namespace named by
+  `global.sharedResources.namespace`, which Kargo reads for every Project
+  including this one. Nothing is needed in this chart -- but nothing works
+  until that app is installed.
 - **`kargo.akuity.io/authorized-stage`.** The `argocd-update` steps require that
   annotation, formatted `kargo-apps-generator:<stage>`, on the Applications
   named `argo-resources` and `kargo-resources`. Those Applications are
