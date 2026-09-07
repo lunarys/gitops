@@ -1,16 +1,14 @@
-The Kargo control plane, and the conventions that make it this repository's.
+The Kargo control plane: API, UI and one controller, prod only, plus the admin
+account it reads at startup (`values-secrets.part.yaml`).
 
-- the **install** (`values.yaml`) -- API, UI and one controller, prod only;
-- the **`render-and-open-pr` ClusterPromotionTask** (`templates/`), which every
-  per-app Stage the generator emits invokes;
-- the **git credential** (`values-secrets.part.yaml`), one Secret in
-  `kargo-shared-resources` serving every Project.
+**The promotion task and the git credential are not here** -- they are in
+`06_apps_kargo`, which explains why. In short: a Kargo CR cannot be applied in
+the same pass that installs the Kargo CRDs, and the credential belongs to the
+flow that uses it rather than to the control plane that never does.
 
-The task lives here rather than in the generator because it is not generic: it
-encodes where a render lands, how the pull request branch is named and what the
-commit says. Its contract with `04_apps_generator/templates/_kargo_stages.tpl`
--- twelve vars, the `./src` + `./out` workspace layout, and the `commit` output
--- is written out at the top of the template.
+What this chart does provide for them is `kargo-shared-resources` -- the
+namespace that credential lands in, and the RBAC that lets the controller read
+Secrets there. Hence this app first, `06_apps_kargo` second.
 
 
 Bootstrap

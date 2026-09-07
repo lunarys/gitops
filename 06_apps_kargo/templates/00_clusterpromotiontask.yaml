@@ -1,3 +1,4 @@
+# CAN'T BE INSTALLED FROM WITHIN KARGO templates - helm: ensure CRDs are installed first
 {{- /*
   The shared promotion task: renders ONE app for ONE environment onto that
   environment's stage branch. Every per-app Stage the generator emits calls it;
@@ -60,7 +61,9 @@
 apiVersion: kargo.akuity.io/v1alpha1
 kind: ClusterPromotionTask
 metadata:
-  name: {{ .Values.promotionTask.name }}
+  # The same string 04_apps_generator writes into every app Stage's task
+  # reference, read from the one file both charts are rendered with.
+  name: {{ .Values.kargo.promotionTask }}
 spec:
   # No defaults: every one is supplied by the Stage, and a var that quietly
   # defaulted would render the wrong app rather than fail.

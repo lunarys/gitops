@@ -62,3 +62,41 @@ autoPromotion:
     test: false
     prod: false
   kargo: false
+
+# -- The git credential every promotion uses, in every Project.
+#
+# Here rather than with the Kargo install because it belongs to the flow, not
+# to the control plane: the install never reads it, and not one of the Stages
+# below can clone or push without it. The namespace it lands in is created by
+# the install, which is why 05_apps/kargo goes first.
+#
+# NOT a separate values file. `.part.yaml` is the generator's convention for
+# app values fragments, and nothing scans this chart -- a fragment would only
+# add a `-f` that can be forgotten, and forgetting it renders no credential and
+# no error, failing much later as a promotion that cannot clone.
+externalsecrets:
+  secrets:
+    # The credential every promotion in every Project clones and pushes with.
+    #
+    # In the shared-resources namespace rather than this one: that is where the
+    # controller is granted Secret access, and an ExternalSecret only ever
+    # creates its Secret in its own namespace.
+    #
+    # The label is what makes it a credential at all -- Kargo finds credentials
+    # by label, not by name, and an unlabelled Secret is simply invisible to it.
+    gitops-repo:
+      namespace: kargo-shared-resources
+      labels:
+        kargo.akuity.io/cred-type: git
+      commonRemoteKey: "14d2795c-00c0-4908-b7be-b4be00c9fc1d"
+      fields:
+        # Kargo matches a credential to a repository by this field, so it is a
+        # constant rather than a stored secret.
+        repoURL:
+          static: https://github.com/lunarys/gitops.git
+        username:
+          storeRefName: bitwarden-login
+          remoteProperty: username
+        password:
+          storeRefName: bitwarden-login
+          remoteProperty: password

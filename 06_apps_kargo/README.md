@@ -1,6 +1,9 @@
 The Kargo flow that renders the generator's output onto the stage branches.
 
 - `kargo-apps-generator` -- Namespace, Project, ProjectConfig
+- ClusterPromotionTask `render-and-open-pr` -- the task every per-app Stage
+  invokes, shared by all of them
+- the git credential every promotion clones and pushes with
 - Warehouse `sources` -- watches what the generator reads
 - Stage `argo-resources-test` -> `stage/test:_rendered/argo-resources/`
 - Stage `argo-resources-prod` -> `stage/prod:_rendered/argo-resources/`
@@ -37,8 +40,19 @@ Kargo CRDs do not exist at bootstrap time -- Kargo arrives with `05_apps`. A
 tier is defined by what is available when it runs, so anything needing a CRD
 that bootstrap cannot provide is not a bootstrap resource.
 
+The task and the credential live here rather than with the Kargo install in
+`05_apps/kargo`, and for different reasons. The task is a Kargo CR: it cannot be
+applied in the same pass that installs the Kargo CRDs, which is the same tier
+rule that put this whole directory outside `03_apps_bootstrap` -- a resource
+whose prerequisites do not exist yet is not a resource of that tier. The
+credential belongs to the flow rather than to the control plane: the install
+never reads it, and no promotion can run without it. It lands in
+`kargo-shared-resources`, a namespace the install creates, so `05_apps/kargo`
+has to be up first.
+
 Applied by hand, once Kargo is up:
 
+    helm dependency build 06_apps_kargo
     helm upgrade --install kargo-apps-generator 06_apps_kargo -f gitops-values.yaml
 
 There is deliberately no promotion flow for this directory yet: it *is* the
@@ -50,11 +64,11 @@ git -- rendering is the part that breaks.
 Not yet resolved
 ----------------
 
-- **Git credentials.** Every promotion here clones and pushes. `05_apps/kargo`
-  provides the credential: one labelled Secret in the namespace named by
-  `global.sharedResources.namespace`, which Kargo reads for every Project
-  including this one. Nothing is needed in this chart -- but nothing works
-  until that app is installed.
+- **The Bitwarden item behind the git credential.** `values.yaml` names it by
+  UUID: a login item whose username is the GitHub user and whose password is a
+  token with `repo` scope. Every promotion in every Project clones, pushes and
+  opens pull requests with it, so nothing promotes until it exists and
+  `05_apps/kargo` has created the namespace it is written into.
 - **`kargo.akuity.io/authorized-stage`.** The `argocd-update` steps require that
   annotation, formatted `kargo-apps-generator:<stage>`, on the Applications
   named `argo-resources` and `kargo-resources`. Those Applications are

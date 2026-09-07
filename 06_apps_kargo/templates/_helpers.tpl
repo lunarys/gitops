@@ -1,42 +1,43 @@
 {{- /*
+  A Kargo expression, written as `{{ include "kargo.expr" "vars.app" }}`.
+
+  Helm parses `{{` wherever it appears in a template -- including inside YAML
+  comments -- so a Kargo expression written literally would be read as a Helm
+  action and fail. The escape is `${{ "{{" }} ... {{ "}}" }}`, which is
+  unreadable repeated thirty times in one file. This says it once.
+
+  Expressions are still wrapped in single YAML quotes at the point of use: an
+  unquoted expression containing a ternary reads to a lenient YAML parser as
+  complex-mapping-key syntax (`? key` / `: value`), silently turning the field
+  into a map that Kargo rejects as "given: object". Quoting all of them rather
+  than only the ternaries leaves no exception to remember. Inside a `|` block
+  scalar the text is literal and neither rule applies.
+*/ -}}
+{{- define "kargo.expr" -}}
+${{ "{{" }} {{ . }} {{ "}}" }}
+{{- end -}}
+
+
+{{- /*
   The three Stages differ in five things: name, shard, which values file the
   generator is rendered with, which directory the output lands in, and which
   branch it targets. Everything else -- the clone, the copy, the render, the PR
   and the Argo sync -- is identical, so it lives here once.
 
-  ESCAPING. Every Kargo expression is written `${{ "{{" }} ... {{ "}}" }}`, and
-  every one that appears in a single-line YAML field is wrapped in single
-  quotes. Both halves matter:
-
-    - Helm parses `{{` wherever it appears, including inside YAML comments, so
-      a bare `${{ ... }}` would be read as a Helm action and fail.
-    - An unquoted Kargo expression containing a ternary reads to a lenient YAML
-      parser as complex-mapping-key syntax (`? key` / `: value`), silently
-      turning the field into a map that Kargo rejects as "given: object".
-      Quoting every expression rather than only the ternaries means the rule
-      has no exceptions to remember.
-
-  Single quotes outside, double quotes inside, so `commitFrom("...")` needs no
-  escaping of its own. Inside a `|` block scalar neither rule applies -- the
-  block is literal text, so the ternaries in the commit message and the PR body
-  need no quoting at all.
-
-  Expressions used in more than one place -- the Freight alias is both the
-  commit subject and a line in its body -- are built as Helm variables below
-  instead. A Helm string literal is the one place `{{` can be written
-  unescaped, which is why they are assembled with printf rather than inline.
+  Kargo expressions are written with the `kargo.expr` helper above -- see it for
+  why they cannot be written literally, and for the quoting rule that goes with
+  them. Every expression in a single-line field here is single-quoted; those
+  inside a `|` block scalar are not, because the block is literal text.
 */ -}}
 {{- define "apps-kargo.stage" -}}
 {{- $root := .root -}}
 {{- $repo := $root.Values.mainRepo -}}
 {{- $generator := $root.Values.generatorRoot | trimSuffix "/" -}}
 {{- $outDir := printf "%s/%s" $root.Values.renderedRoot .outDir -}}
-{{- $o := "${{" -}}
-{{- $c := "}}" -}}
-{{- $alias := printf "%s ctx.targetFreight.alias %s" $o $c -}}
-{{- $freight := printf "%s ctx.targetFreight.name %s" $o $c -}}
-{{- $srcCommit := printf "%s commitFrom(\"%s\").ID %s" $o $repo $c -}}
-{{- $srcBranch := printf "%s commitFrom(\"%s\").Branch %s" $o $repo $c -}}
+{{- $alias := include "kargo.expr" "ctx.targetFreight.alias" -}}
+{{- $freight := include "kargo.expr" "ctx.targetFreight.name" -}}
+{{- $srcCommit := include "kargo.expr" (printf "commitFrom(%q).ID" $repo) -}}
+{{- $srcBranch := include "kargo.expr" (printf "commitFrom(%q).Branch" $repo) -}}
 {{- /*
   Conventional-commit subject. `chore` because the content is generated rather
   than authored, and the scope is the Stage -- which is also the name of the
@@ -59,7 +60,7 @@
   line that git strips from the message; only a rollback says anything. A
   "Rollback: false" line on every commit would be noise.
 */ -}}
-{{- $rollbackLine := printf "%s ctx.meta.promotion.rollback ? \"This is a rollback.\" : \"\" %s" $o $c -}}
+{{- $rollbackLine := include "kargo.expr" `ctx.meta.promotion.rollback ? "This is a rollback." : ""` -}}
 {{- /*
   One fixed branch per Stage. See the comment on git-push below for why it is
   fixed rather than generated, and why force-pushing it is safe.
@@ -96,7 +97,7 @@ spec:
           config:
             repoURL: {{ $repo }}
             checkout:
-              - commit: '${{ "{{" }} commitFrom("{{ $repo }}").ID {{ "}}" }}'
+              - commit: '{{ $srcCommit }}'
                 path: ./src
               - branch: {{ .targetBranch }}
                 create: true
@@ -210,7 +211,7 @@ spec:
             repoURL: {{ $repo }}
             # Set explicitly rather than inferred from the URL.
             provider: github
-            sourceBranch: '${{ "{{" }} outputs.push.branch {{ "}}" }}'
+            sourceBranch: '{{ include "kargo.expr" "outputs.push.branch" }}'
             targetBranch: {{ .targetBranch }}
             title: {{ $prTitle | quote }}
             description: |-{{ $rendered | nindent 14 }}
@@ -236,13 +237,13 @@ spec:
           without it they fail trying to read a PR number that was never
           produced.
         */}}
-        - if: '${{ "{{" }} status("open-pr") != "Skipped" {{ "}}" }}'
+        - if: '{{ include "kargo.expr" `status("open-pr") != "Skipped"` }}'
           uses: git-wait-for-pr
           as: wait-for-pr
           config:
             repoURL: {{ $repo }}
             provider: github
-            prNumber: '${{ "{{" }} outputs["open-pr"].pr.id {{ "}}" }}'
+            prNumber: '{{ include "kargo.expr" `outputs["open-pr"].pr.id` }}'
         {{- /*
           Sync the Application that reconciles what was just written, pinned to
           the commit the merge produced. Without it the Stage would reference no
@@ -252,7 +253,7 @@ spec:
           Requires kargo.akuity.io/authorized-stage on that Application, which
           03_apps_bootstrap must set to <project>:<stage>.
         */}}
-        - if: '${{ "{{" }} status("open-pr") != "Skipped" {{ "}}" }}'
+        - if: '{{ include "kargo.expr" `status("open-pr") != "Skipped"` }}'
           uses: argocd-update
           config:
             apps:
@@ -260,5 +261,5 @@ spec:
                 namespace: {{ $root.Values.argo.namespace }}
                 sources:
                   - repoURL: {{ $repo }}
-                    desiredRevision: '${{ "{{" }} outputs["wait-for-pr"].commit {{ "}}" }}'
+                    desiredRevision: '{{ include "kargo.expr" `outputs["wait-for-pr"].commit` }}'
 {{- end }}

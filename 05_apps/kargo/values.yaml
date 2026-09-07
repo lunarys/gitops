@@ -1,21 +1,16 @@
-# The Kargo control plane, and the two things that make it *this* repository's
-# Kargo rather than a stock one: the promotion task every app Stage invokes,
-# and the git credential every promotion clones and pushes with.
+# The Kargo control plane, and the API admin account it reads at startup.
+#
+# The promotion task and the git credential are NOT here, for two different
+# reasons. The task is a Kargo CR, so it cannot be applied in the same pass
+# that installs the Kargo CRDs -- it belongs to a tier where they already
+# exist. The credential went with it because it belongs to the FLOW rather than
+# to the install: nothing here ever uses it, and no promotion can run without
+# it. Both live in 06_apps_kargo.
 #
 # Prod only. The test cluster runs no control plane and no controller yet, so
 # its Stages have nothing claiming their shard; they queue as Freight until one
 # exists. Adding it means a second, controller-only release there with
 # controller.shardName=test and a kubeconfig pointing back at this cluster.
-
-# -- Name of the ClusterPromotionTask defined in templates/.
-#
-# MUST equal `kargo.promotionTask` in gitops-values.yaml, which is what the
-# generator writes into every app Stage's task reference. Neither can be derived
-# from the other: an app chart is rendered with its own values files only and
-# never sees the repository-wide file. A mismatch stays silent until a promotion
-# runs and cannot find its task.
-promotionTask:
-  name: render-and-open-pr
 
 kargo:
   api:
@@ -39,7 +34,7 @@ kargo:
     ingress:
       enabled: true
       annotations:
-        traefik.ingress.kubernetes.io/router.middlewares: traefik-common-internal-access-allowlist@kubernetescrd
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-common-internal-access-allowlist@kubernetescrd,traefik-common-https-redirect@kubernetescrd
         cert-manager.io/cluster-issuer: step-ca-internal
       tls:
         enabled: true
