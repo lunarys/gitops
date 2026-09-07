@@ -26,6 +26,10 @@ networkpolicy:
     ingress:
       fromWorld: true
       fromNamespace: "nodered"
+      fromNetworkLabels:
+        - label: custom.network/external-access
+          ports:
+            - 9987
     egress:
       toFQDNs:
         # revocation list download, TODO: just port 443 would be sufficient
