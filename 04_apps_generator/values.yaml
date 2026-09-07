@@ -28,6 +28,17 @@
 # Deliberately empty by default so a render with no values file fails loudly.
 mode: ""
 
+# -- Directory inside this chart the app tree is read from.
+#
+# Helm's .Files cannot look outside the chart, so the tree (05_apps on disk) is
+# copied in before every render -- by 06_apps_kargo's copy step in a promotion,
+# by render.sh locally. Both pass this key with --set as they do it, so the
+# name of the directory is declared once, by whoever creates it.
+#
+# The default below therefore only ever applies to a bare `helm template` with
+# no assembled workspace, which finds no apps whatever this says.
+appsDir: apps
+
 # -- Which environment `mode: argo` renders for.
 #
 # Required when mode is argo; must be empty when mode is kargo. That cross-check
@@ -35,14 +46,6 @@ mode: ""
 # kind of resource into a stage branch -- the two words differ by one character
 # and both are valid values, so nothing else would catch it.
 environment: ""
-
-# -- Directory inside THIS CHART where the app directories are assembled.
-#
-# Helm's .Files can only read within the chart directory, and the apps live in
-# a sibling directory (see appRoot in gitops-values.yaml). The promotion -- and
-# render.sh -- copy them to <chart>/apps/ before templating. Nothing else in the
-# design depends on this.
-appsDir: apps
 
 # -- Defaults for every app. Override per app in <app>/settings.yaml, which is
 # merged over these deeply -- so setting one key under `kargo` keeps the rest.

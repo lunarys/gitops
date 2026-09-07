@@ -1,0 +1,22 @@
+{{- /*
+  Renders the per-app Kargo Projects, Warehouses and Stages -- once, covering
+  both environments.
+
+  No -test counterpart, and no environment in its name. Kargo runs in the prod
+  cluster only; the test cluster is an agent whose controller claims Stages by
+  shard but hosts no control plane. So there is exactly one place these
+  resources can be applied, and one branch they belong on.
+
+  This is also why the generator renders them from the UNION of the enabled
+  lists rather than per environment: a per-environment render would emit each
+  Warehouse twice with a conflicting Stage set, and a prod-only app would get no
+  Warehouse at all from the test render.
+*/ -}}
+{{- include "apps-kargo.stage" (dict
+      "root" $
+      "name" .Values.renderedKargoDir
+      "shard" (index .Values.kargo.shards "prod")
+      "valuesFile" "values-kargo.yaml"
+      "outDir" .Values.renderedKargoDir
+      "targetBranch" (printf "%sprod" .Values.renderedBranchPrefix)
+    ) }}

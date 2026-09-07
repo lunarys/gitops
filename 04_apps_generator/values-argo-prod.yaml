@@ -1,4 +1,4 @@
 # Renders the per-cluster resources for PROD: Argo CD Application + AppProject.
-# Output goes to stage/prod/_platform/.
+# Output goes to stage/prod:_rendered/argo-resources/.
 mode: argo
 environment: prod

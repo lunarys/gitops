@@ -1,4 +1,4 @@
 # Renders the per-cluster resources for TEST: Argo CD Application + AppProject.
-# Output goes to stage/test/_platform/.
+# Output goes to stage/test:_rendered/argo-resources/.
 mode: argo
 environment: test

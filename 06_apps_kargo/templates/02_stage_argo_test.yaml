@@ -1,0 +1,21 @@
+{{- /*
+  Renders the Argo CD Applications and AppProjects for the TEST cluster.
+
+  Runs on the test shard. An earlier draft ran both argo Stages on prod, on the
+  grounds that this step "only writes git" and should stay available while the
+  test cluster is down -- but it does not only write git: the argocd-update step
+  syncs the test cluster's Argo CD. On the prod shard it would push the commit
+  and then fail to sync it, leaving the branch ahead of the cluster.
+
+  The cost is real and accepted: while the test cluster is off, structural
+  changes to test cannot be promoted. They queue as Freight and apply when it
+  comes back, which is the correct behaviour for a cluster that is not running.
+*/ -}}
+{{- include "apps-kargo.stage" (dict
+      "root" $
+      "name" (printf "%s-test" .Values.renderedArgoDir)
+      "shard" (index .Values.kargo.shards "test")
+      "valuesFile" "values-argo-test.yaml"
+      "outDir" .Values.renderedArgoDir
+      "targetBranch" (printf "%stest" .Values.renderedBranchPrefix)
+    ) }}

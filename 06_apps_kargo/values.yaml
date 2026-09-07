@@ -1,0 +1,64 @@
+# What 06 alone has an opinion about.
+#
+# Everything else -- the repo URL, the branch and path conventions, the Project
+# name, the shard map -- is repository-wide and lives in gitops-values.yaml at
+# the repository root, because 03_apps_bootstrap and 04_apps_generator need the
+# same values and duplicating them is how they drift. Every render must pass it:
+#
+#   helm template kargo-apps-generator 06_apps_kargo -f gitops-values.yaml
+#
+# Unlike the generator, this chart is rendered ONCE and is not per-environment:
+# it emits one Stage per environment from a single render, because the Kargo
+# control plane covering both clusters is singular.
+
+# -- Directory INSIDE the generator chart that the app tree is assembled into.
+#
+# Declared here rather than repository-wide because this chart is what puts it
+# there. The copy step writes the tree to it and the helm-template step passes
+# the same string to the generator with --set, so the writer and the reader
+# cannot disagree: one declaration governs both halves of the contract.
+#
+# The generator carries a matching default of its own, which only applies to a
+# bare `helm template` with no assembled workspace -- a render that finds no
+# apps either way.
+appsDir: apps
+
+# -- The `sources` Warehouse: how it discovers structural change.
+warehouse:
+  # How often it polls the source branch. Lower means Freight appears sooner
+  # and more git traffic; promotion here is manual either way, so this only
+  # moves when the candidate shows up, never when it lands.
+  interval: 5m
+
+  # Automatic | Manual. Manual stops the Warehouse creating Freight on its own,
+  # which freezes structural changes without touching includePaths or removing
+  # the Warehouse.
+  freightCreationPolicy: Automatic
+
+  # How many candidate commits Kargo keeps.
+  discoveryLimit: 20
+
+# -- Whether new Freight promotes itself, per Stage.
+#
+# Off everywhere -- but NOT because an auto-promotion could reach a cluster on
+# its own. It cannot: every promotion here opens a PR and parks in
+# git-wait-for-pr, so nothing is applied until a person merges it. The reason is
+# sequencing and volume.
+#
+# These Stages are ungated (`direct: true`, no test-before-prod between them),
+# so auto-promotion would open the prod PR at the same moment as the test one,
+# for every commit to the source branch that touches a generator input. And
+# since Kargo runs one Promotion per Stage at a time, each PR opened that way
+# holds that Stage's only promotion slot until someone resolves it.
+#
+# Promoting by hand is what decides WHICH Freight is rendered and WHEN. Kargo
+# already defaults to manual; ProjectConfig states it explicitly.
+#
+# Keyed by what the Stage is rather than by its name: the names are derived
+# from renderedArgoDir / renderedKargoDir, so a key spelling out
+# "argo-resources-test" would silently stop matching the day that value changes.
+autoPromotion:
+  argo:
+    test: false
+    prod: false
+  kargo: false

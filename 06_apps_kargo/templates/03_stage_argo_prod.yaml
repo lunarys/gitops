@@ -1,0 +1,16 @@
+{{- /*
+  Renders the Argo CD Applications and AppProjects for the PROD cluster.
+
+  Not gated on the test Stage. These render structure, not workloads: gating
+  "add an app to prod" behind the test cluster would make an offline test
+  cluster block prod changes, and the app's OWN Stages still carry the
+  test-before-prod gate for anything that actually runs.
+*/ -}}
+{{- include "apps-kargo.stage" (dict
+      "root" $
+      "name" (printf "%s-prod" .Values.renderedArgoDir)
+      "shard" (index .Values.kargo.shards "prod")
+      "valuesFile" "values-argo-prod.yaml"
+      "outDir" .Values.renderedArgoDir
+      "targetBranch" (printf "%sprod" .Values.renderedBranchPrefix)
+    ) }}

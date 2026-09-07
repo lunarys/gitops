@@ -1,0 +1,56 @@
+{{- /*
+  The Kargo Project the generator's own promotion flow lives in, and the
+  namespace it owns.
+
+  The Namespace is emitted EXPLICITLY rather than left to Kargo's Project
+  controller, for the same reason the per-app Projects are: the Warehouse and
+  Stages are namespaced into it, and Argo's built-in kind ordering puts
+  Namespace first so it exists before anything lands in it. Sync waves would not
+  help -- Argo has no health check for kargo.akuity.io/Project and treats the CR
+  as Healthy the instant it is applied, before the controller has created
+  anything.
+
+  The kargo.akuity.io/project label is what permits Kargo to adopt a
+  pre-existing namespace; without it the Project never initializes.
+*/ -}}
+{{- $ns := .Values.kargo.generatorProject -}}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ $ns }}
+  labels:
+    kargo.akuity.io/project: "true"
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Project
+metadata:
+  name: {{ $ns }}
+  annotations:
+    kargo.akuity.io/keep-namespace: "true"
+---
+{{- /*
+  Kargo already defaults to manual promotion; stating it is belt-and-braces.
+  What manual promotion buys here is sequencing, not safety -- nothing reaches a
+  cluster without a merged PR either way. See the autoPromotion notes in
+  values.yaml.
+
+  A policy is emitted per Stage rather than one wildcard selector, so a Stage
+  that is added without a decision about its promotion mode has no policy and
+  falls back to Kargo's default (manual) rather than inheriting prod's.
+*/ -}}
+apiVersion: kargo.akuity.io/v1alpha1
+kind: ProjectConfig
+metadata:
+  name: {{ $ns }}
+  namespace: {{ $ns }}
+spec:
+  promotionPolicies:
+    - stageSelector:
+        name: {{ .Values.renderedArgoDir }}-test
+      autoPromotionEnabled: {{ .Values.autoPromotion.argo.test }}
+    - stageSelector:
+        name: {{ .Values.renderedArgoDir }}-prod
+      autoPromotionEnabled: {{ .Values.autoPromotion.argo.prod }}
+    - stageSelector:
+        name: {{ .Values.renderedKargoDir }}
+      autoPromotionEnabled: {{ .Values.autoPromotion.kargo }}

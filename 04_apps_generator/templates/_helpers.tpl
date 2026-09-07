@@ -71,7 +71,7 @@
   naming an inner key, which reads as a template bug rather than a missing
   values file.
 */ -}}
-{{- range $key := list "mainRepo" "appRoot" "renderedBranchPrefix" "renderedRoot" "kargo" "argo" -}}
+{{- range $key := list "mainRepo" "appRoot" "renderedBranchPrefix" "renderedRoot" "renderedAppsDir" "kargo" "argo" -}}
   {{- if not (index $.Values $key) -}}
     {{- fail (printf "values.%s is not set -- pass the repository-wide values file: helm template ... -f gitops-values.yaml -f values-<mode>.yaml" $key) -}}
   {{- end -}}

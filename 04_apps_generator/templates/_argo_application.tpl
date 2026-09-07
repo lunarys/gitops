@@ -29,7 +29,7 @@ spec:
     repoURL: {{ .root.Values.mainRepo }}
     # Kargo pins the exact commit via argocd-update; this is the fallback.
     targetRevision: {{ .root.Values.renderedBranchPrefix }}{{ .env }}
-    path: {{ .root.Values.renderedRoot }}/apps/{{ .app.name }}
+    path: {{ .root.Values.renderedRoot }}/{{ .root.Values.renderedAppsDir }}/{{ .app.name }}
     directory:
       recurse: true
   syncPolicy:

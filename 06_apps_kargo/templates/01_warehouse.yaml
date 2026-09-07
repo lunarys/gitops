@@ -1,0 +1,52 @@
+{{- /*
+  Produces Freight when the SHAPE of the system changes: an app added or
+  removed, a settings.yaml edited, an enabled list changed, the shared values
+  changed, or the generator itself modified.
+
+  includePaths mirror what the generator actually reads. _scan.tpl discovers
+  apps by globbing for a Chart.yaml one level down, reads each settings.yaml,
+  and collects the NAMES of the top-level yaml files in each app directory -- it
+  states outright that no emitter reads file contents. So a single glob over the
+  top-level yaml of each app directory covers every input the meta render has,
+  and nothing else inside an app directory can affect it.
+
+  The glob dialect is bmatcuk/doublestar/v4, a direct dependency of Kargo, in
+  which a single star matches a sequence of non-separator characters. So the
+  pattern below is exactly "top-level yaml in each app directory" -- the same
+  shape and depth as the scanner's own Files.Glob. A resources/foo.yaml two
+  levels down correctly does not match: the scanner never reads it, and the
+  app's own Warehouse already covers it.
+
+  (Written without quoting the patterns literally: a star followed by a slash
+  ends a Helm comment, so a comment containing one silently stops early.)
+
+  Deliberately unsharded. It is reconciled by the prod controller, which runs
+  with isDefault: true, so discovery keeps running while the test cluster is
+  off. If that controller ever loses isDefault, nothing reconciles this and no
+  Freight is ever created, with no error to explain why.
+*/ -}}
+{{- $appRoot := .Values.appRoot | trimSuffix "/" -}}
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Warehouse
+metadata:
+  name: sources
+  namespace: {{ .Values.kargo.generatorProject }}
+spec:
+  interval: {{ .Values.warehouse.interval }}
+  freightCreationPolicy: {{ .Values.warehouse.freightCreationPolicy }}
+  subscriptions:
+    - git:
+        repoURL: {{ .Values.mainRepo }}
+        branch: {{ .Values.sourceBranch }}
+        commitSelectionStrategy: NewestFromBranch
+        includePaths:
+          # The generator itself: templates, its own values, render.sh.
+          - {{ .Values.generatorRoot | trimSuffix "/" }}/
+          # Repository-wide values are an input to every render.
+          - gitops-values.yaml
+          # The enabled lists -- which apps exist in which environment.
+          - {{ $appRoot }}/apps-test.yaml
+          - {{ $appRoot }}/apps-prod.yaml
+          # Chart.yaml, settings.yaml and the values file names, per app.
+          - glob:{{ $appRoot }}/*/*.yaml
+        discoveryLimit: {{ .Values.warehouse.discoveryLimit }}

@@ -19,6 +19,10 @@ CHART_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$CHART_DIR/.." && pwd)"
 APPS_DIR="$REPO_ROOT/05_apps"
 SHARED_VALUES="$REPO_ROOT/gitops-values.yaml"
+# Where the app tree is assembled inside the chart, declared once: it is both
+# copied there and passed to the render, the same pairing 06_apps_kargo's copy
+# and helm-template steps perform.
+APPS_SUBDIR="apps"
 OUT="${1:-$CHART_DIR/.render}"
 
 WS="$(mktemp -d)"
@@ -26,7 +30,7 @@ trap 'rm -rf "$WS"' EXIT
 
 cp -r "$CHART_DIR" "$WS/chart"
 rm -rf "$WS/chart/.render" "$WS/chart/templates_old"
-cp -r "$APPS_DIR" "$WS/chart/apps"
+cp -r "$APPS_DIR" "$WS/chart/$APPS_SUBDIR"
 
 mkdir -p "$OUT"
 
@@ -40,9 +44,10 @@ render() {
   # gitops-values.yaml is referenced where it lies, NOT copied into the
   # workspace: it is read via -f rather than .Files, so it has no reason to be
   # inside the chart.
-  helm template meta "$WS/chart" \
+  helm template apps-generator "$WS/chart" \
     -f "$SHARED_VALUES" \
     -f "$WS/chart/$values" \
+    --set "appsDir=$APPS_SUBDIR" \
     > "$dest"
 }
 

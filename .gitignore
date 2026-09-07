@@ -1,3 +1,6 @@
 Chart.lock
 charts/
 .idea
+
+# local render output from 04_apps_generator/render.sh
+.render/

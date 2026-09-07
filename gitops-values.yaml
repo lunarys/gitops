@@ -22,12 +22,30 @@ sourceBranch: main
 # -- Branch prefix the rendered manifests are committed to (stage/test, stage/prod).
 renderedBranchPrefix: stage/
 
+# -- Branch prefix for the pull request a promotion opens against a stage
+# branch: <prefix><stage>, one fixed branch per Stage, force-pushed.
+#
+# Kargo's own namespace for generated promotion branches, reused deliberately
+# and without colliding with it: a generated name is that of a Promotion, which
+# always carries a freight and a suffix beyond the Stage name.
+#
+# Repository-wide rather than 06's own, unlike appsDir: this names a branch
+# namespace in the shared repository rather than a path inside a chart, and the
+# per-app promotion task will push into the same namespace.
+promotionBranchPrefix: kargo/promotion/
+
 # -- Path of the app tree within mainRepo.
 #
-# Distinct from the generator's appsDir: Kargo filters Freight by repository
-# path, so Warehouse includePaths must describe the layout on disk, not the
-# assembled one.
+# The layout on disk, which is not the layout the generator renders from: the
+# tree is copied into the generator chart before every render. Kargo filters
+# Freight by repository path, so Warehouse includePaths must describe this one.
+# The assembled location is `appsDir`, and it belongs to whoever assembles it
+# -- 06_apps_kargo and render.sh -- not here.
 appRoot: 05_apps
+
+# -- Path of the generator chart within mainRepo. 06_apps_kargo renders it and
+# copies the app tree into it.
+generatorRoot: 04_apps_generator
 
 # -- Root of the generated tree on a stage branch. Everything below it is
 # machine-written; anything beside it is not.
@@ -37,11 +55,22 @@ appRoot: 05_apps
 # tree too, so a bare `apps/` would sit alongside 05_apps with nothing marking
 # which is which.
 #
-# Apps render to <renderedRoot>/apps/<application name> -- the name, not the
-# directory, consistent with the directory only ever feeding includePaths.
-# Nesting under apps/ also makes an app-vs-meta name collision structurally
-# impossible rather than a naming rule that has to be remembered.
+# Apps render to <renderedRoot>/<renderedAppsDir>/<application name> -- the
+# name, not the directory, consistent with the directory only ever feeding
+# includePaths. Nesting under apps/ also makes a collision between an app and a
+# generated directory structurally impossible, rather than a naming rule that
+# has to be remembered.
 renderedRoot: _rendered
+
+# -- Subdirectories of renderedRoot.
+#
+# The two generated ones are named after the Stage that writes them, so a
+# directory on a stage branch says which Stage produced it. They are also the
+# names of the Argo CD Applications that reconcile them: one string, so the
+# Stage, the directory it writes and the Application reading it cannot drift.
+renderedAppsDir: apps
+renderedArgoDir: argo-resources
+renderedKargoDir: kargo-resources
 
 # -- Private companion repository.
 #
@@ -60,6 +89,17 @@ kargo:
   # the same (prod) cluster. Without the prefix the Project namespace and the
   # workload namespace are the same namespace.
   projectPrefix: kargo-app-
+
+  # -- The Kargo Project that renders the generator's output, defined by
+  # 06_apps_kargo. Named after the chart it runs (04_apps_generator, chart name
+  # apps-generator) rather than after what it produces.
+  #
+  # Also a namespace: a Kargo Project is cluster-scoped and owns a namespace of
+  # its own name, which is where its Warehouse, Stages, Promotions and git
+  # credential live. And it prefixes the kargo.akuity.io/authorized-stage
+  # annotation (<project>:<stage>) that 03 must put on the Applications these
+  # Stages update.
+  generatorProject: kargo-apps-generator
 
   # The shared ClusterPromotionTask every app Stage invokes. Defined by
   # 05_apps/kargo; referenced by the Stages 04_apps_generator emits.

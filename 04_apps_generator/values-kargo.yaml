@@ -1,5 +1,5 @@
 # Renders the control-plane resources: Kargo Namespace, Project, ProjectConfig,
-# Warehouse and Stages. Output goes to stage/prod/_kargo/.
+# Warehouse and Stages. Output goes to stage/prod:_rendered/kargo-resources/.
 #
 # Rendered ONCE, covering both environments -- these live in the single Kargo
 # control plane, not in a cluster. `environment` is deliberately unset; setting
