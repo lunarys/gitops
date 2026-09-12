@@ -30,7 +30,7 @@ longhornstorage:
   volumes:
     ## config and metadata
     config:
-      size: "5Gi"
+      size: "10Gi"
       variant: "retain"
       pvName: "pvc-67dbe02d-bb6f-43f7-b6cf-dc80fd598543"
       mount:
