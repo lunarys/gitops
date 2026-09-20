@@ -40,6 +40,11 @@ metadata:
   It is worth the objects: auto-promotion into the test cluster is the one
   failure this design must not have, because that cluster is powered off most of
   the time and promotions would queue against a controller that is not running.
+
+  One policy per Stage this app actually has -- inTest/inProd, supplied by the
+  caller from the same enabled lists that decide whether kargo-resources.yaml
+  emits the Stage at all. A prod-only app has no test Stage, so a policy
+  selecting one would name a Stage that will never exist.
 */ -}}
 apiVersion: kargo.akuity.io/v1alpha1
 kind: ProjectConfig
@@ -48,10 +53,14 @@ metadata:
   namespace: {{ $ns }}
 spec:
   promotionPolicies:
+    {{- if .inTest }}
     - stageSelector:
         name: test
       autoPromotionEnabled: false
+    {{- end }}
+    {{- if .inProd }}
     - stageSelector:
         name: prod
       autoPromotionEnabled: false
+    {{- end }}
 {{- end }}

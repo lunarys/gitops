@@ -33,6 +33,7 @@
 {{- $app := include "kargo.expr" "vars.app" -}}
 {{- $env := include "kargo.expr" "vars.env" -}}
 {{- $repoURL := include "kargo.expr" "vars.repoURL" -}}
+{{- $sourceRepoWebURL := include "kargo.expr" "vars.sourceRepoWebURL" -}}
 {{- $renderedRepoURL := include "kargo.expr" "vars.renderedRepoURL" -}}
 {{- $targetBranch := include "kargo.expr" "vars.targetBranch" -}}
 {{- $promotionBranch := include "kargo.expr" "vars.promotionBranch" -}}
@@ -55,11 +56,12 @@
 {{- $freight := include "kargo.expr" "ctx.targetFreight.name" -}}
 {{- $srcCommit := include "kargo.expr" "commitFrom(vars.repoURL).ID" -}}
 {{- $srcBranch := include "kargo.expr" "commitFrom(vars.repoURL).Branch" -}}
+{{- $srcCommitURL := printf "%s/commit/%s" $sourceRepoWebURL $srcCommit -}}
 {{- $rollbackLine := include "kargo.expr" `ctx.meta.promotion.rollback ? "This is a rollback." : ""` -}}
 {{- $subject := printf "chore(%s): render %s" $app $alias -}}
 {{- $prTitle := printf "chore(%s): render onto %s" $app $targetBranch -}}
-{{- $rendered := printf "Rendered %s for %s into %s/,\nreconciled by Argo CD on %s." $repoPath $env $outDir $targetBranch -}}
-{{- $provenance := printf "Freight: %s (%s)\nSource:  %s on %s" $alias $freight $srcCommit $srcBranch -}}
+{{- $rendered := printf "Rendered `%s` for %s into `%s`/,\nreconciled by Argo CD on `%s`." $repoPath $env $outDir $targetBranch -}}
+{{- $provenance := printf "Freight: %s (%s)\nSource:  %s on `%s`\nCommit:  %s" $alias $freight $srcCommit $srcBranch $srcCommitURL -}}
 apiVersion: kargo.akuity.io/v1alpha1
 kind: ClusterPromotionTask
 metadata:
@@ -71,6 +73,7 @@ spec:
   # defaulted would render the wrong app rather than fail.
   vars:
     - name: repoURL
+    - name: sourceRepoWebURL
     - name: renderedRepoURL
     - name: app
     - name: appDir

@@ -61,6 +61,13 @@ spec:
           vars:
             - name: repoURL
               value: {{ $root.Values.mainRepo }}
+            # The task only ever sees repoURL as a Kargo expression
+            # (`vars.repoURL`), never the literal -- it is a shared task, not
+            # this Stage. Passed separately so the task's commit provenance can
+            # link to the source commit without needing mainRepo's literal
+            # value itself.
+            - name: sourceRepoWebURL
+              value: {{ $root.Values.mainRepo | trimSuffix ".git" }}
             # Where the render is committed/pushed/PR'd. Same as repoURL
             # unless renderedRepo overrides it -- see gitops-values.yaml.
             - name: renderedRepoURL

@@ -26,7 +26,7 @@
 {{- $inProd := has $dir $inProdAll }}
 {{- if or $inTest $inProd }}
 ---
-{{ include "apps-generator.kargoProject" (dict "root" $ "app" $app) }}
+{{ include "apps-generator.kargoProject" (dict "root" $ "app" $app "inTest" $inTest "inProd" $inProd) }}
 ---
 {{ include "apps-generator.warehouse" (dict "root" $ "app" $app) }}
 {{- if $inTest }}

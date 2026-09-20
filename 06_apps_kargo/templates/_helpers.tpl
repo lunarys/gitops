@@ -47,6 +47,12 @@ ${{ "{{" }} {{ . }} {{ "}}" }}
 {{- $srcCommit := include "kargo.expr" (printf "commitFrom(%q).ID" $repo) -}}
 {{- $srcBranch := include "kargo.expr" (printf "commitFrom(%q).Branch" $repo) -}}
 {{- /*
+  $repo is a literal here (unlike the per-app task, which only ever sees it as
+  a Kargo expression), so the link can be built with a plain trimSuffix rather
+  than a second Stage var.
+*/ -}}
+{{- $srcCommitURL := printf "%s/commit/%s" ($repo | trimSuffix ".git") $srcCommit -}}
+{{- /*
   Conventional-commit subject. `chore` because the content is generated rather
   than authored, and the scope is the Stage -- which is also the name of the
   directory written and of the Argo CD Application that reconciles it.
@@ -61,8 +67,8 @@ ${{ "{{" }} {{ . }} {{ "}}" }}
   time and carries all of it; these two say only what is true of the branch.
 */ -}}
 {{- $prTitle := printf "chore(%s): render onto %s" .name .targetBranch -}}
-{{- $rendered := printf "Rendered %s with %s\ninto %s/, reconciled by Argo CD on %s." $generator .valuesFile $outDir .targetBranch -}}
-{{- $provenance := printf "Freight: %s (%s)\nSource:  %s on %s" $alias $freight $srcCommit $srcBranch -}}
+{{- $rendered := printf "Rendered `%s` with `%s`\ninto `%s`/, reconciled by Argo CD on `%s`." $generator .valuesFile $outDir .targetBranch -}}
+{{- $provenance := printf "Freight: %s (%s)\nSource:  %s on `%s`\nCommit:  %s" $alias $freight $srcCommit $srcBranch $srcCommitURL -}}
 {{- /*
   Renders to nothing at all on an ordinary promotion, leaving a trailing blank
   line that git strips from the message; only a rollback says anything. A
@@ -154,7 +160,18 @@ spec:
         - uses: helm-template
           config:
             path: ./src/{{ $generator }}
-            outPath: ./out/{{ $outDir }}/resources.yaml
+            {{- /*
+              A directory, not a single resources.yaml: the generator is one
+              template file looping over every app, so a file-per-source-template
+              split (Kargo's default "helm" outLayout) would still dump all of
+              them into one file. "flat" instead splits per RENDERED RESOURCE,
+              named `[group-]kind-namespace-name.yaml` -- verified against
+              Kargo's source that this cannot collide even though this chart
+              gives a Namespace, Project and ProjectConfig the same name per
+              app, because Kind is part of the filename.
+            */}}
+            outPath: ./out/{{ $outDir }}
+            outLayout: flat
             # Cosmetic: verified that no generator template reads .Release.Name,
             # so this cannot affect the output. Matches render.sh so a local
             # render and a promotion render are invoked identically.
