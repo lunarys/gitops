@@ -20,6 +20,16 @@
 {{- end }}
 
 {{- /*
+  Where the rendered tree lands. Defaults to mainRepo -- renderedRepo is set
+  only to try the workflow against a scratch repo, and everything else
+  (Warehouse subscription, appRoot, sourceBranch) deliberately stays on
+  mainRepo when it is.
+*/ -}}
+{{- define "apps-generator.renderedRepo" -}}
+{{ .Values.renderedRepo | default .Values.mainRepo }}
+{{- end }}
+
+{{- /*
   Whether this app opens a PR against the stage branch for this environment.
 
   Accepts either shape, because an app overriding it in settings.yaml is likely

@@ -16,9 +16,10 @@
 
     - the vars below, all required, all supplied by the Stage;
     - the workspace layout -- ./src holds the sources at the Freight's commit,
-      ./out holds the stage branch. The caller's `valuesFiles` var arrives
-      already prefixed with ./src, so this layout cannot be changed on one side
-      alone;
+      ./out holds the stage branch, each its own clone since renderedRepoURL
+      may name a different repo than repoURL. The caller's `valuesFiles` var
+      arrives already prefixed with ./src, so this layout cannot be changed on
+      one side alone;
     - the `commit` output, which the caller pins its argocd-update to.
 
   UNVERIFIED, in the order they will break (lab is down):
@@ -32,6 +33,7 @@
 {{- $app := include "kargo.expr" "vars.app" -}}
 {{- $env := include "kargo.expr" "vars.env" -}}
 {{- $repoURL := include "kargo.expr" "vars.repoURL" -}}
+{{- $renderedRepoURL := include "kargo.expr" "vars.renderedRepoURL" -}}
 {{- $targetBranch := include "kargo.expr" "vars.targetBranch" -}}
 {{- $promotionBranch := include "kargo.expr" "vars.promotionBranch" -}}
 {{- $namespace := include "kargo.expr" "vars.namespace" -}}
@@ -69,6 +71,7 @@ spec:
   # defaulted would render the wrong app rather than fail.
   vars:
     - name: repoURL
+    - name: renderedRepoURL
     - name: app
     - name: appDir
     - name: appRoot
@@ -89,6 +92,17 @@ spec:
           # was promoted, even if main has moved since.
           - commit: '{{ include "kargo.expr" "commitFrom(vars.repoURL).ID" }}'
             path: ./src
+    {{- /*
+      A second clone rather than a second checkout entry above: checkout
+      entries within one git-clone share that step's repoURL, and
+      renderedRepoURL is only sometimes the same repo (see gitops-values.yaml
+      renderedRepo). Cloning it separately is what lets ./out live in a
+      different repo from ./src without the two ever being confused.
+    */}}
+    - uses: git-clone
+      config:
+        repoURL: '{{ $renderedRepoURL }}'
+        checkout:
           - branch: '{{ $targetBranch }}'
             # The stage branch may not exist yet on a first promotion.
             create: true
@@ -176,7 +190,7 @@ spec:
       uses: git-open-pr
       as: open-pr
       config:
-        repoURL: '{{ $repoURL }}'
+        repoURL: '{{ $renderedRepoURL }}'
         # Set explicitly rather than inferred from the URL.
         provider: github
         sourceBranch: '{{ include "kargo.expr" `outputs["push-pr"].branch` }}'
@@ -204,7 +218,7 @@ spec:
       uses: git-wait-for-pr
       as: wait-for-pr
       config:
-        repoURL: '{{ $repoURL }}'
+        repoURL: '{{ $renderedRepoURL }}'
         provider: github
         prNumber: '{{ include "kargo.expr" `outputs["open-pr"].pr.id` }}'
     {{- /*

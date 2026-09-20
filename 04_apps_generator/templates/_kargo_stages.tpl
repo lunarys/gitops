@@ -61,6 +61,10 @@ spec:
           vars:
             - name: repoURL
               value: {{ $root.Values.mainRepo }}
+            # Where the render is committed/pushed/PR'd. Same as repoURL
+            # unless renderedRepo overrides it -- see gitops-values.yaml.
+            - name: renderedRepoURL
+              value: {{ include "apps-generator.renderedRepo" $root }}
             - name: app
               value: {{ $app.name }}
             # The directory, which may differ from the application name.
@@ -115,13 +119,21 @@ spec:
         # health signal and "verified in test" degrades to "the promotion
         # finished". There is no scenario where this step fails for lack of a
         # cluster, because the promotion only runs on that cluster's shard.
+        #
+        # argoSyncEnabled is the one exception: false while first trying
+        # renderedRepo against a scratch repo, so nothing here ever asks a real
+        # Argo CD to sync from it.
+        {{- if $root.Values.argoSyncEnabled }}
         - uses: argocd-update
           config:
             apps:
               - name: {{ $app.name }}
                 namespace: {{ $root.Values.argo.namespace }}
                 sources:
-                  - repoURL: {{ $root.Values.mainRepo }}
+                  # Must match the Application's actual source (set in
+                  # _argo_application.tpl from the same helper), not
+                  # necessarily mainRepo.
+                  - repoURL: {{ include "apps-generator.renderedRepo" $root }}
                     # Quoted deliberately. Every Kargo expression in a step
                     # config is wrapped in explicit YAML quotes here: an
                     # unquoted expression containing a ternary reads to a
@@ -129,6 +141,7 @@ spec:
                     # (`? key` / `: value`), so the field silently becomes a
                     # map and Kargo rejects it as "given: object".
                     desiredRevision: "${{ "{{" }} outputs['render'].commit {{ "}}" }}"
+        {{- end }}
   {{- with dig "kargo" "verification" (dict) $app.settings }}
   # Opt in per app -- see defaultSettings.kargo.verification in values.yaml.
   # Without this block Kargo falls back to implicit verification: Freight counts

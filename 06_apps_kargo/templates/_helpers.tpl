@@ -32,6 +32,14 @@ ${{ "{{" }} {{ . }} {{ "}}" }}
 {{- define "apps-kargo.stage" -}}
 {{- $root := .root -}}
 {{- $repo := $root.Values.mainRepo -}}
+{{- /*
+  Where this Stage's render (the Applications/AppProjects/Stages/Warehouse
+  themselves) lands. Same as $repo unless renderedRepo overrides it -- see
+  gitops-values.yaml. $repo stays mainRepo regardless: it is still where the
+  source (04_apps_generator, 05_apps) is cloned from and what provenance is
+  computed against.
+*/ -}}
+{{- $renderedRepo := $root.Values.renderedRepo | default $root.Values.mainRepo -}}
 {{- $generator := $root.Values.generatorRoot | trimSuffix "/" -}}
 {{- $outDir := printf "%s/%s" $root.Values.renderedRoot .outDir -}}
 {{- $alias := include "kargo.expr" "ctx.targetFreight.alias" -}}
@@ -99,6 +107,15 @@ spec:
             checkout:
               - commit: '{{ $srcCommit }}'
                 path: ./src
+        {{- /*
+          A second clone rather than a second checkout entry above: checkout
+          entries within one git-clone share that step's repoURL, and
+          renderedRepo is only sometimes the same repo as mainRepo.
+        */}}
+        - uses: git-clone
+          config:
+            repoURL: {{ $renderedRepo }}
+            checkout:
               - branch: {{ .targetBranch }}
                 create: true
                 path: ./out
@@ -208,7 +225,7 @@ spec:
         - uses: git-open-pr
           as: open-pr
           config:
-            repoURL: {{ $repo }}
+            repoURL: {{ $renderedRepo }}
             # Set explicitly rather than inferred from the URL.
             provider: github
             sourceBranch: '{{ include "kargo.expr" "outputs.push.branch" }}'
@@ -241,7 +258,7 @@ spec:
           uses: git-wait-for-pr
           as: wait-for-pr
           config:
-            repoURL: {{ $repo }}
+            repoURL: {{ $renderedRepo }}
             provider: github
             prNumber: '{{ include "kargo.expr" `outputs["open-pr"].pr.id` }}'
         {{- /*
@@ -252,7 +269,13 @@ spec:
 
           Requires kargo.akuity.io/authorized-stage on that Application, which
           03_apps_bootstrap must set to <project>:<stage>.
+
+          Skipped entirely (Helm-time, not Kargo-time) when argoSyncEnabled is
+          false -- see gitops-values.yaml. That is a repo-wide render decision,
+          not a per-promotion one, so it is not a Kargo `if:` alongside the
+          guard above.
         */}}
+        {{- if $root.Values.argoSyncEnabled }}
         - if: '{{ include "kargo.expr" `status("open-pr") != "Skipped"` }}'
           uses: argocd-update
           config:
@@ -260,6 +283,7 @@ spec:
               - name: {{ .outDir }}
                 namespace: {{ $root.Values.argo.namespace }}
                 sources:
-                  - repoURL: {{ $repo }}
+                  - repoURL: {{ $renderedRepo }}
                     desiredRevision: '{{ include "kargo.expr" `outputs["wait-for-pr"].commit` }}'
+        {{- end }}
 {{- end }}

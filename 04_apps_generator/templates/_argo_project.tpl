@@ -14,7 +14,9 @@ metadata:
 spec:
   description: Project for application {{ .app.name }}
   sourceRepos:
-    - {{ .root.Values.mainRepo }}
+    # The Application's actual source (_argo_application.tpl), which is
+    # mainRepo unless renderedRepo overrides it.
+    - {{ include "apps-generator.renderedRepo" .root }}
   destinations:
     - namespace: {{ include "apps-generator.namespace" . }}
       server: {{ .root.Values.argo.server }}

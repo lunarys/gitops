@@ -28,7 +28,7 @@ warehouse:
   # How often it polls the source branch. Lower means Freight appears sooner
   # and more git traffic; promotion here is manual either way, so this only
   # moves when the candidate shows up, never when it lands.
-  interval: 5m
+  interval: 15m
 
   # Automatic | Manual. Manual stops the Warehouse creating Freight on its own,
   # which freezes structural changes without touching includePaths or removing
@@ -90,13 +90,15 @@ externalsecrets:
         kargo.akuity.io/cred-type: git
       commonRemoteKey: "14d2795c-00c0-4908-b7be-b4be00c9fc1d"
       fields:
-        # Kargo matches a credential to a repository by this field, so it is a
-        # constant rather than a stored secret.
         repoURL:
-          static: https://github.com/lunarys/gitops.git
-        username:
-          storeRefName: bitwarden-login
-          remoteProperty: username
-        password:
-          storeRefName: bitwarden-login
-          remoteProperty: password
+          static: "^https://github.com/lunarys/"
+        repoURLIsRegex:
+          static: "true"
+        githubAppClientID:
+          storeRefName: bitwarden-fields
+          remoteProperty: app-client-id
+        githubAppPrivateKey:
+          storeRefName: bitwarden-notes  # only this works with multiline secrets
+        githubAppInstallationID:
+          storeRefName: bitwarden-fields
+          remoteProperty: app-installation-id

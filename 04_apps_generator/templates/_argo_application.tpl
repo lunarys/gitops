@@ -26,7 +26,7 @@ spec:
     namespace: {{ include "apps-generator.namespace" . }}
     server: {{ .root.Values.argo.server }}
   source:
-    repoURL: {{ .root.Values.mainRepo }}
+    repoURL: {{ include "apps-generator.renderedRepo" .root }}
     # Kargo pins the exact commit via argocd-update; this is the fallback.
     targetRevision: {{ .root.Values.renderedBranchPrefix }}{{ .env }}
     path: {{ .root.Values.renderedRoot }}/{{ .root.Values.renderedAppsDir }}/{{ .app.name }}

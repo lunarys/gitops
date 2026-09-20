@@ -5,6 +5,7 @@ networkpolicy:
     ingress:
       # Traefik reaches the API server. The controller accepts nothing.
       fromIngressController: true
+      fromKubeApi: true
 
     egress:
       # Promotions read and write Kubernetes: Stages, Promotions and Freight
