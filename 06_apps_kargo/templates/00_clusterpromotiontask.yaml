@@ -1,5 +1,5 @@
 # CAN'T BE INSTALLED FROM WITHIN KARGO templates - helm: ensure CRDs are installed first
-{{- /*
+{{/*
   The shared promotion task: renders ONE app for ONE environment onto that
   environment's stage branch. Every per-app Stage the generator emits calls it;
   nothing else does.
