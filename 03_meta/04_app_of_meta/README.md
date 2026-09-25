@@ -1,9 +1,12 @@
 Self-manages `01_app_of_apps`, `02_kargo_meta` and `03_apps_kargo` as Helm
 charts, once each has been hand-applied:
 
-- `app-of-apps` -- self-manages `01_app_of_apps` (both environments)
-- `kargo-meta` -- self-manages `02_kargo_meta` (prod only)
-- `apps-kargo` -- self-manages `03_apps_kargo` (prod only)
+- `meta-app-of-apps` -- self-manages `01_app_of_apps` (both environments)
+- `meta-kargo-apps-generator` -- self-manages `02_kargo_meta` (prod only)
+- `meta-apps-kargo` -- self-manages `03_apps_kargo` (prod only)
+
+Named `meta-*` rather than after the chart each one tracks: these are release
+trackers, not app-of-apps instances themselves.
 
 No Kargo process for these -- Argo re-reads git unconditionally, so its own
 app-of-apps can safely manage itself this way (same pattern already used for

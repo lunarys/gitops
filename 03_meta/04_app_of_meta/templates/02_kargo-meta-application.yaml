@@ -14,7 +14,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kargo-meta
+  name: meta-kargo-apps-generator
   namespace: {{ .Values.argo.namespace }}
 spec:
   project: kargo-meta-project

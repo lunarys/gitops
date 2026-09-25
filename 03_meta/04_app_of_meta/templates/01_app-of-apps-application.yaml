@@ -17,7 +17,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: app-of-apps
+  name: meta-app-of-apps
   namespace: {{ .Values.argo.namespace }}
 spec:
   project: app-of-meta-project
