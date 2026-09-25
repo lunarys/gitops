@@ -11,6 +11,11 @@
   lists rather than per environment: a per-environment render would emit each
   Warehouse twice with a conflicting Stage set, and a prod-only app would get no
   Warehouse at all from the test render.
+
+  Both passes share appName (appsKargoName): 03_meta/03_apps_kargo
+  reconciles both directories as one multi-source Application, not two --
+  see its own comment for why argocd-update only precisely pinning one of
+  the two resulting apps[] entries is fine here.
 */ -}}
 {{- include "apps-kargo.stage" (dict
       "root" $
@@ -23,12 +28,12 @@
           "outDir" .Values.renderedKargoDir
           "appRoot" .Values.appRoot
           "appsDir" .Values.appsDir
-          "appName" .Values.renderedKargoDir)
+          "appName" .Values.appsKargoName)
         (dict
           "valuesFile" "values-kargo.yaml"
           "outDir" .Values.renderedBootstrapKargoDir
           "appRoot" .Values.bootstrapRoot
           "appsDir" .Values.bootstrapAppsDir
-          "appName" .Values.renderedBootstrapKargoDir)
+          "appName" .Values.appsKargoName)
       )
     ) }}

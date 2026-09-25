@@ -113,6 +113,11 @@ renderedBootstrapKargoDir: bootstrap-kargo-resources
 # 03_meta/01_app_of_apps), so no single directory name fits it.
 appOfAppsName: app-of-apps
 
+# -- Same idea, for the Kargo-side counterpart: the single Application in
+# 03_meta/03_apps_kargo that reconciles both kargo-resources and
+# bootstrap-kargo-resources.
+appsKargoName: apps-kargo
+
 # -- Private companion repository.
 #
 # Not yet migrated to the Kargo flow; retained so the existing private

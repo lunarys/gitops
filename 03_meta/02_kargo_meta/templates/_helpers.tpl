@@ -47,10 +47,11 @@ ${{ "{{" }} {{ . }} {{ "}}" }}
     value here rather than the generator's own single default.
   - appName: the Argo CD Application argocd-update tells to sync once this
     pass's content merges. Explicit per pass rather than derived from
-    outDir: most passes are named directly after their outDir, but the two
-    argo-mode passes both name appOfAppsName ("app-of-apps"), since a single
-    multi-source Application (03_meta/01_app_of_apps) reconciles both
-    directories rather than one Application per directory.
+    outDir: every Stage's two passes share one appName (appOfAppsName for
+    the argo-resources Stages, appsKargoName for the kargo-resources Stage),
+    since each pair is reconciled by a single multi-source Application
+    (03_meta/01_app_of_apps, 03_meta/03_apps_kargo) rather than one
+    Application per directory.
 
   Kargo expressions are written with the `kargo.expr` helper above -- see it for
   why they cannot be written literally, and for the quoting rule that goes with

@@ -13,12 +13,12 @@ Each Stage now runs TWO render passes -- the regular `05_apps` tree and
 `02_bootstrap`'s portable components (`cilium`, `argocd`, `traefik`; never
 `02_manual-secrets`, interactive secret entry) -- but still clones the repo
 once, opens one PR, and drives one Promotion; see `apps-kargo.stage` in
-`_helpers.tpl` for the per-pass loop. A Stage name is also the directory its
-FIRST pass writes and (with one exception) the Argo CD Application that
-reconciles it: the two argo-resources Stages' passes are both reconciled by
-`03_meta/01_app_of_apps`'s single `app-of-apps` Application (one Application,
-two sources -- see its own comment), which can't be named after either
-directory since it's neither one alone.
+`_helpers.tpl` for the per-pass loop.
+
+Each Stage's two passes are reconciled by a single Application, not one
+Application per directory: `03_meta/01_app_of_apps`'s `app-of-apps` for both
+argo-resources Stages (test and prod), and `03_meta/03_apps_kargo`'s
+`apps-kargo` for the kargo-resources Stage. 
 
 
 Settings
@@ -82,7 +82,7 @@ Not yet resolved
   annotation, formatted `kargo-apps-generator:<stage>`, on every distinct
   Application named in a Stage's `passes` list: `app-of-apps`
   (`03_meta/01_app_of_apps`'s to create, covering both argo-resources
-  passes), and `kargo-resources` and `bootstrap-kargo-resources`
-  (`03_meta/03_apps_kargo`'s to create).
+  passes) and `apps-kargo` (`03_meta/03_apps_kargo`'s to create, covering
+  both kargo-resources passes).
 - **The `copy` step's directory semantics** are undocumented upstream; see the
   note in `_helpers.tpl`.

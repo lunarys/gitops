@@ -1,12 +1,11 @@
 Reconciles what `03_meta/02_kargo_meta` renders for each app's own Kargo
 control plane:
 
-- `kargo-resources` -- Application for `_rendered/kargo-resources/`
+- `apps-kargo` -- one Application, two sources: `_rendered/kargo-resources/`
   (per-app Namespace, Kargo Project, ProjectConfig, Warehouse, Stage(s);
-  root = `05_apps`)
-- `bootstrap-kargo-resources` -- the same, for `02_bootstrap`'s portable
-  components (`_rendered/bootstrap-kargo-resources/`; root = `02_bootstrap`)
-- `apps-kargo-project` -- the AppProject both belong to, scoped narrowly to
+  root = `05_apps`) and `_rendered/bootstrap-kargo-resources/`, the same for
+  `02_bootstrap`'s portable components (root = `02_bootstrap`)
+- `apps-kargo-project` -- the AppProject it belongs to, scoped narrowly to
   `kargo-app-*` and `kargo-apps-generator`
 
 Kept separate from both `01_app_of_apps` and `02_kargo_meta` on purpose:
