@@ -1,0 +1,38 @@
+{{- /*
+  The app-of-apps: reconciles the per-app Application/AppProject objects
+  04_apps_generator renders (mode=argo, root=05_apps) onto
+  _rendered/argo-resources/. One source, a directory of plain manifests --
+  no helm: block, this doesn't render a chart, it reconciles a directory.
+
+  Named argocdAppsName (= "argocd-apps"), NOT renderedArgoDir: this
+  Application predates the "Stage name == directory name == Application
+  name" convention and keeps its historical name rather than being renamed
+  to match. The authorized-stage annotation below still keys off the STAGE
+  name (renderedArgoDir-based), which is unaffected -- only this
+  Application's own metadata.name differs from it.
+*/ -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.argocdAppsName }}
+  namespace: {{ .Values.argo.namespace }}
+  annotations:
+    kargo.akuity.io/authorized-stage: {{ .Values.kargo.generatorProject }}:{{ .Values.renderedArgoDir }}-{{ .Values.environment }}
+spec:
+  project: app-of-apps-project
+  destination:
+    namespace: {{ .Values.argo.namespace }}
+    server: {{ .Values.argo.server }}
+  source:
+    repoURL: {{ include "app-of-apps.renderedRepo" . }}
+    targetRevision: {{ .Values.renderedBranchPrefix }}{{ .Values.environment }}
+    path: {{ .Values.renderedRoot }}/{{ .Values.renderedArgoDir }}
+    directory:
+      recurse: true
+  syncPolicy:
+    automated:
+      enabled: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

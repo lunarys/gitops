@@ -19,10 +19,39 @@ ${{ "{{" }} {{ . }} {{ "}}" }}
 
 
 {{- /*
-  The three Stages differ in five things: name, shard, which values file the
-  generator is rendered with, which directory the output lands in, and which
-  branch it targets. Everything else -- the clone, the copy, the render, the PR
-  and the Argo sync -- is identical, so it lives here once.
+  The Stages differ in: name, shard, which values file the generator is
+  rendered with, which directory the output lands in, and which branch it
+  targets -- now doubled, because each Stage runs TWO render passes (the
+  regular 05_apps tree and 02_bootstrap's portable components), each with
+  its own valuesFile/outDir/appRoot/appsDir/appName, but still ONE
+  git-clone/commit/push/open-pr/wait-for-pr/argocd-update: one Promotion,
+  one PR, per Stage, regardless of how many passes it renders.
+
+  A pass is a dict: {valuesFile, outDir, appRoot, appsDir, appName}.
+  - valuesFile: which of 04_apps_generator's own values-<mode>-<env>.yaml
+    (or values-kargo.yaml) to render with. mode/environment are identical
+    across passes of the same Stage; only appRoot/appsDir differ, so both
+    passes reuse the same valuesFile today -- kept as an explicit per-pass
+    field anyway rather than hoisted to the Stage, so a future pass that
+    genuinely needs a different one doesn't need restructuring.
+  - outDir: subdirectory of renderedRoot this pass's render lands in, and
+    what git-commit/git-push/git-open-pr operate over collectively via
+    `./out`.
+  - appRoot: source root this pass's copy step assembles from (05_apps or
+    02_bootstrap), also passed to the generator via setValues -- needed by
+    mode=kargo (Warehouse includePaths, per-app task vars); harmless and
+    unread by mode=argo.
+  - appsDir: destination directory inside the generator chart this pass's
+    copy step writes to, and what's passed to helm-template's setValues --
+    the copy step is the one place that decides this, so it's a per-pass
+    value here rather than the generator's own single default.
+  - appName: the Argo CD Application argocd-update tells to sync once this
+    pass's content merges. Explicit per pass rather than derived from
+    outDir: the first argo-mode pass's Application predates the
+    "Stage name == directory name == Application name" convention
+    (argocdAppsName = "argocd-apps", not renderedArgoDir) and keeps its
+    historical name; every other pass's Application is named directly
+    after its outDir.
 
   Kargo expressions are written with the `kargo.expr` helper above -- see it for
   why they cannot be written literally, and for the quoting rule that goes with
@@ -36,12 +65,11 @@ ${{ "{{" }} {{ . }} {{ "}}" }}
   Where this Stage's render (the Applications/AppProjects/Stages/Warehouse
   themselves) lands. Same as $repo unless renderedRepo overrides it -- see
   gitops-values.yaml. $repo stays mainRepo regardless: it is still where the
-  source (04_apps_generator, 05_apps) is cloned from and what provenance is
-  computed against.
+  source (04_apps_generator, 05_apps, 02_bootstrap) is cloned from and what
+  provenance is computed against.
 */ -}}
 {{- $renderedRepo := $root.Values.renderedRepo | default $root.Values.mainRepo -}}
 {{- $generator := $root.Values.generatorRoot | trimSuffix "/" -}}
-{{- $outDir := printf "%s/%s" $root.Values.renderedRoot .outDir -}}
 {{- $alias := include "kargo.expr" "ctx.targetFreight.alias" -}}
 {{- $freight := include "kargo.expr" "ctx.targetFreight.name" -}}
 {{- $srcCommit := include "kargo.expr" (printf "commitFrom(%q).ID" $repo) -}}
@@ -55,9 +83,19 @@ ${{ "{{" }} {{ . }} {{ "}}" }}
 {{- /*
   Conventional-commit subject. `chore` because the content is generated rather
   than authored, and the scope is the Stage -- which is also the name of the
-  directory written and of the Argo CD Application that reconciles it.
+  directory written (per pass, now) and of the Argo CD Application that
+  reconciles it.
 */ -}}
 {{- $subject := printf "chore(%s): render %s" .name $alias -}}
+{{- /*
+  One line per pass, describing what was rendered with what into where.
+  Multiple passes mean this is a list now rather than a single sentence.
+*/ -}}
+{{- $passDescs := list -}}
+{{- range $pass := .passes -}}
+  {{- $passDescs = append $passDescs (printf "`%s` with `%s` (from `%s`) into `%s/%s`/" $generator $pass.valuesFile $pass.appRoot $root.Values.renderedRoot $pass.outDir) -}}
+{{- end -}}
+{{- $rendered := printf "Rendered %s,\nreconciled by Argo CD on `%s`." (join ",\n" $passDescs) .targetBranch -}}
 {{- /*
   The PR title and description name NO Freight, and cannot. This branch is
   force-pushed, and git-open-pr adopts an already-open PR unchanged -- it looks
@@ -67,7 +105,6 @@ ${{ "{{" }} {{ . }} {{ "}}" }}
   time and carries all of it; these two say only what is true of the branch.
 */ -}}
 {{- $prTitle := printf "chore(%s): render onto %s" .name .targetBranch -}}
-{{- $rendered := printf "Rendered `%s` with `%s`\ninto `%s`/, reconciled by Argo CD on `%s`." $generator .valuesFile $outDir .targetBranch -}}
 {{- $provenance := printf "Freight: %s (%s)\nSource:  %s on `%s`\nCommit:  %s" $alias $freight $srcCommit $srcBranch $srcCommitURL -}}
 {{- /*
   Renders to nothing at all on an ordinary promotion, leaving a trailing blank
@@ -125,38 +162,34 @@ spec:
               - branch: {{ .targetBranch }}
                 create: true
                 path: ./out
+        {{- range $pass := .passes }}
         {{- /*
-          Helm's .Files cannot read outside the chart directory, and the apps
-          are a sibling of the generator. render.sh assembles the same workspace
-          locally; without this step the scan finds no apps and the render is
-          silently empty rather than failing.
-
-          appsDir is this chart's own value, not a repository-wide one, and the
-          helm-template step below passes the same string to the generator with
-          --set: the step that writes the directory is the step that names it,
-          so the two cannot drift.
-
-          UNVERIFIED: that `copy` recurses into directories and creates the
-          destination. The reference documents only inPath/outPath and says
-          nothing about either. If it turns out to copy files only, this becomes
-          a git-clone of the apps path into place instead.
-        */}}
-        - uses: copy
-          config:
-            inPath: ./src/{{ $root.Values.appRoot | trimSuffix "/" }}
-            outPath: ./src/{{ $generator }}/{{ $root.Values.appsDir }}
-        {{- /*
-          Deleted before rendering so a removed app's resources disappear rather
-          than lingering: the render only ever writes what currently exists, and
-          without this the output is additive.
+          Deleted before rendering so a removed app's resources disappear
+          rather than lingering: the render only ever writes what currently
+          exists, and without this the output is additive.
 
           strict: false because the directory does not exist on the first
           promotion, when the stage branch has just been created empty.
         */}}
         - uses: delete
           config:
-            path: ./out/{{ $outDir }}
+            path: ./out/{{ $pass.outDir }}
             strict: false
+        {{- /*
+          Helm's .Files cannot read outside the chart directory, and the apps
+          are a sibling of the generator. render.sh assembles the same
+          workspace locally; without this step the scan finds no apps and the
+          render is silently empty rather than failing.
+
+          UNVERIFIED: that `copy` recurses into directories and creates the
+          destination. The reference documents only inPath/outPath and says
+          nothing about either. If it turns out to copy files only, this
+          becomes a git-clone of the pass's root into place instead.
+        */}}
+        - uses: copy
+          config:
+            inPath: ./src/{{ $pass.appRoot | trimSuffix "/" }}
+            outPath: ./src/{{ $generator }}/{{ $pass.appsDir }}
         - uses: helm-template
           config:
             path: ./src/{{ $generator }}
@@ -168,9 +201,14 @@ spec:
               named `[group-]kind-namespace-name.yaml` -- verified against
               Kargo's source that this cannot collide even though this chart
               gives a Namespace, Project and ProjectConfig the same name per
-              app, because Kind is part of the filename.
+              app, because Kind is part of the filename. Two passes writing
+              to two DIFFERENT outPaths (never the same one twice -- see
+              gitops-values.yaml's renderedBootstrapArgoDir/
+              renderedBootstrapKargoDir comment) sidesteps ever needing to
+              know whether a second call into the same outPath would
+              accumulate or clobber -- genuinely unverified upstream.
             */}}
-            outPath: ./out/{{ $outDir }}
+            outPath: ./out/{{ $pass.outDir }}
             outLayout: flat
             # Cosmetic: verified that no generator template reads .Release.Name,
             # so this cannot affect the output. Matches render.sh so a local
@@ -182,14 +220,18 @@ spec:
               # shared file would let a generator default shadow a
               # repository-wide one.
               - ./src/gitops-values.yaml
-              - ./src/{{ $generator }}/{{ .valuesFile }}
-            # Where the copy step above put the app tree. Last word, so it wins
-            # over the generator's own default.
+              - ./src/{{ $generator }}/{{ $pass.valuesFile }}
+            # Where the copy step above put this pass's app tree, and which
+            # root it copied from. Last word, so they win over the
+            # generator's own default / gitops-values.yaml's appRoot.
             setValues:
               - key: appsDir
-                value: {{ $root.Values.appsDir }}
+                value: {{ $pass.appsDir }}
+              - key: appRoot
+                value: {{ $pass.appRoot }}
             buildDependencies: false
             skipTests: true
+        {{- end }}
         - uses: git-commit
           as: commit
           config:
@@ -250,7 +292,7 @@ spec:
             title: {{ $prTitle | quote }}
             description: |-{{ $rendered | nindent 14 }}
 
-              Everything under that path is machine-written, so this diff *is* the
+              Everything under these paths is machine-written, so this diff *is* the
               change: nothing renders again between merging this and the cluster acting
               on it. The promotion is parked in `git-wait-for-pr` until this PR is merged
               or closed.
@@ -279,13 +321,15 @@ spec:
             provider: github
             prNumber: '{{ include "kargo.expr" `outputs["open-pr"].pr.id` }}'
         {{- /*
-          Sync the Application that reconciles what was just written, pinned to
-          the commit the merge produced. Without it the Stage would reference no
-          Argo CD Application, so Kargo would have no health signal at all and
-          "promoted" would mean only "the git push succeeded".
+          Sync every Application that reconciles what was just written, pinned
+          to the commit the merge produced -- one apps[] entry per pass.
+          Without it the Stage would reference no Argo CD Application, so
+          Kargo would have no health signal at all and "promoted" would mean
+          only "the git push succeeded".
 
-          Requires kargo.akuity.io/authorized-stage on that Application, which
-          03_apps_bootstrap must set to <project>:<stage>.
+          Requires kargo.akuity.io/authorized-stage on each of these
+          Applications, which 03_meta/01_app_of_apps and 03_meta/03_apps_kargo
+          must set to <project>:<stage>.
 
           Skipped entirely (Helm-time, not Kargo-time) when argoSyncEnabled is
           false -- see gitops-values.yaml. That is a repo-wide render decision,
@@ -297,10 +341,12 @@ spec:
           uses: argocd-update
           config:
             apps:
-              - name: {{ .outDir }}
+              {{- range $pass := .passes }}
+              - name: {{ $pass.appName }}
                 namespace: {{ $root.Values.argo.namespace }}
                 sources:
                   - repoURL: {{ $renderedRepo }}
                     desiredRevision: '{{ include "kargo.expr" `outputs["wait-for-pr"].commit` }}'
+              {{- end }}
         {{- end }}
 {{- end }}

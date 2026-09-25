@@ -1,0 +1,11 @@
+# -- Only apps listed here will be rendered.
+#
+# Same shape as 05_apps/apps-test.yaml, for the bootstrap-flavored render
+# pass -- see gitops-values.yaml's renderedBootstrapArgoDir. Identical to
+# apps-prod.yaml: nothing here varies by environment, every cluster needs
+# its own cilium, argocd and traefik. 02_manual-secrets is never listed --
+# it's interactive secret entry and structurally can't be rendered.
+enabled:
+  - 00_cilium
+  - 01_argocd
+  - 03_traefik

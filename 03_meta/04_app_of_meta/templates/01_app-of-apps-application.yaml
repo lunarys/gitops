@@ -1,0 +1,45 @@
+{{- /*
+  Self-manages 01_app_of_apps after it's been hand-applied once per cluster.
+  Multi-source: one source is the chart path itself, the other a bare `ref`
+  source with no path, purely so the chart's helm.valueFiles can reach
+  gitops-values.yaml at the repo root via `$mainrepo/...` -- Argo CD's
+  documented way to pull a values file from outside the source's own path.
+
+  project: app-of-meta-project, a dedicated one (see
+  00_app-of-meta-project.yaml) rather than app-of-apps-project itself: this
+  chart self-manages 01_app_of_apps, so depending on a project 01_app_of_apps
+  creates would make app-of-meta's own applicability depend on its child
+  having already run.
+
+  Unconditional (renders on both environments): 01_app_of_apps itself is
+  hand-applied per cluster, so its self-management has to exist on both.
+*/ -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-of-apps
+  namespace: {{ .Values.argo.namespace }}
+spec:
+  project: app-of-meta-project
+  destination:
+    namespace: {{ .Values.argo.namespace }}
+    server: {{ .Values.argo.server }}
+  sources:
+    - repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.sourceBranch }}
+      path: 03_meta/01_app_of_apps
+      helm:
+        version: v3
+        valueFiles:
+          - $mainrepo/gitops-values.yaml
+          - values-{{ .Values.environment }}.yaml
+    - repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.sourceBranch }}
+      ref: mainrepo
+  syncPolicy:
+    automated:
+      enabled: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

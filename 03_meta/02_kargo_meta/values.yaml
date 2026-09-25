@@ -23,6 +23,14 @@
 # apps either way.
 appsDir: apps
 
+# -- Same idea, for the second render pass over 02_bootstrap's portable
+# components. Owned here rather than in gitops-values.yaml for the same
+# reason as appsDir above: nothing outside this chart needs to know it --
+# 01_app_of_apps and 03_apps_kargo only ever read the OUTPUT directories
+# (renderedBootstrapArgoDir / renderedBootstrapKargoDir), never this one.
+bootstrapRoot: 02_bootstrap
+bootstrapAppsDir: bootstrap-apps
+
 # -- The `sources` Warehouse: how it discovers structural change.
 warehouse:
   # How often it polls the source branch. Lower means Freight appears sooner

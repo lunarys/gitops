@@ -1,0 +1,9 @@
+apiVersion: v2
+name: app-of-meta
+description: >-
+  Self-manages 01_app_of_apps, 02_kargo_meta and 03_apps_kargo as Helm charts,
+  once each has been hand-applied. Argo re-reads git unconditionally, so its
+  own app-of-apps can safely manage itself this way; nothing here is
+  rendered or updated by Kargo.
+type: application
+version: 0.1.0

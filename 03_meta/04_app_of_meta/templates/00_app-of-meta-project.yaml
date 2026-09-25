@@ -1,0 +1,26 @@
+{{- /*
+  Narrowly scoped for self-managing 01_app_of_apps and 03_apps_kargo: both
+  Applications below only ever emit namespaced Application/AppProject
+  objects into argo.namespace, so this project permits exactly that and
+  nothing more -- no clusterResourceWhitelist, unlike kargo-meta-project's.
+
+  Dedicated rather than reusing app-of-apps-project (created by
+  01_app_of_apps itself): this chart self-manages that one, so depending on
+  a project it creates would mean app-of-meta can't apply until its own
+  child has already run -- the same reason kargo-meta-project below is
+  dedicated too, not reused from 02_kargo_meta.
+*/ -}}
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: app-of-meta-project
+  namespace: {{ .Values.argo.namespace }}
+spec:
+  description: Self-management of the app-of-apps and apps-kargo charts
+  sourceRepos:
+    - {{ .Values.mainRepo }}
+  destinations:
+    - namespace: {{ .Values.argo.namespace }}
+      server: {{ .Values.argo.server }}
+  orphanedResources:
+    warn: false

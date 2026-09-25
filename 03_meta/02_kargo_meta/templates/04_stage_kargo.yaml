@@ -16,7 +16,19 @@
       "root" $
       "name" .Values.renderedKargoDir
       "shard" (index .Values.kargo.shards "prod")
-      "valuesFile" "values-kargo.yaml"
-      "outDir" .Values.renderedKargoDir
       "targetBranch" (printf "%sprod" .Values.renderedBranchPrefix)
+      "passes" (list
+        (dict
+          "valuesFile" "values-kargo.yaml"
+          "outDir" .Values.renderedKargoDir
+          "appRoot" .Values.appRoot
+          "appsDir" .Values.appsDir
+          "appName" .Values.renderedKargoDir)
+        (dict
+          "valuesFile" "values-kargo.yaml"
+          "outDir" .Values.renderedBootstrapKargoDir
+          "appRoot" .Values.bootstrapRoot
+          "appsDir" .Values.bootstrapAppsDir
+          "appName" .Values.renderedBootstrapKargoDir)
+      )
     ) }}

@@ -1,0 +1,30 @@
+{{- /*
+  Narrowly scoped for self-managing 02_kargo_meta specifically: that chart
+  creates a cluster-scoped Namespace + kargo.akuity.io/Project directly
+  (kargo-apps-generator itself), and its externalsecrets dependency writes
+  the shared git credential into kargo-shared-resources -- see
+  02_kargo_meta/values.yaml's externalsecrets.secrets.gitops-repo.
+*/ -}}
+{{- if eq .Values.environment "prod" }}
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: kargo-meta-project
+  namespace: {{ .Values.argo.namespace }}
+spec:
+  description: The kargo-apps-generator control plane itself (the kargo-meta chart)
+  sourceRepos:
+    - {{ .Values.mainRepo }}
+  destinations:
+    - namespace: {{ .Values.kargo.generatorProject }}
+      server: {{ .Values.argo.server }}
+    - namespace: kargo-shared-resources
+      server: {{ .Values.argo.server }}
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+    - group: kargo.akuity.io
+      kind: Project
+  orphanedResources:
+    warn: false
+{{- end }}

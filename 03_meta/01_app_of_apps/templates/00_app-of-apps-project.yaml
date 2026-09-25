@@ -1,0 +1,25 @@
+{{- /*
+  Only permits creating namespaced Application/AppProject objects in
+  argo.namespace. No clusterResourceWhitelist entries at all: argocd is now
+  a generated app with its own auto-generated per-app project (which
+  already carries its own wildcard, unconditionally -- see
+  04_apps_generator's _argo_project.tpl), so nothing that belongs to this
+  project ever creates a cluster-scoped resource directly.
+*/ -}}
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: app-of-apps-project
+  namespace: {{ .Values.argo.namespace }}
+spec:
+  description: The app-of-apps Applications that deploy the rendered application and bootstrap trees
+  sourceRepos:
+    - {{ .Values.mainRepo }}
+    {{- if and .Values.renderedRepo (ne .Values.renderedRepo .Values.mainRepo) }}
+    - {{ .Values.renderedRepo }}
+    {{- end }}
+  destinations:
+    - namespace: {{ .Values.argo.namespace }}
+      server: {{ .Values.argo.server }}
+  orphanedResources:
+    warn: false

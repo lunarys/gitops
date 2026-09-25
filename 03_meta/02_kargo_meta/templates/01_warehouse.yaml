@@ -26,6 +26,7 @@
   Freight is ever created, with no error to explain why.
 */ -}}
 {{- $appRoot := .Values.appRoot | trimSuffix "/" -}}
+{{- $bootstrapRoot := .Values.bootstrapRoot | trimSuffix "/" -}}
 apiVersion: kargo.akuity.io/v1alpha1
 kind: Warehouse
 metadata:
@@ -49,4 +50,5 @@ spec:
           - {{ $appRoot }}/apps-prod.yaml
           # Chart.yaml, settings.yaml and the values file names, per app.
           - glob:{{ $appRoot }}/*/*.yaml
+          - glob:{{ $bootstrapRoot }}/*/*.yaml
         discoveryLimit: {{ .Values.warehouse.discoveryLimit }}

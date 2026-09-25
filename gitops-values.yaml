@@ -94,6 +94,24 @@ renderedAppsDir: apps
 renderedArgoDir: argo-resources
 renderedKargoDir: kargo-resources
 
+# -- Same idea, for the second render pass over 02_bootstrap's portable
+# components (cilium, argocd, traefik -- never 02_manual-secrets, which is
+# interactive secret entry and structurally can't be rendered). Kept as
+# separate output directories rather than merged into renderedArgoDir /
+# renderedKargoDir: Kargo's helm-template step writing twice into the same
+# outPath is unverified upstream, while two directories each get an
+# ordinary delete-then-write, same guarantee every other Stage output
+# already relies on.
+renderedBootstrapArgoDir: bootstrap-argo-resources
+renderedBootstrapKargoDir: bootstrap-kargo-resources
+
+# -- The pre-existing app-of-apps Application's name. Deliberately NOT
+# renderedArgoDir: the directory/Stage naming convention above says "Stage
+# name == directory name == Application name" for everything the generator
+# emits per app, but this Application predates that convention and keeps
+# its historical name rather than being renamed to match.
+argocdAppsName: argocd-apps
+
 # -- Private companion repository.
 #
 # Not yet migrated to the Kargo flow; retained so the existing private

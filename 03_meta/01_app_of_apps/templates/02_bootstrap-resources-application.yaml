@@ -1,0 +1,36 @@
+{{- /*
+  The bootstrap-tree counterpart to argocd-apps: reconciles the per-app
+  Application/AppProject objects 04_apps_generator renders for
+  02_bootstrap's portable components (mode=argo, root=02_bootstrap) onto
+  _rendered/bootstrap-argo-resources/.
+
+  A genuinely new Application (no pre-existing name to preserve), so it's
+  named directly after the rendered directory, unlike argocd-apps.
+  Authorized by the SAME Stage as argocd-apps -- one Stage now renders both
+  passes (see 02_kargo_meta), not a separate bootstrap-flavored stage.
+*/ -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.renderedBootstrapArgoDir }}
+  namespace: {{ .Values.argo.namespace }}
+  annotations:
+    kargo.akuity.io/authorized-stage: {{ .Values.kargo.generatorProject }}:{{ .Values.renderedArgoDir }}-{{ .Values.environment }}
+spec:
+  project: app-of-apps-project
+  destination:
+    namespace: {{ .Values.argo.namespace }}
+    server: {{ .Values.argo.server }}
+  source:
+    repoURL: {{ include "app-of-apps.renderedRepo" . }}
+    targetRevision: {{ .Values.renderedBranchPrefix }}{{ .Values.environment }}
+    path: {{ .Values.renderedRoot }}/{{ .Values.renderedBootstrapArgoDir }}
+    directory:
+      recurse: true
+  syncPolicy:
+    automated:
+      enabled: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

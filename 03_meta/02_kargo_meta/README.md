@@ -5,14 +5,18 @@ The Kargo flow that renders the generator's output onto the stage branches.
   invokes, shared by all of them
 - the git credential every promotion clones and pushes with
 - Warehouse `sources` -- watches what the generator reads
-- Stage `argo-resources-test` -> `stage/test:_rendered/argo-resources/`
-- Stage `argo-resources-prod` -> `stage/prod:_rendered/argo-resources/`
-- Stage `kargo-resources`     -> `stage/prod:_rendered/kargo-resources/`
+- Stage `argo-resources-test` -> `stage/test:_rendered/{argo-resources,bootstrap-argo-resources}/`
+- Stage `argo-resources-prod` -> `stage/prod:_rendered/{argo-resources,bootstrap-argo-resources}/`
+- Stage `kargo-resources`     -> `stage/prod:_rendered/{kargo-resources,bootstrap-kargo-resources}/`
 
-Each Stage clones the repo, copies the app tree into the generator chart,
-renders it, and opens a PR against the stage branch. A Stage name is also the
-directory it writes and the Argo CD Application that reconciles it, so the three
-cannot drift apart.
+Each Stage now runs TWO render passes -- the regular `05_apps` tree and
+`02_bootstrap`'s portable components (`cilium`, `argocd`, `traefik`; never
+`02_manual-secrets`, interactive secret entry) -- but still clones the repo
+once, opens one PR, and drives one Promotion; see `apps-kargo.stage` in
+`_helpers.tpl` for the per-pass loop. A Stage name is also the directory its
+FIRST pass writes and (with one exception) the Argo CD Application that
+reconciles it: `03_meta/01_app_of_apps`'s app-of-apps keeps its historical name
+`argocd-apps` rather than being renamed to `argo-resources` to match.
 
 
 Settings
@@ -25,6 +29,8 @@ Settings
   generator chart. The `copy` step writes it and the `helm-template` step
   passes the same string to the generator with `--set`, so the two halves of
   the contract have one declaration.
+- `bootstrapRoot` / `bootstrapAppsDir` -- the same pair, for the second render
+  pass over `02_bootstrap`'s portable components.
 - `warehouse.interval` / `.freightCreationPolicy` / `.discoveryLimit` -- how
   structural change is discovered.
 - `autoPromotion.argo.test` / `.argo.prod` / `.kargo` -- off, deliberately.
@@ -35,15 +41,16 @@ Settings
   holds that Stage's only promotion slot until someone resolves it.
 
 
-Separate from `03_apps_bootstrap` because these are Kargo resources, and the
-Kargo CRDs do not exist at bootstrap time -- Kargo arrives with `05_apps`. A
-tier is defined by what is available when it runs, so anything needing a CRD
-that bootstrap cannot provide is not a bootstrap resource.
+Separate from `03_meta/01_app_of_apps` and `03_meta/03_apps_kargo` because these
+are Kargo resources, and the Kargo CRDs do not exist at bootstrap time --
+Kargo arrives with `05_apps`. A tier is defined by what is available when it
+runs, so anything needing a CRD that bootstrap cannot provide is not a
+bootstrap resource.
 
 The task and the credential live here rather than with the Kargo install in
 `05_apps/kargo`, and for different reasons. The task is a Kargo CR: it cannot be
 applied in the same pass that installs the Kargo CRDs, which is the same tier
-rule that put this whole directory outside `03_apps_bootstrap` -- a resource
+rule that put this whole directory outside `03_meta/01_app_of_apps` -- a resource
 whose prerequisites do not exist yet is not a resource of that tier. The
 credential belongs to the flow rather than to the control plane: the install
 never reads it, and no promotion can run without it. It lands in
@@ -52,8 +59,8 @@ has to be up first.
 
 Applied by hand, once Kargo is up:
 
-    helm dependency build 06_apps_kargo
-    helm upgrade --install kargo-apps-generator 06_apps_kargo -f gitops-values.yaml
+    helm dependency build 03_meta/02_kargo_meta
+    helm upgrade --install kargo-apps-generator 03_meta/02_kargo_meta -f gitops-values.yaml
 
 There is deliberately no promotion flow for this directory yet: it *is* the
 promotion flow, so promoting it with itself means a bad render breaks the
@@ -70,8 +77,10 @@ Not yet resolved
   opens pull requests with it, so nothing promotes until it exists and
   `05_apps/kargo` has created the namespace it is written into.
 - **`kargo.akuity.io/authorized-stage`.** The `argocd-update` steps require that
-  annotation, formatted `kargo-apps-generator:<stage>`, on the Applications
-  named `argo-resources` and `kargo-resources`. Those Applications are
-  `03_apps_bootstrap`'s to create.
+  annotation, formatted `kargo-apps-generator:<stage>`, on every Application
+  named in a Stage's `passes` list: `argocd-apps` and
+  `bootstrap-argo-resources` (`03_meta/01_app_of_apps`'s to create), and
+  `kargo-resources` and `bootstrap-kargo-resources`
+  (`03_meta/03_apps_kargo`'s to create).
 - **The `copy` step's directory semantics** are undocumented upstream; see the
   note in `_helpers.tpl`.

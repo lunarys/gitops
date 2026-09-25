@@ -1,0 +1,13 @@
+apiVersion: v2
+name: apps-kargo
+description: >-
+  Reconciles what 02_kargo_meta renders for each app's own Kargo control
+  plane (kargo-resources / bootstrap-kargo-resources): per-app Namespace,
+  Kargo Project, ProjectConfig, Warehouse and Stage(s). A different
+  responsibility from 02_kargo_meta itself -- that chart produces the
+  render, this one reconciles it -- kept in its own chart rather than
+  folded into either 01_app_of_apps (Argo CD only, no Kargo dependency at
+  all) or 02_kargo_meta (applied at a different time, for a different
+  reason).
+type: application
+version: 0.1.0

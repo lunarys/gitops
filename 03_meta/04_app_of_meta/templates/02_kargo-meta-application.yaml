@@ -1,0 +1,45 @@
+{{- /*
+  Self-manages 02_kargo_meta. Prod-only: the Kargo control plane runs only
+  in the prod cluster, so this chart is only ever hand-applied there --
+  same reasoning as 02_kargo_meta's own "rendered ONCE, not per environment".
+  Single source, no per-env values needed for the nested chart.
+
+  valueFiles lists 02_kargo_meta's own values.yaml explicitly, after
+  gitops-values.yaml: Helm loads a chart's default values.yaml regardless,
+  but listing it again last makes it win over gitops-values.yaml on any
+  overlapping key, and documents that ordering instead of leaving it to
+  Helm's implicit default-file behavior.
+*/ -}}
+{{- if eq .Values.environment "prod" }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kargo-meta
+  namespace: {{ .Values.argo.namespace }}
+spec:
+  project: kargo-meta-project
+  destination:
+    namespace: {{ .Values.kargo.generatorProject }}
+    server: {{ .Values.argo.server }}
+  sources:
+    - repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.sourceBranch }}
+      path: 03_meta/02_kargo_meta
+      helm:
+        version: v3
+        valueFiles:
+          - $mainrepo/gitops-values.yaml
+          - values.yaml
+    - repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.sourceBranch }}
+      ref: mainrepo
+  syncPolicy:
+    automated:
+      enabled: false
+      selfHeal: true
+    syncOptions:
+      # No CreateNamespace: kargo-apps-generator's Namespace is emitted
+      # explicitly labelled by 02_kargo_meta itself -- an auto-created one
+      # would lack kargo.akuity.io/project and Kargo would never adopt it.
+      - ServerSideApply=true
+{{- end }}

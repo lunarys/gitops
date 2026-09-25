@@ -1,5 +1,5 @@
 apiVersion: v2
-name: apps-kargo
+name: kargo-meta
 description: >-
   The Kargo platform flow: the kargo-platform Project, the Warehouse that
   watches the authored sources, and the Stages that render the generator's

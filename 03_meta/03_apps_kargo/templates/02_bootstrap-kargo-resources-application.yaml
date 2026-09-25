@@ -1,0 +1,31 @@
+{{- /*
+  The bootstrap-tree counterpart to kargo-resources: reconciles the per-app
+  Kargo control-plane objects 04_apps_generator renders for 02_bootstrap's
+  portable components (mode=kargo, root=02_bootstrap) onto
+  _rendered/bootstrap-kargo-resources/. Authorized by the SAME Stage as
+  kargo-resources -- one Stage renders both passes (see 02_kargo_meta).
+*/ -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.renderedBootstrapKargoDir }}
+  namespace: {{ .Values.argo.namespace }}
+  annotations:
+    kargo.akuity.io/authorized-stage: {{ .Values.kargo.generatorProject }}:{{ .Values.renderedKargoDir }}
+spec:
+  project: apps-kargo-project
+  destination:
+    namespace: {{ .Values.argo.namespace }}
+    server: {{ .Values.argo.server }}
+  source:
+    repoURL: {{ .Values.renderedRepo | default .Values.mainRepo }}
+    targetRevision: {{ .Values.renderedBranchPrefix }}prod
+    path: {{ .Values.renderedRoot }}/{{ .Values.renderedBootstrapKargoDir }}
+    directory:
+      recurse: true
+  syncPolicy:
+    automated:
+      enabled: false
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true

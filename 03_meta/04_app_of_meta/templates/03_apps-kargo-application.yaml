@@ -1,0 +1,42 @@
+{{- /*
+  Self-manages 03_apps_kargo. Prod-only, same reasoning as kargo-meta above
+  (Kargo runs prod-only, so this chart is only ever hand-applied there).
+
+  project: app-of-meta-project, the same dedicated project used for
+  app-of-apps's own self-management above (see 00_app-of-meta-project.yaml)
+  -- this only ever emits namespaced Application/AppProject objects into
+  argo.namespace (the apps-kargo-project AppProject and the two
+  Applications that reference it). The actual privileged access
+  (kargo-app-* namespaces) belongs to apps-kargo-project itself, used by
+  those child Applications, not by this one.
+*/ -}}
+{{- if eq .Values.environment "prod" }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps-kargo
+  namespace: {{ .Values.argo.namespace }}
+spec:
+  project: app-of-meta-project
+  destination:
+    namespace: {{ .Values.argo.namespace }}
+    server: {{ .Values.argo.server }}
+  sources:
+    - repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.sourceBranch }}
+      path: 03_meta/03_apps_kargo
+      helm:
+        version: v3
+        valueFiles:
+          - $mainrepo/gitops-values.yaml
+    - repoURL: {{ .Values.mainRepo }}
+      targetRevision: {{ .Values.sourceBranch }}
+      ref: mainrepo
+  syncPolicy:
+    automated:
+      enabled: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+{{- end }}

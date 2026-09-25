@@ -15,7 +15,19 @@
       "root" $
       "name" (printf "%s-test" .Values.renderedArgoDir)
       "shard" (index .Values.kargo.shards "test")
-      "valuesFile" "values-argo-test.yaml"
-      "outDir" .Values.renderedArgoDir
       "targetBranch" (printf "%stest" .Values.renderedBranchPrefix)
+      "passes" (list
+        (dict
+          "valuesFile" "values-argo-test.yaml"
+          "outDir" .Values.renderedArgoDir
+          "appRoot" .Values.appRoot
+          "appsDir" .Values.appsDir
+          "appName" .Values.argocdAppsName)
+        (dict
+          "valuesFile" "values-argo-test.yaml"
+          "outDir" .Values.renderedBootstrapArgoDir
+          "appRoot" .Values.bootstrapRoot
+          "appsDir" .Values.bootstrapAppsDir
+          "appName" .Values.renderedBootstrapArgoDir)
+      )
     ) }}

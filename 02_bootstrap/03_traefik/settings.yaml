@@ -1,0 +1,4 @@
+# -- The directory is 03_traefik (numeric prefix for bootstrap.sh's apply
+# order); the app itself is just "traefik". Namespace already matches the
+# name (install.sh: NAMESPACE='traefik'), no override needed.
+applicationName: traefik

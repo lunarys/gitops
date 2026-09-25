@@ -1,0 +1,30 @@
+{{- /*
+  Narrowly scoped to exactly what kargo-resources/bootstrap-kargo-resources
+  actually sync: each app's own kargo-app-<name> namespace (created
+  explicitly labelled by 04_apps_generator's per-app kargo Project template,
+  never by CreateNamespace -- an auto-created namespace lacks
+  kargo.akuity.io/project and Kargo never adopts it) plus
+  kargo-apps-generator itself, and the two cluster-scoped kinds those
+  namespaces actually receive.
+*/ -}}
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: apps-kargo-project
+  namespace: {{ .Values.argo.namespace }}
+spec:
+  description: Per-app Kargo Projects, Warehouses and Stages rendered by kargo-apps-generator
+  sourceRepos:
+    - {{ .Values.renderedRepo | default .Values.mainRepo }}
+  destinations:
+    - namespace: {{ .Values.kargo.projectPrefix }}*
+      server: {{ .Values.argo.server }}
+    - namespace: {{ .Values.kargo.generatorProject }}
+      server: {{ .Values.argo.server }}
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+    - group: kargo.akuity.io
+      kind: Project
+  orphanedResources:
+    warn: false
