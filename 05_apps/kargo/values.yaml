@@ -14,6 +14,12 @@
 
 kargo:
   api:
+    # Every Project/ProjectConfig/Warehouse/Stage is rendered and applied by
+    # Argo CD; the only credential Kargo uses (gitops-repo) arrives via
+    # ExternalSecret, never through the API server. So its own Secret
+    # management is attack surface with nothing behind it.
+    secretManagementEnabled: false
+
     # Used for the Ingress rule, the certificate and any generated URL.
     host: kargo.svc.elda
 
