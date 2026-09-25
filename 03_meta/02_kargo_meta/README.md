@@ -15,8 +15,10 @@ Each Stage now runs TWO render passes -- the regular `05_apps` tree and
 once, opens one PR, and drives one Promotion; see `apps-kargo.stage` in
 `_helpers.tpl` for the per-pass loop. A Stage name is also the directory its
 FIRST pass writes and (with one exception) the Argo CD Application that
-reconciles it: `03_meta/01_app_of_apps`'s app-of-apps keeps its historical name
-`argocd-apps` rather than being renamed to `argo-resources` to match.
+reconciles it: the two argo-resources Stages' passes are both reconciled by
+`03_meta/01_app_of_apps`'s single `app-of-apps` Application (one Application,
+two sources -- see its own comment), which can't be named after either
+directory since it's neither one alone.
 
 
 Settings
@@ -77,10 +79,10 @@ Not yet resolved
   opens pull requests with it, so nothing promotes until it exists and
   `05_apps/kargo` has created the namespace it is written into.
 - **`kargo.akuity.io/authorized-stage`.** The `argocd-update` steps require that
-  annotation, formatted `kargo-apps-generator:<stage>`, on every Application
-  named in a Stage's `passes` list: `argocd-apps` and
-  `bootstrap-argo-resources` (`03_meta/01_app_of_apps`'s to create), and
-  `kargo-resources` and `bootstrap-kargo-resources`
+  annotation, formatted `kargo-apps-generator:<stage>`, on every distinct
+  Application named in a Stage's `passes` list: `app-of-apps`
+  (`03_meta/01_app_of_apps`'s to create, covering both argo-resources
+  passes), and `kargo-resources` and `bootstrap-kargo-resources`
   (`03_meta/03_apps_kargo`'s to create).
 - **The `copy` step's directory semantics** are undocumented upstream; see the
   note in `_helpers.tpl`.

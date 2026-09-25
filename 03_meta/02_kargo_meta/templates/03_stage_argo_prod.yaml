@@ -5,6 +5,11 @@
   "add an app to prod" behind the test cluster would make an offline test
   cluster block prod changes, and the app's OWN Stages still carry the
   test-before-prod gate for anything that actually runs.
+
+  Both passes share appName (appOfAppsName): 03_meta/01_app_of_apps
+  reconciles both directories as one multi-source Application, not two --
+  see its own comment for why argocd-update only precisely pinning one of
+  the two resulting apps[] entries is fine here.
 */ -}}
 {{- include "apps-kargo.stage" (dict
       "root" $
@@ -17,12 +22,12 @@
           "outDir" .Values.renderedArgoDir
           "appRoot" .Values.appRoot
           "appsDir" .Values.appsDir
-          "appName" .Values.argocdAppsName)
+          "appName" .Values.appOfAppsName)
         (dict
           "valuesFile" "values-argo-prod.yaml"
           "outDir" .Values.renderedBootstrapArgoDir
           "appRoot" .Values.bootstrapRoot
           "appsDir" .Values.bootstrapAppsDir
-          "appName" .Values.renderedBootstrapArgoDir)
+          "appName" .Values.appOfAppsName)
       )
     ) }}

@@ -105,12 +105,13 @@ renderedKargoDir: kargo-resources
 renderedBootstrapArgoDir: bootstrap-argo-resources
 renderedBootstrapKargoDir: bootstrap-kargo-resources
 
-# -- The pre-existing app-of-apps Application's name. Deliberately NOT
-# renderedArgoDir: the directory/Stage naming convention above says "Stage
-# name == directory name == Application name" for everything the generator
-# emits per app, but this Application predates that convention and keeps
-# its historical name rather than being renamed to match.
-argocdAppsName: argocd-apps
+# -- The app-of-apps Application's name. Deliberately NOT renderedArgoDir:
+# the directory/Stage naming convention above says "Stage name == directory
+# name == Application name" for everything the generator emits per app, but
+# this Application reconciles TWO directories (argo-resources and
+# bootstrap-argo-resources, one Application with two sources -- see
+# 03_meta/01_app_of_apps), so no single directory name fits it.
+appOfAppsName: app-of-apps
 
 # -- Private companion repository.
 #

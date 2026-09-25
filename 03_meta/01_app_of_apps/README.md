@@ -1,11 +1,11 @@
 This is the stuff that initially needs to be applied to the cluster for Argo
 to take over:
 
-- `argocd-apps` -- the app-of-apps for the rendered application tree
-  (`_rendered/argo-resources/`)
-- `bootstrap-argo-resources` -- the same, for `02_bootstrap`'s portable
-  components (`_rendered/bootstrap-argo-resources/`)
-- `app-of-apps-project` -- the AppProject both of the above belong to
+- `app-of-apps` -- the app-of-apps for the rendered application tree, one
+  Application with two sources: the `05_apps` tree (`_rendered/argo-resources/`)
+  and `02_bootstrap`'s portable components
+  (`_rendered/bootstrap-argo-resources/`)
+- `app-of-apps-project` -- the AppProject it belongs to
 
 Argo CD resources only. Nothing here may depend on a CRD that does not exist
 yet, which rules out Kargo resources and ExternalSecrets -- both arrive with

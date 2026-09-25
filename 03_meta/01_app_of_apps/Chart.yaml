@@ -1,11 +1,11 @@
 apiVersion: v2
 name: app-of-apps
 description: >-
-  Argo CD's own bootstrap: the AppProject and Applications hand-applied once
+  Argo CD's own bootstrap: the AppProject and Application hand-applied once
   per cluster so Argo CD can take over -- the app-of-apps for the rendered
-  application tree, and the bootstrap-tree counterpart alongside it. Argo CD
-  resources only: nothing here may depend on a CRD that doesn't exist yet,
-  which rules out Kargo resources and ExternalSecrets -- both arrive with
-  05_apps.
+  application tree and the bootstrap tree, one Application with two sources.
+  Argo CD resources only: nothing here may depend on a CRD that doesn't
+  exist yet, which rules out Kargo resources and ExternalSecrets -- both
+  arrive with 05_apps.
 type: application
 version: 0.1.0

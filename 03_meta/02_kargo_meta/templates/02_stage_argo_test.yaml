@@ -10,6 +10,11 @@
   The cost is real and accepted: while the test cluster is off, structural
   changes to test cannot be promoted. They queue as Freight and apply when it
   comes back, which is the correct behaviour for a cluster that is not running.
+
+  Both passes share appName (appOfAppsName): 03_meta/01_app_of_apps
+  reconciles both directories as one multi-source Application, not two --
+  see its own comment for why argocd-update only precisely pinning one of
+  the two resulting apps[] entries is fine here.
 */ -}}
 {{- include "apps-kargo.stage" (dict
       "root" $
@@ -22,12 +27,12 @@
           "outDir" .Values.renderedArgoDir
           "appRoot" .Values.appRoot
           "appsDir" .Values.appsDir
-          "appName" .Values.argocdAppsName)
+          "appName" .Values.appOfAppsName)
         (dict
           "valuesFile" "values-argo-test.yaml"
           "outDir" .Values.renderedBootstrapArgoDir
           "appRoot" .Values.bootstrapRoot
           "appsDir" .Values.bootstrapAppsDir
-          "appName" .Values.renderedBootstrapArgoDir)
+          "appName" .Values.appOfAppsName)
       )
     ) }}

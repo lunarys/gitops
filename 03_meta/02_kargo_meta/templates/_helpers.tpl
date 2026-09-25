@@ -47,11 +47,10 @@ ${{ "{{" }} {{ . }} {{ "}}" }}
     value here rather than the generator's own single default.
   - appName: the Argo CD Application argocd-update tells to sync once this
     pass's content merges. Explicit per pass rather than derived from
-    outDir: the first argo-mode pass's Application predates the
-    "Stage name == directory name == Application name" convention
-    (argocdAppsName = "argocd-apps", not renderedArgoDir) and keeps its
-    historical name; every other pass's Application is named directly
-    after its outDir.
+    outDir: most passes are named directly after their outDir, but the two
+    argo-mode passes both name appOfAppsName ("app-of-apps"), since a single
+    multi-source Application (03_meta/01_app_of_apps) reconciles both
+    directories rather than one Application per directory.
 
   Kargo expressions are written with the `kargo.expr` helper above -- see it for
   why they cannot be written literally, and for the quoting rule that goes with
@@ -322,8 +321,13 @@ spec:
             prNumber: '{{ include "kargo.expr" `outputs["open-pr"].pr.id` }}'
         {{- /*
           Sync every Application that reconciles what was just written, pinned
-          to the commit the merge produced -- one apps[] entry per pass.
-          Without it the Stage would reference no Argo CD Application, so
+          to the commit the merge produced -- one apps[] entry per pass, even
+          when two passes share an appName because a single multi-source
+          Application reconciles both (03_meta/01_app_of_apps): argocd-update
+          only precisely pins the first entry matching a given repoURL
+          (akuity/kargo#5475), which is fine there specifically because both
+          passes are always written by the same commit anyway. Without this
+          step at all the Stage would reference no Argo CD Application, so
           Kargo would have no health signal at all and "promoted" would mean
           only "the git push succeeded".
 
