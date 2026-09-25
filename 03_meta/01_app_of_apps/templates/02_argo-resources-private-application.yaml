@@ -1,0 +1,35 @@
+{{- /*
+  Reconciles gitops-private's per-app Argo CD Application/AppProject
+  objects, rendered by the argo-resources-private-{test,prod} Stages onto
+  gitops-private's own _rendered/argo-resources/ -- never mainRepo's.
+
+  Plain single source, unlike app-of-apps: no bootstrap-equivalent second
+  directory to merge with.
+*/ -}}
+{{- if .Values.privateRepoEnabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.argoResourcesPrivateName }}
+  namespace: {{ .Values.argo.namespace }}
+  annotations:
+    kargo.akuity.io/authorized-stage: {{ .Values.kargo.generatorProject }}:argo-resources-private-{{ .Values.environment }}
+spec:
+  project: app-of-apps-project
+  destination:
+    namespace: {{ .Values.argo.namespace }}
+    server: {{ .Values.argo.server }}
+  source:
+    repoURL: {{ .Values.privateRepo }}
+    targetRevision: {{ .Values.renderedBranchPrefix }}{{ .Values.environment }}
+    path: {{ .Values.renderedRoot }}/{{ .Values.renderedArgoDir }}
+    directory:
+      recurse: true
+  syncPolicy:
+    automated:
+      enabled: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+{{- end }}

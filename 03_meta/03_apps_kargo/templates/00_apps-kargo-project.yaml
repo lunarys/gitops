@@ -16,6 +16,9 @@ spec:
   description: Per-app Kargo Projects, Warehouses and Stages rendered by kargo-apps-generator
   sourceRepos:
     - {{ .Values.renderedRepo | default .Values.mainRepo }}
+    {{- if .Values.privateRepoEnabled }}
+    - {{ .Values.privateRepo }}
+    {{- end }}
   destinations:
     - namespace: {{ .Values.kargo.projectPrefix }}*
       server: {{ .Values.argo.server }}

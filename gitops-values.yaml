@@ -25,6 +25,9 @@ mainRepo: https://github.com/lunarys/gitops.git
 # its sources from mainRepo -- only the stage branch it commits/pushes/opens a
 # PR against, and the repoURL each app's Argo CD Application syncs from, move
 # to this repo instead.
+#
+# Ignored by the private Stages (see apps-kargo.stage): testing the private
+# flow writes to the real gitops-private repo, not a scratch one.
 renderedRepo: "https://github.com/lunarys/kargo-test.git"
 
 # -- Whether a promotion's argocd-update step runs after rendering,
@@ -39,6 +42,10 @@ renderedRepo: "https://github.com/lunarys/kargo-test.git"
 argoSyncEnabled: false
 
 # -- Branch the Warehouses watch for source changes.
+#
+# Shared between mainRepo and gitops-private (sources-private subscribes to
+# this same name in gitops-private). That means gitops-private needs a branch of
+# this same name before its Warehouse can discover anything.
 sourceBranch: feat/kargo  # TODO: testing
 
 # -- Branch prefix the rendered manifests are committed to (stage/test, stage/prod).
@@ -118,13 +125,21 @@ appOfAppsName: app-of-apps
 # bootstrap-kargo-resources.
 appsKargoName: apps-kargo
 
-# -- Private companion repository.
+# -- Private companion repository, wired into the same Kargo pipeline as
+# mainRepo. The per-app `privateSettings` sidecar merge from the pre-Kargo
+# architecture is not ported -- no app in 05_apps needs it.
 #
-# Not yet migrated to the Kargo flow; retained so the existing private
-# app-of-apps keeps working. The per-app `privateSettings` merge is gone -- no
-# app in 05_apps used it.
+# privateRepoEnabled: false (or unset) renders none of the private
+# resources. Still false: gitops-private's apps aren't Chart.yaml-shaped yet
+# and its branch doesn't exist (see sourceBranch) -- flip once both are true.
 privateRepo: https://github.com/lunarys/gitops-private.git
-privateRepoEnabled: true
+privateRepoEnabled: false
+
+# -- Names of the two Applications that reconcile gitops-private's rendered
+# output. Plain directory names plus a suffix, unlike appOfAppsName: each
+# reconciles one directory, no second pass to merge with.
+argoResourcesPrivateName: argo-resources-private
+kargoResourcesPrivateName: kargo-resources-private
 
 # -- Kargo control plane.
 kargo:

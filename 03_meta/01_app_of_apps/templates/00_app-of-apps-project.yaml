@@ -18,6 +18,9 @@ spec:
     {{- if and .Values.renderedRepo (ne .Values.renderedRepo .Values.mainRepo) }}
     - {{ .Values.renderedRepo }}
     {{- end }}
+    {{- if .Values.privateRepoEnabled }}
+    - {{ .Values.privateRepo }}
+    {{- end }}
   destinations:
     - namespace: {{ .Values.argo.namespace }}
       server: {{ .Values.argo.server }}

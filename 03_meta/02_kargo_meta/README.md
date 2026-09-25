@@ -8,6 +8,14 @@ The Kargo flow that renders the generator's output onto the stage branches.
 - Stage `argo-resources-test` -> `stage/test:_rendered/{argo-resources,bootstrap-argo-resources}/`
 - Stage `argo-resources-prod` -> `stage/prod:_rendered/{argo-resources,bootstrap-argo-resources}/`
 - Stage `kargo-resources`     -> `stage/prod:_rendered/{kargo-resources,bootstrap-kargo-resources}/`
+- `sources-private` -- separate Warehouse for `gitops-private`, independent
+  Freight lineage from `sources`
+- Stage `argo-resources-private-test` -> `gitops-private`'s own
+  `stage/test:_rendered/argo-resources/`
+- Stage `argo-resources-private-prod` -> `gitops-private`'s own
+  `stage/prod:_rendered/argo-resources/`
+- Stage `kargo-resources-private` -> `gitops-private`'s own
+  `stage/prod:_rendered/kargo-resources/`
 
 Each Stage now runs TWO render passes -- the regular `05_apps` tree and
 `02_bootstrap`'s portable components (`cilium`, `argocd`, `traefik`; never
@@ -58,6 +66,10 @@ credential belongs to the flow rather than to the control plane: the install
 never reads it, and no promotion can run without it. It lands in
 `kargo-shared-resources`, a namespace the install creates, so `05_apps/kargo`
 has to be up first.
+
+The same credential covers `gitops-private`: its `repoURL` field
+(`values.yaml`) is a regex, `^https://github.com/lunarys/`, matching both
+repos already.
 
 Applied by hand, once Kargo is up:
 

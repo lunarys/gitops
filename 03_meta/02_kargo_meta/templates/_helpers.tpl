@@ -27,6 +27,13 @@ ${{ "{{" }} {{ . }} {{ "}}" }}
   git-clone/commit/push/open-pr/wait-for-pr/argocd-update: one Promotion,
   one PR, per Stage, regardless of how many passes it renders.
 
+  Two more optional stage-level keys, alongside name/shard/targetBranch/
+  passes: `repo` (default mainRepo) is which repo the app CONTENT comes
+  from -- when it differs from mainRepo, a second git-clone fetches it
+  separately, since the generator chart itself always lives in mainRepo.
+  `warehouseName` (default "sources") is which Warehouse this Stage
+  requests Freight from.
+
   A pass is a dict: {valuesFile, outDir, appRoot, appsDir, appName}.
   - valuesFile: which of 04_apps_generator's own values-<mode>-<env>.yaml
     (or values-kargo.yaml) to render with. mode/environment are identical
@@ -46,12 +53,8 @@ ${{ "{{" }} {{ . }} {{ "}}" }}
     the copy step is the one place that decides this, so it's a per-pass
     value here rather than the generator's own single default.
   - appName: the Argo CD Application argocd-update tells to sync once this
-    pass's content merges. Explicit per pass rather than derived from
-    outDir: every Stage's two passes share one appName (appOfAppsName for
-    the argo-resources Stages, appsKargoName for the kargo-resources Stage),
-    since each pair is reconciled by a single multi-source Application
-    (03_meta/01_app_of_apps, 03_meta/03_apps_kargo) rather than one
-    Application per directory.
+    pass's content merges. Explicit per pass, not derived from outDir: some
+    Stages' passes share one Application spanning multiple directories.
 
   Kargo expressions are written with the `kargo.expr` helper above -- see it for
   why they cannot be written literally, and for the quoting rule that goes with
@@ -60,15 +63,19 @@ ${{ "{{" }} {{ . }} {{ "}}" }}
 */ -}}
 {{- define "apps-kargo.stage" -}}
 {{- $root := .root -}}
-{{- $repo := $root.Values.mainRepo -}}
+{{- $mainRepo := $root.Values.mainRepo -}}
+{{- $repo := .repo | default $mainRepo -}}
 {{- /*
-  Where this Stage's render (the Applications/AppProjects/Stages/Warehouse
-  themselves) lands. Same as $repo unless renderedRepo overrides it -- see
-  gitops-values.yaml. $repo stays mainRepo regardless: it is still where the
-  source (04_apps_generator, 05_apps, 02_bootstrap) is cloned from and what
-  provenance is computed against.
+  Path content is cloned into, when its repo differs from mainRepo -- the
+  generator chart itself always lives in mainRepo, so ./src is reserved for
+  fetching that.
 */ -}}
-{{- $renderedRepo := $root.Values.renderedRepo | default $root.Values.mainRepo -}}
+{{- $contentRepo := ternary "./src-content" "./src" (ne $repo $mainRepo) -}}
+{{- /*
+  .repo wins unconditionally over renderedRepo's override, so a private
+  Stage's output can't land on mainRepo's scratch-test repo.
+*/ -}}
+{{- $renderedRepo := .repo | default ($root.Values.renderedRepo | default $mainRepo) -}}
 {{- $generator := $root.Values.generatorRoot | trimSuffix "/" -}}
 {{- $alias := include "kargo.expr" "ctx.targetFreight.alias" -}}
 {{- $freight := include "kargo.expr" "ctx.targetFreight.name" -}}
@@ -135,7 +142,7 @@ spec:
   requestedFreight:
     - origin:
         kind: Warehouse
-        name: sources
+        name: {{ .warehouseName | default "sources" }}
       sources:
         # No gating between these Stages. They render structure -- an app added,
         # a setting changed -- and gating prod's structure behind test would mean
@@ -146,10 +153,18 @@ spec:
       steps:
         - uses: git-clone
           config:
+            repoURL: {{ $mainRepo }}
+            checkout:
+              - commit: '{{ include "kargo.expr" (printf "commitFrom(%q).ID" $mainRepo) }}'
+                path: ./src
+        {{- if ne $repo $mainRepo }}
+        - uses: git-clone
+          config:
             repoURL: {{ $repo }}
             checkout:
               - commit: '{{ $srcCommit }}'
-                path: ./src
+                path: {{ $contentRepo }}
+        {{- end }}
         {{- /*
           A second clone rather than a second checkout entry above: checkout
           entries within one git-clone share that step's repoURL, and
@@ -188,7 +203,7 @@ spec:
         */}}
         - uses: copy
           config:
-            inPath: ./src/{{ $pass.appRoot | trimSuffix "/" }}
+            inPath: {{ $contentRepo }}/{{ $pass.appRoot | trimSuffix "/" }}
             outPath: ./src/{{ $generator }}/{{ $pass.appsDir }}
         - uses: helm-template
           config:
@@ -224,11 +239,21 @@ spec:
             # Where the copy step above put this pass's app tree, and which
             # root it copied from. Last word, so they win over the
             # generator's own default / gitops-values.yaml's appRoot.
+            {{- /*
+              mainRepo/renderedRepo: redundant for public passes (same
+              values gitops-values.yaml already supplies); for a private
+              pass this is what points every per-app object at
+              gitops-private instead.
+            */}}
             setValues:
               - key: appsDir
                 value: {{ $pass.appsDir }}
               - key: appRoot
                 value: {{ $pass.appRoot }}
+              - key: mainRepo
+                value: {{ $repo }}
+              - key: renderedRepo
+                value: {{ $renderedRepo }}
             buildDependencies: false
             skipTests: true
         {{- end }}
