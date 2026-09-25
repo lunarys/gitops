@@ -1,9 +1,6 @@
 {{- /*
-  The previous version enumerated every Helm repository any app in the project
-  pulled from, so Argo's source allowlist would permit them. After pre-rendering
-  an Application only ever reads the gitops repo, so that loop is gone and the
-  AppProject's remaining job is namespace restriction -- which is the part that
-  was actually load-bearing.
+  An Application only ever reads the gitops repo after pre-rendering, so the
+  AppProject's remaining job is namespace restriction.
 */ -}}
 {{- define "apps-generator.project" -}}
 apiVersion: argoproj.io/v1alpha1

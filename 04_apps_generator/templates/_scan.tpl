@@ -16,17 +16,9 @@
       test: [bitwarden, ...]
       prod: [bitwarden, ...]
 
-  Two things keep this small compared to what it replaced:
-
-  1. One format, one app per directory. Every app is a Helm chart, so detection
-     is a single glob. The old scanner had to handle app.yaml, Chart.yaml,
-     <prefix>-app.yaml and Chart-<file>.yaml, and group several apps per
-     directory.
-
-  2. No file contents. No emitter reads a values or resource file -- they need
-     only name, dir, settings and the values file NAMES. Collecting parsed file
-     bodies existed to feed Argo's multi-source Application, which pre-rendering
-     deleted.
+  One format, one app per directory: every app is a Helm chart, so detection
+  is a single glob. No emitter reads a values or resource file -- they need
+  only name, dir, settings and the values file NAMES.
 
   The enabled lists are read as FILES, not as Helm values. They stay two
   separate files that way, and one render can see both -- which the kargo

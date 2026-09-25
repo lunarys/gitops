@@ -1,14 +1,8 @@
 {{- /*
-  The previous version was 122 lines, 82 of them a multi-source block: one
-  source per chart, one for the shared externalsecrets chart, one for
-  networkpolicy, a ref-only source so those could reach value files, one for the
-  private repo, and one each for resources/ and resources-<env>/ -- every one
-  conditional on which files the app happened to have.
-
-  Pre-rendering deletes all of it. There is exactly one source: a directory of
-  plain manifests on a stage branch. Nothing here varies with the app's chart or
-  its version, so the Application resource stops changing when the app changes,
-  which is what removes the wrapper-before-app sync ordering problem.
+  Exactly one source: a directory of plain manifests on a stage branch.
+  Nothing here varies with the app's chart or its version, so the
+  Application resource stops changing when the app changes -- which is what
+  removes the wrapper-before-app sync ordering problem.
 */ -}}
 {{- define "apps-generator.application" -}}
 apiVersion: argoproj.io/v1alpha1
