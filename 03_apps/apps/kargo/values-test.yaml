@@ -28,6 +28,8 @@ kargo:
     kubeconfigSecrets:
       # values-secrets-test.part.yaml
       kargo: kargo-prod-kubeconfig
+    rollouts:
+      integrationEnabled: false  # TODO: disables the check for argo-rollouts, which is currently not covered by the access token to the prod cluster
 
 
 
