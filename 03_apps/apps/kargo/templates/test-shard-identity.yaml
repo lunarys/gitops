@@ -23,6 +23,12 @@ kind: ServiceAccount
 metadata:
   name: {{ $name }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    # The management controller grants Secret read in every Project namespace
+    # to ServiceAccounts with this label. Needed even though every credential
+    # lives in the shared-resources namespace: Kargo looks in the Project
+    # namespace first and aborts on a 403 instead of falling through.
+    app.kubernetes.io/component: controller
 ---
 # Long-lived token, read by mint-test-kubeconfig.sh.
 apiVersion: v1
