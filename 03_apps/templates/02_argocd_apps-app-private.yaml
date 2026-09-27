@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-apps-private
+  name: app-of-apps-private
 spec:
   destination:
     namespace: {{ .Values.namespace }}
