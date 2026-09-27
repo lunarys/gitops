@@ -1,4 +1,4 @@
-targetRevision: main
+targetRevision: legacy
 #targetValuesFile: values-test.yaml
 #targetSecretsFile: secrets-test.yaml
 #targetResourcesDir: resources-test
