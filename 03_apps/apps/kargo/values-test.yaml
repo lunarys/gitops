@@ -1,0 +1,71 @@
+# Controller only, for the test shard. It reconciles Kargo resources in the
+# prod control plane through a kubeconfig, and Argo CD in this cluster through
+# its own ServiceAccount.
+
+kargo:
+  api:
+    enabled: false
+  managementController:
+    enabled: false
+  garbageCollector:
+    enabled: false
+  webhooksServer:
+    enabled: false
+  externalWebhooksServer:
+    enabled: false
+
+  # The Kargo data plane (CRDs, its RBAC, webhook registrations, shared
+  # namespaces) lives in prod. Argo CD's data plane is governed separately
+  # (argocd.dataPlane) and stays on: that's the local Application access.
+  dataPlane:
+    install: false
+    controller:
+      install: false
+
+  controller:
+    shardName: test
+    isDefault: false
+    kubeconfigSecrets:
+      # values-secrets-test.part.yaml
+      kargo: kargo-prod-kubeconfig
+
+
+
+
+externalsecrets:
+  secrets:
+    # Minted by mint-test-kubeconfig.sh. The key name is Kargo's: the chart
+    # mounts exactly kubeconfig.yaml from this Secret.
+    kargo-prod-kubeconfig:
+      commonRemoteKey: "00000000-0000-0000-0000-000000000000"  # TODO: placeholder, Bitwarden item not created yet
+      fields:
+        kubeconfig.yaml:
+          storeRefName: bitwarden-notes
+
+
+
+
+networkpolicy:
+  preset:
+    ingress:
+      # Chart default is true; nothing here serves traffic.
+      fromIngressController: false
+
+    egress:
+      # Replaces the common rules list (Helm doesn't merge lists), so the HTTPS
+      # rule from values-network.part.yaml is repeated here.
+      rules:
+        - toFQDNs:
+            - matchPattern: "*"
+          toPorts:
+            - ports:
+                - port: "443"
+                  protocol: TCP
+        # The prod control plane's API, reached through the kubeconfig -- must
+        # match the server in mint-test-kubeconfig.sh.
+        - toCIDR:
+            - 10.0.1.40/32  # TODO: placeholder, no prod API VIP yet
+          toPorts:
+            - ports:
+                - port: "6443"
+                  protocol: TCP

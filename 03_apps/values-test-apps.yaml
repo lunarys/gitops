@@ -16,3 +16,5 @@ enabled:
   - hello-world
   - hello-world-simple
   - demo-podinfo
+
+  - kargo

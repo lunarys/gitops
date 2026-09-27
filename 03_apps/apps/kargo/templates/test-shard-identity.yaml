@@ -1,0 +1,83 @@
+{{- /*
+  The identity the test cluster's controller authenticates as. It binds only
+  roles the Kargo chart already creates for its own controller.
+
+  Deliberately left out, for now:
+  - Per-Project Secret read: the management controller grants it only to
+    ServiceAccounts labelled app.kubernetes.io/component=controller, which
+    this one intentionally isn't. Fine while every credential lives in the
+    shared-resources namespace.
+  - Control-plane recognition: the webhook server only treats usernames
+    matching its CONTROLPLANE_USER_REGEX as control plane, so auto-promotions
+    from the test shard are recorded as if this ServiceAccount created them by
+    hand.
+*/ -}}
+{{- if .Values.testShardIdentity.enabled }}
+{{- $name := "kargo-controller-test" }}
+{{- $global := .Values.kargo.global | default dict }}
+{{- $sharedNs := dig "sharedResources" "namespace" "kargo-shared-resources" $global }}
+{{- $systemNs := dig "systemResources" "namespace" "kargo-system-resources" $global }}
+{{- $clusterSecretsNs := dig "clusterSecretsNamespace" "kargo-cluster-secrets" $global }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+---
+# Long-lived token, read by mint-test-kubeconfig.sh.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $name }}-token
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    kubernetes.io/service-account.name: {{ $name }}
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ $name }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kargo-controller
+subjects:
+  - kind: ServiceAccount
+    name: {{ $name }}
+    namespace: {{ .Release.Namespace }}
+---
+# The shard's heartbeat Lease, which the UI reads for controller liveness.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kargo-controller
+subjects:
+  - kind: ServiceAccount
+    name: {{ $name }}
+    namespace: {{ .Release.Namespace }}
+{{- range $role := list
+      (list $sharedNs "kargo-shared-resources-controller-reader")
+      (list $systemNs "kargo-system-resources-reader")
+      (list $clusterSecretsNs "kargo-cluster-secrets-reader") }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $name }}-{{ index $role 1 | trimPrefix "kargo-" }}
+  namespace: {{ index $role 0 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ index $role 1 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ $name }}
+    namespace: {{ $.Release.Namespace }}
+{{- end }}
+{{- end }}

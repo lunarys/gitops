@@ -1,0 +1,26 @@
+# Prod runs the control plane, test only a controller for its shard -- two
+# different releases rather than one tuned per environment, so nearly
+# everything lives in values-prod.yaml / values-test.yaml.
+
+testShardIdentity:
+  enabled: false
+
+
+networkpolicy:
+  preset:
+    namespaceIsolation: true
+
+    egress:
+      # This cluster's API: Argo CD Applications during argocd-update, and in
+      # prod the Kargo resources themselves.
+      toKubeApi: true
+
+      # No host list, deliberately.
+      rules:
+        - toFQDNs:
+            - matchPattern: "*"
+          toPorts:
+            - ports:
+                - port: "443"
+                  protocol: TCP
+

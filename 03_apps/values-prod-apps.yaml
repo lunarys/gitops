@@ -23,5 +23,7 @@ enabled:
   - mosquitto
   - n8n
 
+  - kargo
+
   - jellyfin
   - heimdall
