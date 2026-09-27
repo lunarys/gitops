@@ -37,7 +37,7 @@ externalsecrets:
     # Minted by mint-test-kubeconfig.sh. The key name is Kargo's: the chart
     # mounts exactly kubeconfig.yaml from this Secret.
     kargo-prod-kubeconfig:
-      commonRemoteKey: "00000000-0000-0000-0000-000000000000"  # TODO: placeholder, Bitwarden item not created yet
+      commonRemoteKey: "a788ae4c-9ff9-401f-86bc-b4d201142b35"
       fields:
         kubeconfig.yaml:
           storeRefName: bitwarden-notes
