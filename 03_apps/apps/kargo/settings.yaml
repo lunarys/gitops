@@ -1,5 +1,4 @@
-settings:
-  additionalNamespaces:
-    - kargo-system-resources
-    - kargo-shared-resources
-    - kargo-cluster-secrets
+additionalNamespaces:
+  - kargo-system-resources
+  - kargo-shared-resources
+  - kargo-cluster-secrets
