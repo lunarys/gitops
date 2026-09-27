@@ -10,7 +10,7 @@ mainHelmRepo: oci://ghcr.io/lunarys/charts
 wrapperHelmRepo: oci://ghcr.io/lunarys
 
 # -- The revision of the `mainRepo` to use.
-targetRevision: main
+targetRevision: legacy
 
 # - The helm chart within the `mainHelmRepo` that is used to render secrets.
 secretsChart: "externalsecrets"
