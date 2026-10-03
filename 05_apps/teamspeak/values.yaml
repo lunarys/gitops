@@ -9,10 +9,8 @@ teamspeak:
   service:
     port: 9987
     targetPort: 9987
-    nodePort: 31239
     protocol: UDP
-    type: LoadBalancer  # dynamic IP from the default LB pool (no fixed address needed)
-    allocateLoadBalancerNodePorts: true
+    #type: LoadBalancer  # dynamic IP from the default LB pool (no fixed address needed)
 
   services:
     admin:
@@ -27,6 +25,10 @@ teamspeak:
       ingress:
         fromWorld: true
         fromNamespace: "nodered"
+        fromNetworkLabels:
+          - label: custom.network/external-access
+            ports:
+              - 9987
       egress:
         toFQDNs:
           # revocation list download, TODO: just port 443 would be sufficient

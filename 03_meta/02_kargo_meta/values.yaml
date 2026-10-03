@@ -2,10 +2,10 @@
 #
 # Everything else -- the repo URL, the branch and path conventions, the Project
 # name, the shard map -- is repository-wide and lives in gitops-values.yaml at
-# the repository root, because 03_apps_bootstrap and 04_apps_generator need the
+# the repository root, because 03_meta/01_app_of_apps and 04_apps_generator need the
 # same values and duplicating them is how they drift. Every render must pass it:
 #
-#   helm template kargo-apps-generator 06_apps_kargo -f gitops-values.yaml
+#   helm template kargo-apps-generator 03_meta/02_kargo_meta -f gitops-values.yaml
 #
 # Unlike the generator, this chart is rendered ONCE and is not per-environment:
 # it emits one Stage per environment from a single render, because the Kargo

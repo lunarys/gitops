@@ -1,7 +1,7 @@
 # Repository-wide facts and conventions.
 #
-# Read by every chart that needs them -- 03_apps_bootstrap, 04_apps_generator
-# and 06_apps_kargo -- and always passed with `-f`, never read via .Files. It
+# Read by every chart that needs them -- 03_meta/01_app_of_apps, 04_apps_generator
+# and 03_meta/02_kargo_meta -- and always passed with `-f`, never read via .Files. It
 # therefore lives at the repository root, outside every chart, and is
 # referenced by path: from the worktree locally, or from a promotion's clone
 # as ./src/gitops-values.yaml.
@@ -69,10 +69,10 @@ promotionBranchPrefix: kargo/promotion/
 # tree is copied into the generator chart before every render. Kargo filters
 # Freight by repository path, so Warehouse includePaths must describe this one.
 # The assembled location is `appsDir`, and it belongs to whoever assembles it
-# -- 06_apps_kargo and render.sh -- not here.
+# -- 03_meta/02_kargo_meta and render.sh -- not here.
 appRoot: 05_apps
 
-# -- Path of the generator chart within mainRepo. 06_apps_kargo renders it and
+# -- Path of the generator chart within mainRepo. 03_meta/02_kargo_meta renders it and
 # copies the app tree into it.
 generatorRoot: 04_apps_generator
 
@@ -152,7 +152,7 @@ kargo:
   projectPrefix: kargo-app-
 
   # -- The Kargo Project that renders the generator's output, defined by
-  # 06_apps_kargo. Named after the chart it runs (04_apps_generator, chart name
+  # 03_meta/02_kargo_meta. Named after the chart it runs (04_apps_generator, chart name
   # apps-generator) rather than after what it produces.
   #
   # Also a namespace: a Kargo Project is cluster-scoped and owns a namespace of

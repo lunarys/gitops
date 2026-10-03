@@ -9,7 +9,7 @@
 # helm-template. Nothing is written to the repository.
 #
 # Repository-wide values come from ../gitops-values.yaml, shared with
-# 03_apps_bootstrap and 06_apps_kargo.
+# 03_meta/01_app_of_apps and 03_meta/02_kargo_meta.
 #
 # Usage: ./render.sh [out-dir]      (default: ./.render, gitignored)
 
@@ -20,7 +20,7 @@ REPO_ROOT="$(cd "$CHART_DIR/.." && pwd)"
 APPS_DIR="$REPO_ROOT/05_apps"
 SHARED_VALUES="$REPO_ROOT/gitops-values.yaml"
 # Where the app tree is assembled inside the chart, declared once: it is both
-# copied there and passed to the render, the same pairing 06_apps_kargo's copy
+# copied there and passed to the render, the same pairing 03_meta/02_kargo_meta's copy
 # and helm-template steps perform.
 APPS_SUBDIR="apps"
 OUT="${1:-$CHART_DIR/.render}"
@@ -29,7 +29,7 @@ WS="$(mktemp -d)"
 trap 'rm -rf "$WS"' EXIT
 
 cp -r "$CHART_DIR" "$WS/chart"
-rm -rf "$WS/chart/.render" "$WS/chart/templates_old"
+rm -rf "$WS/chart/.render"
 cp -r "$APPS_DIR" "$WS/chart/$APPS_SUBDIR"
 
 mkdir -p "$OUT"

@@ -125,4 +125,4 @@ echo
 echo "Next steps:"
 echo "1. Verify all components are running: kubectl get pods -A"
 echo "2. Check ArgoCD status: kubectl get pods -n argocd"
-echo "3. Deploy applications: cd ../03_apps && helm install ..."
+echo "3. Hand over to Argo CD and Kargo: apply the charts in ../03_meta (see ../03_meta/README.md)"

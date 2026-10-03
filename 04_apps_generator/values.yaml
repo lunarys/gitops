@@ -5,7 +5,7 @@
 #
 # Repository-wide facts -- mainRepo, branch names, path conventions, the Argo
 # and Kargo topology -- are NOT here. They live in gitops-values.yaml at the
-# repository root, because 03_apps_bootstrap and 06_apps_kargo need the same
+# repository root, because 03_meta/01_app_of_apps and 03_meta/02_kargo_meta need the same
 # values and duplicating them is how they drift. Every render must pass it:
 #
 #   helm template meta 04_apps_generator -f gitops-values.yaml -f values-<mode>.yaml
@@ -31,7 +31,7 @@ mode: ""
 # -- Directory inside this chart the app tree is read from.
 #
 # Helm's .Files cannot look outside the chart, so the tree (05_apps on disk) is
-# copied in before every render -- by 06_apps_kargo's copy step in a promotion,
+# copied in before every render -- by 03_meta/02_kargo_meta's copy step in a promotion,
 # by render.sh locally. Both pass this key with --set as they do it, so the
 # name of the directory is declared once, by whoever creates it.
 #

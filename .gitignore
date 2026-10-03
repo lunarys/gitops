@@ -4,3 +4,6 @@ charts/
 
 # local render output from 04_apps_generator/render.sh
 .render/
+
+__pycache__/
+*.pyc
