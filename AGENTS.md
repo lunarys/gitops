@@ -202,8 +202,8 @@ Files can have environment suffixes:
 ## Overlays
 
 > **Known gap:** the Argo/Kargo generator (`04_apps_generator`) does not generate the
-> `traefik-external` overlay yet, and the overlay tooling below (`install.sh`, PR diff,
-> `check-argo-coverage.py`) still assumes the pre-Kargo `app.yaml`/wrapper layout. Treat this
+> `traefik-external` overlay yet, and the overlay tooling below (`install.sh`, PR diff)
+> still assumes the pre-Kargo `app.yaml`/wrapper layout. Treat this
 > section as describing the intended contract until that is reconciled.
 
 An **overlay** is a subdirectory of an app directory that declares a *second release of
@@ -239,11 +239,8 @@ Deploy or render an overlay with:
 scripts/install.sh -d 02_bootstrap/03_traefik --overlay external --env prod --template
 ```
 
-`scripts/check-argo-coverage.py` (run by the PR diff workflow) gates the contract: every
-declared overlay must be deployed by an Application of the declared name with matching
-namespace and value files, and every Application that layers values from a subdirectory
-must have a marker. That second direction catches a forgotten `.overlay.yaml` — the
-failure mode a hidden marker makes more likely.
+There is currently no automated check that declared overlays match a deployed Application
+(the former `check-argo-coverage.py` depended on the removed apps-wrapper chart).
 
 > **One overlay exists in this repo** (`02_bootstrap/03_traefik/external` →
 > `traefik-external`). The feature is deliberately minimal; if a second one appears,
