@@ -2,16 +2,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: crowdsec-project
+  name: kargo-project
   namespace: argocd
 spec:
-  description: Project for application crowdsec
+  description: Project for application kargo
   sourceRepos:
     # The Application's actual source (_argo_application.tpl), which is
     # mainRepo unless renderedRepo overrides it.
     - https://github.com/lunarys/gitops.git
   destinations:
-    - namespace: crowdsec
+    - namespace: kargo
+      server: https://kubernetes.default.svc
+    - namespace: kargo-system-resources
+      server: https://kubernetes.default.svc
+    - namespace: kargo-shared-resources
+      server: https://kubernetes.default.svc
+    - namespace: kargo-cluster-secrets
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: '*'
