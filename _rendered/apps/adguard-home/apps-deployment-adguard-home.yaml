@@ -1,0 +1,104 @@
+# Source: adguard-home/charts/adguard-home/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    helm.sh/chart: adguard-home-4.6.0
+    
+    custom.network/homeassistant-integrated: ingress
+    custom.network/heimdall-integrated: ingress
+    app.kubernetes.io/name: adguard-home
+    app.kubernetes.io/instance: adguard-home
+    app.kubernetes.io/version: "v0.107.78"
+    app.kubernetes.io/managed-by: Helm
+  name: adguard-home
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: adguard-home
+      app.kubernetes.io/instance: adguard-home
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        
+        prometheus.io/scrape: 'false'
+      labels:
+        
+        custom.network/homeassistant-integrated: ingress
+        custom.network/heimdall-integrated: ingress
+        app.kubernetes.io/name: adguard-home
+        app.kubernetes.io/instance: adguard-home
+    spec:
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: adguard-home
+          image: adguard/adguardhome:v0.107.78
+          imagePullPolicy: IfNotPresent
+          resources:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - CAP_NET_RAW
+              - CAP_SYS_ADMIN
+            privileged: false
+            readOnlyRootFilesystem: false
+          #readiness & liveness
+          livenessProbe:
+            httpGet:
+              path: /login.html
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /login.html
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          ports:
+            - containerPort: 3000
+              name: default
+              protocol: TCP
+            - containerPort: 8053
+              name: dns-tcp
+              protocol: TCP
+            - containerPort: 8053
+              name: dns-udp
+              protocol: UDP
+          #config values that comes from the configmap 
+          envFrom:
+          env:
+            # settings from 'env'
+            - name: "TZ"
+              value: "Europe/Berlin"
+          volumeMounts:
+            
+            
+            - name: longhorn-confdir
+              mountPath: /opt/adguardhome/conf
+              readOnly: false
+            - name: longhorn-workdir
+              mountPath: /opt/adguardhome/work
+              readOnly: false
+      volumes:
+        
+        
+        - name: longhorn-confdir
+          persistentVolumeClaim:
+            claimName: adguard-home-confdir-pvc
+        - name: longhorn-workdir
+          persistentVolumeClaim:
+            claimName: adguard-home-workdir-pvc

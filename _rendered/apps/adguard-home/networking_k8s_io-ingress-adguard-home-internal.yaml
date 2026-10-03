@@ -1,0 +1,25 @@
+# Source: adguard-home/charts/adguard-home/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: adguard-home-internal
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-https-redirect@kubernetescrd"
+    cert-manager.io/cluster-issuer: "step-ca-internal"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - adguard.svc.elda
+      secretName: adguard-home-internal-cert
+  rules:
+    - host: adguard.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: adguard-home
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix

@@ -1,0 +1,12 @@
+# Source: adguard-home/charts/adguard-home/charts/longhornstorage/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: adguard-home-workdir-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 1Gi

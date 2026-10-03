@@ -1,0 +1,24 @@
+# Source: adguard-home/charts/adguard-home/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: adguard-home
+  labels:
+    helm.sh/chart: adguard-home-4.6.0
+    
+    custom.network/homeassistant-integrated: ingress
+    custom.network/heimdall-integrated: ingress
+    app.kubernetes.io/name: adguard-home
+    app.kubernetes.io/instance: adguard-home
+    app.kubernetes.io/version: "v0.107.78"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: default-service-endpoint
+      protocol: TCP
+      port: 80
+      targetPort: 3000
+  selector:
+    app.kubernetes.io/name: adguard-home
+    app.kubernetes.io/instance: adguard-home
