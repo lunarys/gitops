@@ -5,7 +5,7 @@ version: 0.1.0
 
 dependencies:
   - name: local-path-provisioner
-    version: 0.0.36
+    version: 0.0.37
     repository: oci://ghcr.io/rancher/local-path-provisioner/charts
 
   - name: networkpolicy
