@@ -28,7 +28,7 @@ mainRepo: https://github.com/lunarys/gitops.git
 #
 # Ignored by the private Stages (see apps-kargo.stage): testing the private
 # flow writes to the real gitops-private repo, not a scratch one.
-renderedRepo: "https://github.com/lunarys/kargo-test.git"
+renderedRepo: ""
 
 # -- Whether a promotion's argocd-update step runs after rendering,
 # committing, pushing and opening/waiting on its PR.
@@ -46,7 +46,7 @@ argoSyncEnabled: false
 # Shared between mainRepo and gitops-private (sources-private subscribes to
 # this same name in gitops-private). That means gitops-private needs a branch of
 # this same name before its Warehouse can discover anything.
-sourceBranch: feat/kargo  # TODO: testing
+sourceBranch: main
 
 # -- Branch prefix the rendered manifests are committed to (stage/test, stage/prod).
 renderedBranchPrefix: stage/
