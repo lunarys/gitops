@@ -5,13 +5,13 @@ metadata:
   name: argocd-applicationset-controller
   namespace: argocd
   labels:
-    helm.sh/chart: argo-cd-10.2.1
+    helm.sh/chart: argo-cd-10.9.6
     app.kubernetes.io/name: argocd-applicationset-controller
     app.kubernetes.io/instance: argocd
     app.kubernetes.io/component: applicationset-controller
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: "v3.4.5"
+    app.kubernetes.io/version: "v3.5.3"
 spec:
   replicas: 1
   revisionHistoryLimit: 3
@@ -22,22 +22,22 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 5e7fa38d0dd595c60fe67743e25711dcb2b8c157ba6f8d487600547524386321
+        checksum/cmd-params: 3ba60854280504915a978703de6a06ec31e5104e5659f51a575fe39b8d98f74a
       labels:
-        helm.sh/chart: argo-cd-10.2.1
+        helm.sh/chart: argo-cd-10.9.6
         app.kubernetes.io/name: argocd-applicationset-controller
         app.kubernetes.io/instance: argocd
         app.kubernetes.io/component: applicationset-controller
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: "v3.4.5"
+        app.kubernetes.io/version: "v3.5.3"
     spec:
       terminationGracePeriodSeconds: 30
       serviceAccountName: argocd-applicationset-controller
       automountServiceAccountToken: true
       containers:
         - name: applicationset-controller
-          image: quay.io/argoproj/argocd:v3.4.5
+          image: quay.io/argoproj/argocd:v3.5.3
           imagePullPolicy: IfNotPresent
           args:
             - /usr/local/bin/argocd-applicationset-controller
@@ -49,6 +49,12 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: GRPC_ENABLE_TXT_SERVICE_CONFIG
+              valueFrom:
+                configMapKeyRef:
+                  key: applicationsetcontroller.grpc.enable.txt.service.config
+                  name: argocd-cmd-params-cm
+                  optional: true
             - name: ARGOCD_APPLICATIONSET_CONTROLLER_GLOBAL_PRESERVED_ANNOTATIONS
               valueFrom:
                 configMapKeyRef:
@@ -265,6 +271,7 @@ spec:
         - name: tls-certs
           configMap:
             name: argocd-tls-certs-cm
+            optional: true
         - name: gpg-keys
           configMap:
             name: argocd-gpg-keys-cm
