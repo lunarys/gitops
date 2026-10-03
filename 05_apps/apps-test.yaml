@@ -1,5 +1,6 @@
 # -- Only apps listed here will be rendered.
 enabled:
+  - kargo
   - bitwarden
   - local-path-provisioner
   - longhorn
