@@ -1,7 +1,8 @@
 {{- /*
   Narrowly scoped for self-managing 02_kargo_meta specifically: that chart
   creates a cluster-scoped Namespace + kargo.akuity.io/Project directly
-  (kargo-apps-generator itself), and its externalsecrets dependency writes
+  (kargo-apps-generator itself) plus the cluster-scoped ClusterPromotionTask
+  every per-app Stage calls, and its externalsecrets dependency writes
   the shared git credential into kargo-shared-resources -- see
   02_kargo_meta/values.yaml's externalsecrets.secrets.gitops-repo.
 */ -}}
@@ -25,6 +26,8 @@ spec:
       kind: Namespace
     - group: kargo.akuity.io
       kind: Project
+    - group: kargo.akuity.io
+      kind: ClusterPromotionTask
   orphanedResources:
     warn: false
 {{- end }}
