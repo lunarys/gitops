@@ -1,0 +1,33 @@
+# PLEASE NOTE: These issuers are dummy issuers to replace let's encrypt
+#  for my internal testing environment that is not exposed to the internet.
+#  The names are kept the same as the real issuers in production to avoid having to change.
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    server: https://step-ca.svc.elda/acme/elda/directory
+    caBundle: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUI2RENDQVcrZ0F3SUJBZ0lRYzZaVDk4WlJNdUVJVk02ZzJRczY3ekFLQmdncWhrak9QUVFEQXpBak1TRXcKSHdZRFZRUURFeGh6ZEdWd0xXTmhMbk4yWXk1bGJHUmhJRkp2YjNRZ1EwRXdIaGNOTWpZd016QTRNVEV3T0RRNQpXaGNOTXpZd016QTFNVEV3T0RRNVdqQWpNU0V3SHdZRFZRUURFeGh6ZEdWd0xXTmhMbk4yWXk1bGJHUmhJRkp2CmIzUWdRMEV3ZGpBUUJnY3Foa2pPUFFJQkJnVXJnUVFBSWdOaUFBUU1vdWVrV2FnMlFOZll4WGZlUmRiOEJUSkQKaFRFRVJIazdCc1UybEpoUjhhYlJtYXYvUFR2MW96OEk2YkhTbkE4U1ROMHVGTnQ2dkwxRmtHNXo1ZVE4eHY1SQowMzZmR2JnUkdKUmdUdGp2dkFEbkxwN25WNGx5S2tIL2x3SGI1MGlqYURCbU1BNEdBMVVkRHdFQi93UUVBd0lCCkJqQVNCZ05WSFJNQkFmOEVDREFHQVFIL0FnRUJNQjBHQTFVZERnUVdCQlRpQW1vQXJEUzhLTEViVXIyOElHTVYKSmZ2cEFUQWhCZ05WSFI0QkFmOEVGekFWb0JNd0I0SUZMbVZzWkdFd0NJSUdMbXh2WTJGc01Bb0dDQ3FHU000OQpCQU1EQTJjQU1HUUNNQUpVMHpYUFFtdXZvY0d3TXMzSUlSdDhsQjBaRmYrcFVMbmZKaDg3Z2lyWEswS0RDc1U4Cjd1dktNN3hWdTFLRHZnSXdMMUpOUFRrelg2T0I4Z2J5YUtVd1Q2ck9aSStNQUcxd0N4WmtMcGNsd3FUTFZSTUQKZnpWTlJpRzJIbkdKS2NFMQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+    privateKeySecretRef:
+      name: step-ca-acme-account-key-letsencrypt-dummy-staging
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: traefik
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://step-ca.svc.elda/acme/elda/directory
+    caBundle: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUI2RENDQVcrZ0F3SUJBZ0lRYzZaVDk4WlJNdUVJVk02ZzJRczY3ekFLQmdncWhrak9QUVFEQXpBak1TRXcKSHdZRFZRUURFeGh6ZEdWd0xXTmhMbk4yWXk1bGJHUmhJRkp2YjNRZ1EwRXdIaGNOTWpZd016QTRNVEV3T0RRNQpXaGNOTXpZd016QTFNVEV3T0RRNVdqQWpNU0V3SHdZRFZRUURFeGh6ZEdWd0xXTmhMbk4yWXk1bGJHUmhJRkp2CmIzUWdRMEV3ZGpBUUJnY3Foa2pPUFFJQkJnVXJnUVFBSWdOaUFBUU1vdWVrV2FnMlFOZll4WGZlUmRiOEJUSkQKaFRFRVJIazdCc1UybEpoUjhhYlJtYXYvUFR2MW96OEk2YkhTbkE4U1ROMHVGTnQ2dkwxRmtHNXo1ZVE4eHY1SQowMzZmR2JnUkdKUmdUdGp2dkFEbkxwN25WNGx5S2tIL2x3SGI1MGlqYURCbU1BNEdBMVVkRHdFQi93UUVBd0lCCkJqQVNCZ05WSFJNQkFmOEVDREFHQVFIL0FnRUJNQjBHQTFVZERnUVdCQlRpQW1vQXJEUzhLTEViVXIyOElHTVYKSmZ2cEFUQWhCZ05WSFI0QkFmOEVGekFWb0JNd0I0SUZMbVZzWkdFd0NJSUdMbXh2WTJGc01Bb0dDQ3FHU000OQpCQU1EQTJjQU1HUUNNQUpVMHpYUFFtdXZvY0d3TXMzSUlSdDhsQjBaRmYrcFVMbmZKaDg3Z2lyWEswS0RDc1U4Cjd1dktNN3hWdTFLRHZnSXdMMUpOUFRrelg2T0I4Z2J5YUtVd1Q2ck9aSStNQUcxd0N4WmtMcGNsd3FUTFZSTUQKZnpWTlJpRzJIbkdKS2NFMQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="
+    privateKeySecretRef:
+      name: step-ca-acme-account-key-letsencrypt-dummy-prod
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: traefik
