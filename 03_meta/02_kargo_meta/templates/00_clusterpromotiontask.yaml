@@ -22,13 +22,15 @@
       one side alone;
     - the `commit` output, which the caller pins its argocd-update to.
 
+  The `valuesFiles` var arrives as a JSON-encoded string (the Stage CRD
+  rejects a list-valued var) and is coerced back into a list by expression
+  evaluation -- checked against Kargo's source, see the caller.
+
   UNVERIFIED, in the order they will break (lab is down):
-    1. that a list-valued var populates a list-typed config field
-       (`valuesFiles`) -- also flagged at the caller;
-    2. that `status()` inside a task takes the plain step alias, given that
+    1. that `status()` inside a task takes the plain step alias, given that
        outputs require `task.outputs[...]` because aliases are namespaced after
        inflation;
-    3. that `kind: ClusterPromotionTask` is accepted on the task reference.
+    2. that `kind: ClusterPromotionTask` is accepted on the task reference.
 */ -}}
 {{- $app := include "kargo.expr" "vars.app" -}}
 {{- $env := include "kargo.expr" "vars.env" -}}
