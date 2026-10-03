@@ -124,6 +124,13 @@ spec:
               value: {{ not (dig "skipCrds" true $app.settings) | quote }}
             - name: openPR
               value: {{ include "apps-generator.openPR" . | quote }}
+            # Whether resources/ and resources-<env>/ exist, so the task's copy
+            # steps run only for directories that are there -- Kargo's copy
+            # step errors on a missing source rather than skipping it.
+            - name: copyResources
+              value: {{ has "resources" ($app.resourceDirs | default (list)) | quote }}
+            - name: copyEnvResources
+              value: {{ has (printf "resources-%s" $env) ($app.resourceDirs | default (list)) | quote }}
         # Both environments sync and report health.
         #
         # Omitting this would be strictly worse than including it: the Stage

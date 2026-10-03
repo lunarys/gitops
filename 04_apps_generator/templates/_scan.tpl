@@ -12,13 +12,15 @@
           base: [values.yaml, values-network.part.yaml]
           test: [values-test.yaml, values-secrets-test.part.yaml]
           prod: [values-prod.yaml]
+        resourceDirs: [resources, resources-prod]   # those that exist and hold files
     enabled:
       test: [bitwarden, ...]
       prod: [bitwarden, ...]
 
   One format, one app per directory: every app is a Helm chart, so detection
   is a single glob. No emitter reads a values or resource file -- they need
-  only name, dir, settings and the values file NAMES.
+  only name, dir, settings, the values file NAMES and which resource
+  directories exist.
 
   The enabled lists are read as FILES, not as Helm values. They stay two
   separate files that way, and one render can see both -- which the kargo
@@ -38,7 +40,19 @@
     {{- $settings = mergeOverwrite (dict) (deepCopy $root.Values.defaultSettings) (. | fromYaml) -}}
   {{- end }}
   {{- $valuesFiles := include "apps-generator.valuesFiles" (dict "root" $root "dir" $dir "envs" $envs) | fromYaml -}}
-  {{- $_ := set $apps $dir (dict "name" (dig "applicationName" $dir $settings) "dir" $dir "settings" $settings "valuesFiles" $valuesFiles) -}}
+  {{- /*
+    resources/ and resources-<env>/: raw manifests, copied verbatim into the
+    render by the promotion task -- never templated. Only listed when they hold
+    at least one file: the task's copy step fails on a missing source, so the
+    Stage has to know rather than the task finding out.
+  */ -}}
+  {{- $resourceDirs := list -}}
+  {{- range $rd := list "resources" "resources-test" "resources-prod" }}
+    {{- if $root.Files.Glob (printf "%s/%s/%s/**" $appsDir $dir $rd) -}}
+      {{- $resourceDirs = append $resourceDirs $rd -}}
+    {{- end -}}
+  {{- end }}
+  {{- $_ := set $apps $dir (dict "name" (dig "applicationName" $dir $settings) "dir" $dir "settings" $settings "valuesFiles" $valuesFiles "resourceDirs" $resourceDirs) -}}
 {{- end }}
 {{- $enabled := dict -}}
 {{- range $env := $envs }}

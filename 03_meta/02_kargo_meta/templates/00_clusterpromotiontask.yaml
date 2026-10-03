@@ -55,6 +55,8 @@
 {{- $includeCRDs := include "kargo.expr" `vars.includeCRDs == "true"` -}}
 {{- $wantPR := include "kargo.expr" `vars.openPR == "true"` -}}
 {{- $noPR := include "kargo.expr" `vars.openPR != "true"` -}}
+{{- $copyResources := include "kargo.expr" `vars.copyResources == "true"` -}}
+{{- $copyEnvResources := include "kargo.expr" `vars.copyEnvResources == "true"` -}}
 {{- $prOpened := include "kargo.expr" `status("open-pr") != "Skipped"` -}}
 {{- $alias := include "kargo.expr" "ctx.targetFreight.alias" -}}
 {{- $freight := include "kargo.expr" "ctx.targetFreight.name" -}}
@@ -90,6 +92,13 @@ spec:
     - name: namespace
     - name: includeCRDs
     - name: openPR
+    # The exception to "no defaults": "false" is the right answer for most
+    # apps, and it keeps a Stage that predates these vars promotable -- a
+    # var with neither default nor Stage value fails the whole promotion
+    - name: copyResources
+      value: "false"
+    - name: copyEnvResources
+      value: "false"
   steps:
     - uses: git-clone
       config:
@@ -148,6 +157,27 @@ spec:
         # egress allowlist in values-network.part.yaml exists for.
         buildDependencies: true
         skipTests: true
+    {{- /*
+      resources/ and resources-<env>/ are raw manifests, copied verbatim and
+      never templated -- the chart's templates/ is what helm-template reads, so
+      without these they are silently dropped. Copied into subdirectories of the
+      app's directory, which the Argo CD Application reads with recurse: true.
+
+      Each step runs only if the Stage says the directory exists: the copy step
+      fails on a missing source (checked in Kargo v1.11.4's file_copier.go), and
+      a task cannot test for a path itself. The destination needs no creating --
+      the copy creates it.
+    */}}
+    - if: '{{ $copyResources }}'
+      uses: copy
+      config:
+        inPath: '{{ printf "%s/resources" $chartPath }}'
+        outPath: '{{ printf "./out/%s/resources" $outDir }}'
+    - if: '{{ $copyEnvResources }}'
+      uses: copy
+      config:
+        inPath: '{{ printf "%s/resources-%s" $chartPath $env }}'
+        outPath: '{{ printf "./out/%s/resources-%s" $outDir $env }}'
     - uses: git-commit
       as: commit
       config:
