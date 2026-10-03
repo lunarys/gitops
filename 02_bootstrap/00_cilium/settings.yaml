@@ -3,3 +3,5 @@
 # "cilium" -- verified against install.sh's `--namespace kube-system`.
 applicationName: cilium
 namespace: kube-system
+additionalNamespaces:
+  - cilium-secrets
