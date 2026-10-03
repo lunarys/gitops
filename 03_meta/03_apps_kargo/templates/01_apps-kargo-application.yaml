@@ -28,7 +28,11 @@ metadata:
 spec:
   project: apps-kargo-project
   destination:
-    namespace: {{ .Values.argo.namespace }}
+    # Only the default for namespaced objects without one -- the generator
+    # sets metadata.namespace on all of them. Still validated against
+    # apps-kargo-project's destinations, which don't (and shouldn't) include
+    # argocd.
+    namespace: {{ .Values.kargo.generatorProject }}
     server: {{ .Values.argo.server }}
   sources:
     - repoURL: {{ .Values.renderedRepo | default .Values.mainRepo }}
