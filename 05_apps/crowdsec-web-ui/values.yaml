@@ -1,0 +1,78 @@
+crowdsec-web-ui:
+  # app: https://github.com/TheDuffman85/crowdsec-web-ui?tab=readme-ov-file
+  # example helm: https://github.com/zekker6/helm-charts/blob/main/charts/apps/crowdsec-web-ui/values.yaml
+  ingress:
+    host: crowdsec.svc.elda
+
+  image:
+    name: ghcr.io/theduffman85/crowdsec-web-ui
+    tag: 2026.7.25
+
+  service:
+    targetPort: 3000
+
+  env:
+    CONFIG_UI_TIME_ZONE: "Europe/Berlin"
+
+    # Since v2026.7.16 the app persists LAPI config into /app/data/config.yaml on first boot
+    # and then ignores the legacy CROWDSEC_URL/CROWDSEC_USER/CROWDSEC_PASSWORD vars for good
+    # (data/ is a persistent volume here, so that freeze would stick). Use the CONFIG_ env
+    # override mechanism (added in v2026.7.17) instead, which is re-applied in memory on every
+    # start, so secret rotations here keep taking effect.
+    CONFIG_INSTANCE_LAPI_URL: "http://crowdsec-service:8080"
+    CONFIG_INSTANCE_LAPI_AUTH_TYPE: "password"
+    CONFIG_INSTANCE_LAPI_AUTH_USERNAME:
+      valueFrom:
+        secretKeyRef:
+          name: crowdsec-secrets
+          key: web_ui_user
+    CONFIG_INSTANCE_LAPI_AUTH_PASSWORD:
+      valueFrom:
+        secretKeyRef:
+          name: crowdsec-secrets
+          key: web_ui_password
+
+    # override baked-in image values to disable update check (server/config.ts: updateCheckEnabled = Boolean(VITE_COMMIT_HASH || VITE_VERSION))
+    # https://github.com/TheDuffman85/crowdsec-web-ui/blob/9d79dc5c6784e79c513c25b741c4571807a8ac2f/server/config.ts#L125
+    VITE_COMMIT_HASH: ""
+    VITE_VERSION: ""
+
+  livenessProbe:
+    enabled: true
+    http:
+      path: /api/health
+      port: 3000
+
+  readinessProbe:
+    enabled: true
+    http:
+      path: /api/health
+      port: 3000
+
+  longhornstorage:
+    volumes:
+      data:
+        size: "200Mi"
+        variant: "auto-delete"  # persists alerts and decisions locally in /app/data/crowdsec.db to reduce memory usage and support historical data - should be fine to rebuild
+        mount:
+          path: "/app/data"
+
+  networkpolicy:
+    enabled: true
+    preset:
+      useChartEndpointSelector: true
+      namespaceIsolation: false
+      egress:
+        toNetworkLabels:
+          - custom.network/mqtt-client
+        toFQDNs:
+          - services.nvd.nist.gov  # checking for recent CVEs - might only be required when creating a notification channel?
+        rules:
+          - toEndpoints:
+              - matchLabels:
+                  k8s-app: crowdsec
+                  type: lapi
+            toPorts:
+              - ports:
+                  - port: "8080"
+                    protocol: TCP

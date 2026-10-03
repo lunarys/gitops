@@ -1,0 +1,54 @@
+{{- /*
+  The app-of-apps: reconciles the per-app Application/AppProject objects
+  04_apps_generator renders (mode=argo), for both the 05_apps tree
+  (root=05_apps, onto _rendered/argo-resources/) and 02_bootstrap's portable
+  components (root=02_bootstrap, onto _rendered/bootstrap-argo-resources/).
+  Two sources, each a directory of plain manifests -- no helm: block on
+  either, this doesn't render a chart, it reconciles directories.
+
+  One Application rather than two: Kargo's own Stage already treats both
+  directories as a single unit (one clone, one PR, one Promotion -- see
+  02_kargo_meta), so this now matches that at the Argo layer too.
+
+  Known limitation, accepted: Kargo's argocd-update promotion step only
+  patches the FIRST source matching a given repoURL (akuity/kargo#5475), so
+  only the argo-resources source gets its targetRevision pinned to the exact
+  promoted commit; the bootstrap-argo-resources source is left tracking the
+  floating branch. This is safe here specifically because both directories
+  are always rendered and force-pushed together as one commit by a single,
+  serialized Promotion (02_kargo_meta's Stage never runs the two passes
+  independently) -- so the floating branch always already points at the
+  exact commit the pinned source was just set to. What's lost is Kargo's
+  explicit verification of the second source's convergence, not its
+  correctness.
+*/ -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.appOfAppsName }}
+  namespace: {{ .Values.argo.namespace }}
+  annotations:
+    kargo.akuity.io/authorized-stage: {{ .Values.kargo.generatorProject }}:{{ .Values.renderedArgoDir }}-{{ .Values.environment }}
+spec:
+  project: app-of-apps-project
+  destination:
+    namespace: {{ .Values.argo.namespace }}
+    server: {{ .Values.argo.server }}
+  sources:
+    - repoURL: {{ include "app-of-apps.renderedRepo" . }}
+      targetRevision: {{ .Values.renderedBranchPrefix }}{{ .Values.environment }}
+      path: {{ .Values.renderedRoot }}/{{ .Values.renderedArgoDir }}
+      directory:
+        recurse: true
+    - repoURL: {{ include "app-of-apps.renderedRepo" . }}
+      targetRevision: {{ .Values.renderedBranchPrefix }}{{ .Values.environment }}
+      path: {{ .Values.renderedRoot }}/{{ .Values.renderedBootstrapArgoDir }}
+      directory:
+        recurse: true
+  syncPolicy:
+    automated:
+      enabled: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

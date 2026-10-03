@@ -1,0 +1,14 @@
+apiVersion: v2
+name: postgresdb-user-operator
+description: Operator managing PostgreSQL users in the CloudNativePG cluster
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: postgresdb-user-operator
+    version: 0.3.7
+    repository: oci://ghcr.io/lunarys/charts
+
+  - name: networkpolicy
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts

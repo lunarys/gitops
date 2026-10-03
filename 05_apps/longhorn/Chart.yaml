@@ -1,0 +1,14 @@
+apiVersion: v2
+name: longhorn
+description: A Helm chart for deploying Longhorn distributed block storage system
+type: application
+version: 0.1.0
+home: https://longhorn.io/
+dependencies:
+  - name: longhorn
+    version: 1.12.0
+    repository: https://charts.longhorn.io
+
+  - name: externalsecrets
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts

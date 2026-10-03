@@ -1,0 +1,23 @@
+{{- /*
+  Per-cluster resources: one Application and one AppProject per enabled app, for
+  a single environment. Rendered once per environment into
+  stage/<env>/_platform/.
+
+  Debug a single kind with:
+    helm template . -f values.yaml -f values-argo-prod.yaml \
+      --show-only templates/argo-resources.yaml
+*/ -}}
+{{- include "apps-generator.validate" . }}
+{{- if eq .Values.mode "argo" }}
+{{- $idx := include "apps-generator.scan" . | fromYaml }}
+{{- $env := .Values.environment }}
+{{- $enabled := dig $env (list) $idx.enabled }}
+{{- range $dir, $app := $idx.apps }}
+{{- if has $dir $enabled }}
+---
+{{ include "apps-generator.project" (dict "root" $ "app" $app "env" $env) }}
+---
+{{ include "apps-generator.application" (dict "root" $ "app" $app "env" $env) }}
+{{- end }}
+{{- end }}
+{{- end }}

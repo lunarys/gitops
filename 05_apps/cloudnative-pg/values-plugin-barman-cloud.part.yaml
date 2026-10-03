@@ -1,0 +1,14 @@
+# Values for the barman-cloud backup plugin subchart.
+plugin-barman-cloud:
+  # Pins resource names to what a standalone `cnpg-plugin-barman-cloud` release
+  # produced. Load-bearing beyond cosmetics: resources/rbac.yaml binds a
+  # RoleBinding and ClusterRoleBinding to `sa/cnpg-plugin-barman-cloud` by
+  # literal name, and that file is copied verbatim rather than templated, so it
+  # cannot follow a rename.
+  fullnameOverride: cnpg-plugin-barman-cloud
+
+  # It creates a clusterrole and clusterrolebinding, but should only run in the cloudnative-pg namespace
+  #  -> create rbac separately
+  # TODO: could be removed when the included rbac is less permissive / supports namespaced install
+  rbac:
+    create: false

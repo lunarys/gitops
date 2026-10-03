@@ -1,9 +1,0 @@
-apiVersion: v2
-name: postgresdb
-description: A Helm chart for deploying a postgresdb with CloudNativePG
-type: application
-version: 0.1.0
-dependencies:
-  - name: externalsecrets
-    version: 4.6.0
-    repository: oci://ghcr.io/lunarys/charts

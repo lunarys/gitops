@@ -1,0 +1,14 @@
+apiVersion: v2
+name: kyverno
+description: Kyverno policy engine, plus the cluster policies in resources/
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: kyverno
+    version: 3.8.2
+    repository: oci://ghcr.io/kyverno/charts
+
+  - name: networkpolicy
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts

@@ -1,2 +1,0 @@
-linux:
-  kubelet: "/var/lib/k0s/kubelet"

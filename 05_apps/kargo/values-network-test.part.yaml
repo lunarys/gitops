@@ -1,0 +1,24 @@
+networkpolicy:
+  preset:
+    ingress:
+      # Chart default is true; nothing here serves traffic.
+      fromIngressController: false
+
+    egress:
+      # Replaces the common rules list (Helm doesn't merge lists), so the HTTPS
+      # rule from values-network.part.yaml is repeated here.
+      rules:
+        - toFQDNs:
+            - matchPattern: "*"
+          toPorts:
+            - ports:
+                - port: "443"
+                  protocol: TCP
+        # The prod control plane's API, reached through the kubeconfig -- must
+        # match the server in mint-test-kubeconfig.sh.
+        - toCIDR:
+            - 10.0.1.40/32  # TODO: placeholder, no prod API VIP yet
+          toPorts:
+            - ports:
+                - port: "6443"
+                  protocol: TCP

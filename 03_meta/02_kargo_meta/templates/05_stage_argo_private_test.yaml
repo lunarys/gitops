@@ -1,0 +1,24 @@
+{{- /*
+  Renders per-app Argo CD Applications/AppProjects for gitops-private's
+  apps, test cluster. Single pass -- gitops-private has no
+  02_bootstrap-equivalent portable-components tree to render alongside it,
+  unlike the public argo-resources Stages.
+*/ -}}
+{{- if .Values.privateRepoEnabled }}
+{{- include "apps-kargo.stage" (dict
+      "root" $
+      "repo" .Values.privateRepo
+      "warehouseName" "sources-private"
+      "name" "argo-resources-private-test"
+      "shard" (index .Values.kargo.shards "test")
+      "targetBranch" (printf "%stest" .Values.renderedBranchPrefix)
+      "passes" (list
+        (dict
+          "valuesFile" "values-argo-test.yaml"
+          "outDir" .Values.renderedArgoDir
+          "appRoot" "apps"
+          "appsDir" .Values.appsDir
+          "appName" .Values.argoResourcesPrivateName)
+      )
+    ) }}
+{{- end }}

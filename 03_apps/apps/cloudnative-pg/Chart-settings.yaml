@@ -1,4 +1,0 @@
-# Change the name for the helm chart installation
-# Can't use the <name>-app.yaml schema for Chart.yaml
-applicationName: postgresdb
-serverSideApply: false

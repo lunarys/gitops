@@ -1,0 +1,4 @@
+# keda needs a clusterrolebinding for the Kubernetes External Metrics API.
+# The respective role is in the kube-system namespace.
+additionalNamespaces:
+  - kube-system

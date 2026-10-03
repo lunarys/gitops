@@ -1,0 +1,53 @@
+{{- /*
+  Same idea as `sources` (01_warehouse.yaml), for gitops-private: produces
+  Freight when a private app changes, a settings.yaml or enabled list is
+  edited, or the generator itself is modified.
+
+  A separate Warehouse rather than a second subscription on `sources`:
+  gitops-private changes on its own schedule, and combining them would
+  surface an unrelated public commit as private Freight and vice versa.
+
+  includePaths mirror `sources`, rooted at gitops-private's own `apps/`
+  instead of mainRepo's 05_apps. No bootstrap-equivalent glob: gitops-private
+  has no 02_bootstrap analog.
+
+  A second subscription, on mainRepo, watches only the generator and
+  gitops-values.yaml -- never 05_apps/02_bootstrap, which would reintroduce
+  the coupling above. Needed for more than freshness: every private Stage's
+  promotion clones mainRepo and pins it via commitFrom(mainRepo), which
+  fails at promotion time if this Warehouse's Freight never carries a
+  mainRepo commit.
+*/ -}}
+{{- if .Values.privateRepoEnabled }}
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Warehouse
+metadata:
+  name: sources-private
+  namespace: {{ .Values.kargo.generatorProject }}
+spec:
+  interval: {{ .Values.warehouse.interval }}
+  freightCreationPolicy: {{ .Values.warehouse.freightCreationPolicy }}
+  subscriptions:
+    - git:
+        repoURL: {{ .Values.privateRepo }}
+        branch: {{ .Values.sourceBranch }}
+        commitSelectionStrategy: NewestFromBranch
+        includePaths:
+          # Inside apps/, not the repo root: the scanner reads
+          # {appsDir}/apps-<env>.yaml after appRoot's contents are copied
+          # into appsDir. Doesn't exist yet -- part of the app.yaml ->
+          # Chart.yaml conversion prerequisite.
+          - apps/apps-test.yaml
+          - apps/apps-prod.yaml
+          # Chart.yaml, settings.yaml and the values file names, per app.
+          - glob:apps/*/*.yaml
+        discoveryLimit: {{ .Values.warehouse.discoveryLimit }}
+    - git:
+        repoURL: {{ .Values.mainRepo }}
+        branch: {{ .Values.sourceBranch }}
+        commitSelectionStrategy: NewestFromBranch
+        includePaths:
+          - {{ .Values.generatorRoot | trimSuffix "/" }}/
+          - gitops-values.yaml
+        discoveryLimit: {{ .Values.warehouse.discoveryLimit }}
+{{- end }}

@@ -1,0 +1,4 @@
+# -- The directory is 01_argocd (numeric prefix for bootstrap.sh's apply
+# order); the app itself is just "argocd". Namespace already matches the
+# name (install.sh: ARGOCD_NS='argocd'), no override needed.
+applicationName: argocd

@@ -1,0 +1,21 @@
+# -- Only apps listed here will be rendered.
+enabled:
+  - bitwarden
+  - local-path-provisioner
+  - longhorn
+  - smb-driver
+  - keda
+
+  - cert-manager
+  #- kyverno
+  #- policy-reporter
+  - crowdsec
+  - crowdsec-web-ui
+
+  - cloudnative-pg
+  - postgresdb-user-operator
+
+  # testing only
+  - hello-world
+  - hello-world-simple
+  - demo-podinfo

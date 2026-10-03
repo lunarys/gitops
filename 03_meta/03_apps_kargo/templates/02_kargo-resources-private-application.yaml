@@ -1,0 +1,35 @@
+{{- /*
+  Reconciles gitops-private's per-app Kargo control-plane objects: per-app
+  Namespace, Kargo Project, ProjectConfig, Warehouse, Stage(s). Rendered by
+  the kargo-resources-private Stage onto gitops-private's own
+  _rendered/kargo-resources/.
+
+  Prod-only, same reasoning as apps-kargo: Kargo runs prod-only. Plain
+  single source -- no bootstrap-equivalent to merge with.
+*/ -}}
+{{- if .Values.privateRepoEnabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.kargoResourcesPrivateName }}
+  namespace: {{ .Values.argo.namespace }}
+  annotations:
+    kargo.akuity.io/authorized-stage: {{ .Values.kargo.generatorProject }}:kargo-resources-private
+spec:
+  project: apps-kargo-project
+  destination:
+    namespace: {{ .Values.argo.namespace }}
+    server: {{ .Values.argo.server }}
+  source:
+    repoURL: {{ .Values.privateRepo }}
+    targetRevision: {{ .Values.renderedBranchPrefix }}prod
+    path: {{ .Values.renderedRoot }}/{{ .Values.renderedKargoDir }}
+    directory:
+      recurse: true
+  syncPolicy:
+    automated:
+      enabled: false
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+{{- end }}

@@ -1,0 +1,49 @@
+{{- /*
+  Reconciles the per-app Kargo control-plane objects 04_apps_generator
+  renders (mode=kargo), for both the 05_apps tree (root=05_apps, onto
+  _rendered/kargo-resources/) and 02_bootstrap's portable components
+  (root=02_bootstrap, onto _rendered/bootstrap-kargo-resources/). Kargo runs
+  prod-only, so this Application only ever needs to exist on the prod
+  cluster -- there is no per-environment split for this chart at all
+  (mirrors 02_kargo_meta's own single, not-per-environment render).
+
+  One Application rather than two, same reasoning as 03_meta/01_app_of_apps's
+  merge: the Stage that authorizes both (see 02_kargo_meta) already renders
+  and force-pushes both directories together as one commit, one PR, one
+  Promotion, so this now matches that at the Argo layer too -- including the
+  same accepted argocd-update limitation (akuity/kargo#5475) for the second
+  source, safe for the same reason (see 01_app_of_apps's comment).
+
+  No CreateNamespace: the per-app Namespaces are emitted explicitly
+  labelled kargo.akuity.io/project=true by the generator; an auto-created
+  one wouldn't carry that label and Kargo would never adopt it.
+*/ -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.appsKargoName }}
+  namespace: {{ .Values.argo.namespace }}
+  annotations:
+    kargo.akuity.io/authorized-stage: {{ .Values.kargo.generatorProject }}:{{ .Values.renderedKargoDir }}
+spec:
+  project: apps-kargo-project
+  destination:
+    namespace: {{ .Values.argo.namespace }}
+    server: {{ .Values.argo.server }}
+  sources:
+    - repoURL: {{ .Values.renderedRepo | default .Values.mainRepo }}
+      targetRevision: {{ .Values.renderedBranchPrefix }}prod
+      path: {{ .Values.renderedRoot }}/{{ .Values.renderedKargoDir }}
+      directory:
+        recurse: true
+    - repoURL: {{ .Values.renderedRepo | default .Values.mainRepo }}
+      targetRevision: {{ .Values.renderedBranchPrefix }}prod
+      path: {{ .Values.renderedRoot }}/{{ .Values.renderedBootstrapKargoDir }}
+      directory:
+        recurse: true
+  syncPolicy:
+    automated:
+      enabled: false
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true

@@ -1,0 +1,5 @@
+# -- The directory is 00_cilium (numeric prefix for bootstrap.sh's apply
+# order); the app itself is just "cilium". Namespace is kube-system, not
+# "cilium" -- verified against install.sh's `--namespace kube-system`.
+applicationName: cilium
+namespace: kube-system

@@ -1,8 +1,0 @@
-helm:
-  chart: plugin-barman-cloud
-  version: 0.7.1
-  repo: https://cloudnative-pg.github.io/charts
-
-settings:
-  skipCrds: false
-  serverSideApply: false

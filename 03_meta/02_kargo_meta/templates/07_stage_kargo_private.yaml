@@ -1,0 +1,23 @@
+{{- /*
+  Renders per-app Kargo Projects/Warehouses/Stages for gitops-private's
+  apps. Prod-only, same reasoning as the public kargo-resources Stage:
+  Kargo itself runs in the prod cluster only.
+*/ -}}
+{{- if .Values.privateRepoEnabled }}
+{{- include "apps-kargo.stage" (dict
+      "root" $
+      "repo" .Values.privateRepo
+      "warehouseName" "sources-private"
+      "name" "kargo-resources-private"
+      "shard" (index .Values.kargo.shards "prod")
+      "targetBranch" (printf "%sprod" .Values.renderedBranchPrefix)
+      "passes" (list
+        (dict
+          "valuesFile" "values-kargo.yaml"
+          "outDir" .Values.renderedKargoDir
+          "appRoot" "apps"
+          "appsDir" .Values.appsDir
+          "appName" .Values.kargoResourcesPrivateName)
+      )
+    ) }}
+{{- end }}

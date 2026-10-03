@@ -1,0 +1,8 @@
+# Stays in the kyverno namespace rather than defaulting to its own.
+#
+# Split out for lifecycle reasons — it tracks its own version (3.9.1 against
+# kyverno's 3.8.2) and is an optional add-on. The coupling is runtime only: it
+# reads the PolicyReport CRs Kyverno produces, which are cluster-scoped, so
+# moving namespace would work — but that is a behavioural change, not a
+# restructure.
+namespace: kyverno

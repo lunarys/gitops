@@ -1,0 +1,382 @@
+{{- /*
+  A Kargo expression, written as `{{ include "kargo.expr" "vars.app" }}`.
+
+  Helm parses `{{` wherever it appears in a template -- including inside YAML
+  comments -- so a Kargo expression written literally would be read as a Helm
+  action and fail. The escape is `${{ "{{" }} ... {{ "}}" }}`, which is
+  unreadable repeated thirty times in one file. This says it once.
+
+  Expressions are still wrapped in single YAML quotes at the point of use: an
+  unquoted expression containing a ternary reads to a lenient YAML parser as
+  complex-mapping-key syntax (`? key` / `: value`), silently turning the field
+  into a map that Kargo rejects as "given: object". Quoting all of them rather
+  than only the ternaries leaves no exception to remember. Inside a `|` block
+  scalar the text is literal and neither rule applies.
+*/ -}}
+{{- define "kargo.expr" -}}
+${{ "{{" }} {{ . }} {{ "}}" }}
+{{- end -}}
+
+
+{{- /*
+  The Stages differ in: name, shard, which values file the generator is
+  rendered with, which directory the output lands in, and which branch it
+  targets -- now doubled, because each Stage runs TWO render passes (the
+  regular 05_apps tree and 02_bootstrap's portable components), each with
+  its own valuesFile/outDir/appRoot/appsDir/appName, but still ONE
+  git-clone/commit/push/open-pr/wait-for-pr/argocd-update: one Promotion,
+  one PR, per Stage, regardless of how many passes it renders.
+
+  Two more optional stage-level keys, alongside name/shard/targetBranch/
+  passes: `repo` (default mainRepo) is which repo the app CONTENT comes
+  from -- when it differs from mainRepo, a second git-clone fetches it
+  separately, since the generator chart itself always lives in mainRepo.
+  `warehouseName` (default "sources") is which Warehouse this Stage
+  requests Freight from.
+
+  A pass is a dict: {valuesFile, outDir, appRoot, appsDir, appName}.
+  - valuesFile: which of 04_apps_generator's own values-<mode>-<env>.yaml
+    (or values-kargo.yaml) to render with. mode/environment are identical
+    across passes of the same Stage; only appRoot/appsDir differ, so both
+    passes reuse the same valuesFile today -- kept as an explicit per-pass
+    field anyway rather than hoisted to the Stage, so a future pass that
+    genuinely needs a different one doesn't need restructuring.
+  - outDir: subdirectory of renderedRoot this pass's render lands in, and
+    what git-commit/git-push/git-open-pr operate over collectively via
+    `./out`.
+  - appRoot: source root this pass's copy step assembles from (05_apps or
+    02_bootstrap), also passed to the generator via setValues -- needed by
+    mode=kargo (Warehouse includePaths, per-app task vars); harmless and
+    unread by mode=argo.
+  - appsDir: destination directory inside the generator chart this pass's
+    copy step writes to, and what's passed to helm-template's setValues --
+    the copy step is the one place that decides this, so it's a per-pass
+    value here rather than the generator's own single default.
+  - appName: the Argo CD Application argocd-update tells to sync once this
+    pass's content merges. Explicit per pass, not derived from outDir: some
+    Stages' passes share one Application spanning multiple directories.
+
+  Kargo expressions are written with the `kargo.expr` helper above -- see it for
+  why they cannot be written literally, and for the quoting rule that goes with
+  them. Every expression in a single-line field here is single-quoted; those
+  inside a `|` block scalar are not, because the block is literal text.
+*/ -}}
+{{- define "apps-kargo.stage" -}}
+{{- $root := .root -}}
+{{- $mainRepo := $root.Values.mainRepo -}}
+{{- $repo := .repo | default $mainRepo -}}
+{{- /*
+  Path content is cloned into, when its repo differs from mainRepo -- the
+  generator chart itself always lives in mainRepo, so ./src is reserved for
+  fetching that.
+*/ -}}
+{{- $contentRepo := ternary "./src-content" "./src" (ne $repo $mainRepo) -}}
+{{- /*
+  .repo wins unconditionally over renderedRepo's override, so a private
+  Stage's output can't land on mainRepo's scratch-test repo.
+*/ -}}
+{{- $renderedRepo := .repo | default ($root.Values.renderedRepo | default $mainRepo) -}}
+{{- $generator := $root.Values.generatorRoot | trimSuffix "/" -}}
+{{- $alias := include "kargo.expr" "ctx.targetFreight.alias" -}}
+{{- $freight := include "kargo.expr" "ctx.targetFreight.name" -}}
+{{- $srcCommit := include "kargo.expr" (printf "commitFrom(%q).ID" $repo) -}}
+{{- $srcBranch := include "kargo.expr" (printf "commitFrom(%q).Branch" $repo) -}}
+{{- /*
+  $repo is a literal here (unlike the per-app task, which only ever sees it as
+  a Kargo expression), so the link can be built with a plain trimSuffix rather
+  than a second Stage var.
+*/ -}}
+{{- $srcCommitURL := printf "%s/commit/%s" ($repo | trimSuffix ".git") $srcCommit -}}
+{{- /*
+  Conventional-commit subject. `chore` because the content is generated rather
+  than authored, and the scope is the Stage -- which is also the name of the
+  directory written (per pass, now) and of the Argo CD Application that
+  reconciles it.
+*/ -}}
+{{- $subject := printf "chore(%s): render %s" .name $alias -}}
+{{- /*
+  One line per pass, describing what was rendered with what into where.
+  Multiple passes mean this is a list now rather than a single sentence.
+*/ -}}
+{{- $passDescs := list -}}
+{{- range $pass := .passes -}}
+  {{- $passDescs = append $passDescs (printf "`%s` with `%s` (from `%s`) into `%s/%s`/" $generator $pass.valuesFile $pass.appRoot $root.Values.renderedRoot $pass.outDir) -}}
+{{- end -}}
+{{- $rendered := printf "Rendered %s,\nreconciled by Argo CD on `%s`." (join ",\n" $passDescs) .targetBranch -}}
+{{- /*
+  The PR title and description name NO Freight, and cannot. This branch is
+  force-pushed, and git-open-pr adopts an already-open PR unchanged -- it looks
+  one up and returns it, with no call that could edit its title or body. So
+  anything per-promotion written here survives from the FIRST render on the
+  branch and then describes a later render's diff. The commit is rebuilt every
+  time and carries all of it; these two say only what is true of the branch.
+*/ -}}
+{{- $prTitle := printf "chore(%s): render onto %s" .name .targetBranch -}}
+{{- $provenance := printf "Freight: %s (%s)\nSource:  %s on `%s`\nCommit:  %s" $alias $freight $srcCommit $srcBranch $srcCommitURL -}}
+{{- /*
+  Renders to nothing at all on an ordinary promotion, leaving a trailing blank
+  line that git strips from the message; only a rollback says anything. A
+  "Rollback: false" line on every commit would be noise.
+*/ -}}
+{{- $rollbackLine := include "kargo.expr" `ctx.meta.promotion.rollback ? "This is a rollback." : ""` -}}
+{{- /*
+  One fixed branch per Stage. See the comment on git-push below for why it is
+  fixed rather than generated, and why force-pushing it is safe.
+*/ -}}
+{{- $branch := printf "%s%s" $root.Values.promotionBranchPrefix .name -}}
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: {{ .name }}
+  namespace: {{ $root.Values.kargo.generatorProject }}
+spec:
+  # spec.shard, NOT the kargo.akuity.io/shard label. The Stage admission webhook
+  # treats spec.shard as authoritative and derives the label from it, silently
+  # stripping a label that does not match. Setting only the label means no
+  # controller ever claims the Stage, with no error.
+  #
+  # A Stage runs on the shard of the cluster it changes. These Stages do change
+  # a cluster: the argocd-update step below syncs that cluster's Argo CD, so a
+  # Stage running elsewhere would push the git change and then fail to sync it.
+  shard: {{ .shard }}
+  requestedFreight:
+    - origin:
+        kind: Warehouse
+        name: {{ .warehouseName | default "sources" }}
+      sources:
+        # No gating between these Stages. They render structure -- an app added,
+        # a setting changed -- and gating prod's structure behind test would mean
+        # an offline test cluster blocks adding an app to prod.
+        direct: true
+  promotionTemplate:
+    spec:
+      steps:
+        - uses: git-clone
+          config:
+            repoURL: {{ $mainRepo }}
+            checkout:
+              - commit: '{{ include "kargo.expr" (printf "commitFrom(%q).ID" $mainRepo) }}'
+                path: ./src
+        {{- if ne $repo $mainRepo }}
+        - uses: git-clone
+          config:
+            repoURL: {{ $repo }}
+            checkout:
+              - commit: '{{ $srcCommit }}'
+                path: {{ $contentRepo }}
+        {{- end }}
+        {{- /*
+          A second clone rather than a second checkout entry above: checkout
+          entries within one git-clone share that step's repoURL, and
+          renderedRepo is only sometimes the same repo as mainRepo.
+        */}}
+        - uses: git-clone
+          config:
+            repoURL: {{ $renderedRepo }}
+            checkout:
+              - branch: {{ .targetBranch }}
+                create: true
+                path: ./out
+        {{- range $pass := .passes }}
+        {{- /*
+          Deleted before rendering so a removed app's resources disappear
+          rather than lingering: the render only ever writes what currently
+          exists, and without this the output is additive.
+
+          strict: false because the directory does not exist on the first
+          promotion, when the stage branch has just been created empty.
+        */}}
+        - uses: delete
+          config:
+            path: ./out/{{ $pass.outDir }}
+            strict: false
+        {{- /*
+          Helm's .Files cannot read outside the chart directory, and the apps
+          are a sibling of the generator. render.sh assembles the same
+          workspace locally; without this step the scan finds no apps and the
+          render is silently empty rather than failing.
+
+          UNVERIFIED: that `copy` recurses into directories and creates the
+          destination. The reference documents only inPath/outPath and says
+          nothing about either. If it turns out to copy files only, this
+          becomes a git-clone of the pass's root into place instead.
+        */}}
+        - uses: copy
+          config:
+            inPath: {{ $contentRepo }}/{{ $pass.appRoot | trimSuffix "/" }}
+            outPath: ./src/{{ $generator }}/{{ $pass.appsDir }}
+        - uses: helm-template
+          config:
+            path: ./src/{{ $generator }}
+            {{- /*
+              A directory, not a single resources.yaml: the generator is one
+              template file looping over every app, so a file-per-source-template
+              split (Kargo's default "helm" outLayout) would still dump all of
+              them into one file. "flat" instead splits per RENDERED RESOURCE,
+              named `[group-]kind-namespace-name.yaml` -- verified against
+              Kargo's source that this cannot collide even though this chart
+              gives a Namespace, Project and ProjectConfig the same name per
+              app, because Kind is part of the filename. Two passes writing
+              to two DIFFERENT outPaths (never the same one twice -- see
+              gitops-values.yaml's renderedBootstrapArgoDir/
+              renderedBootstrapKargoDir comment) sidesteps ever needing to
+              know whether a second call into the same outPath would
+              accumulate or clobber -- genuinely unverified upstream.
+            */}}
+            outPath: ./out/{{ $pass.outDir }}
+            outLayout: flat
+            # Cosmetic: verified that no generator template reads .Release.Name,
+            # so this cannot affect the output. Matches render.sh so a local
+            # render and a promotion render are invoked identically.
+            releaseName: apps-generator
+            valuesFiles:
+              # The chart's own values.yaml is loaded automatically as the base
+              # and is deliberately not repeated here -- passing it after the
+              # shared file would let a generator default shadow a
+              # repository-wide one.
+              - ./src/gitops-values.yaml
+              - ./src/{{ $generator }}/{{ $pass.valuesFile }}
+            # Where the copy step above put this pass's app tree, and which
+            # root it copied from. Last word, so they win over the
+            # generator's own default / gitops-values.yaml's appRoot.
+            {{- /*
+              mainRepo/renderedRepo: redundant for public passes (same
+              values gitops-values.yaml already supplies); for a private
+              pass this is what points every per-app object at
+              gitops-private instead.
+            */}}
+            setValues:
+              - key: appsDir
+                value: {{ $pass.appsDir }}
+              - key: appRoot
+                value: {{ $pass.appRoot }}
+              - key: mainRepo
+                value: {{ $repo }}
+              - key: renderedRepo
+                value: {{ $renderedRepo }}
+            buildDependencies: false
+            skipTests: true
+        {{- end }}
+        - uses: git-commit
+          as: commit
+          config:
+            path: ./out
+            message: |-{{ $subject | nindent 14 }}
+              {{ $rendered | nindent 14 }}
+              {{ $provenance | nindent 14 }}
+              {{ $rollbackLine | nindent 14 }}
+        {{- /*
+          Pushed to a branch of its own and merged through a PR rather than
+          straight onto the stage branch. Structural changes -- an app added or
+          removed, a values file renamed, the generator itself changed -- are the
+          ones most worth seeing as a rendered diff before they land, and for the
+          prod apps with no test instance the rendered-config PR is the only gate
+          there is. It is also what keeps a bad render out of the cluster
+          altogether: argocd-update runs only once the PR has merged.
+
+          ONE FIXED BRANCH PER STAGE, force-pushed, rather than Kargo's
+          generateTargetBranch. A generated branch belongs to one Promotion, so
+          re-rendering always means a second PR -- and the first PR's review
+          comments are stranded on it -- while every aborted or no-op promotion
+          leaves its branch behind.
+
+          Force-pushing a fixed branch UPDATES the PR already under review
+          instead: git-open-pr looks for an existing PR by base branch, head
+          branch and head commit, and GitHub moves an open PR's head when its
+          branch is force-pushed, so the PR it finds is that one -- same number,
+          same comments. A PR that was already merged cannot be matched by
+          mistake, its head commit being frozen at what merged rather than at
+          what was just pushed.
+
+          Forcing is safe here and nowhere else: this branch holds nothing but
+          machine-written output, rebuilt from the stage branch on every
+          promotion. A hand-written commit pushed onto it would be discarded --
+          correctly, since editing rendered output is not a change; the source it
+          was rendered from is.
+
+          What this does NOT change is queueing. git-wait-for-pr below holds the
+          promotion until the PR is resolved, and Kargo runs one Promotion per
+          Stage at a time, so newer Freight waits as Pending rather than
+          replacing what is in review. The PR gets updated when a waiting
+          promotion is aborted and a newer one promoted in its place.
+        */}}
+        - uses: git-push
+          as: push
+          config:
+            path: ./out
+            targetBranch: {{ $branch }}
+            force: true
+        - uses: git-open-pr
+          as: open-pr
+          config:
+            repoURL: {{ $renderedRepo }}
+            # Set explicitly rather than inferred from the URL.
+            provider: github
+            sourceBranch: '{{ include "kargo.expr" "outputs.push.branch" }}'
+            targetBranch: {{ .targetBranch }}
+            title: {{ $prTitle | quote }}
+            description: |-{{ $rendered | nindent 14 }}
+
+              Everything under these paths is machine-written, so this diff *is* the
+              change: nothing renders again between merging this and the cluster acting
+              on it. The promotion is parked in `git-wait-for-pr` until this PR is merged
+              or closed.
+
+              Which Freight this is, and which source commit it was rendered from, is in
+              the commit message rather than here: a pull request's title and body are
+              written once, when it opens, while this branch is force-pushed and this
+              pull request reused if a later render supersedes the one below.
+        {{- /*
+          A render identical to the branch needs no special handling up to this
+          point, and gets none: git-commit finds no diff, quietly makes no
+          commit and outputs the existing HEAD; git-push then pushes a branch
+          that matches its target; and git-open-pr, finding no difference
+          between the two branches, reports Skipped rather than opening an empty
+          PR.
+
+          Only the steps AFTER it need the guard, and they need it explicitly --
+          without it they fail trying to read a PR number that was never
+          produced.
+        */}}
+        - if: '{{ include "kargo.expr" `status("open-pr") != "Skipped"` }}'
+          uses: git-wait-for-pr
+          as: wait-for-pr
+          config:
+            repoURL: {{ $renderedRepo }}
+            provider: github
+            prNumber: '{{ include "kargo.expr" `outputs["open-pr"].pr.id` }}'
+        {{- /*
+          Sync every Application that reconciles what was just written, pinned
+          to the commit the merge produced -- one apps[] entry per pass, even
+          when two passes share an appName because a single multi-source
+          Application reconciles both (03_meta/01_app_of_apps): argocd-update
+          only precisely pins the first entry matching a given repoURL
+          (akuity/kargo#5475), which is fine there specifically because both
+          passes are always written by the same commit anyway. Without this
+          step at all the Stage would reference no Argo CD Application, so
+          Kargo would have no health signal at all and "promoted" would mean
+          only "the git push succeeded".
+
+          Requires kargo.akuity.io/authorized-stage on each of these
+          Applications, which 03_meta/01_app_of_apps and 03_meta/03_apps_kargo
+          must set to <project>:<stage>.
+
+          Skipped entirely (Helm-time, not Kargo-time) when argoSyncEnabled is
+          false -- see gitops-values.yaml. That is a repo-wide render decision,
+          not a per-promotion one, so it is not a Kargo `if:` alongside the
+          guard above.
+        */}}
+        {{- if $root.Values.argoSyncEnabled }}
+        - if: '{{ include "kargo.expr" `status("open-pr") != "Skipped"` }}'
+          uses: argocd-update
+          config:
+            apps:
+              {{- range $pass := .passes }}
+              - name: {{ $pass.appName }}
+                namespace: {{ $root.Values.argo.namespace }}
+                sources:
+                  - repoURL: {{ $renderedRepo }}
+                    desiredRevision: '{{ include "kargo.expr" `outputs["wait-for-pr"].commit` }}'
+              {{- end }}
+        {{- end }}
+{{- end }}

@@ -1,7 +1,0 @@
-helm:
-  chart: kyverno
-  version: 3.8.2
-  repo: oci://ghcr.io/kyverno/charts
-
-settings:
-  skipCrds: false

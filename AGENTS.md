@@ -9,17 +9,25 @@ This gitops repo works alongside a separate `helm-charts` repo:
 ```
 k8s/                             # Parent directory
 ├── gitops/                      # This repository
-│   └── 03_apps/
-│       ├── apps/                # Application definitions
-│       │   └── <app-name>/
-│       │       ├── app.yaml     # Helm chart reference (external charts)
-│       │       ├── Chart.yaml   # Local chart definition (alternative to app.yaml)
-│       │       ├── values.yaml  # Helm values
-│       │       ├── secrets.yaml # ExternalSecrets configuration
-│       │       └── resources/   # Additional K8s manifests (ConfigMaps, etc.)
-│       ├── charts/
-│       │   └── application-wrapper/  # ArgoCD Application generator
-│       └── values.yaml          # Global defaults (externalsecrets version, etc.)
+│   ├── 01_k0s/                  # k0s cluster configuration and scripts
+│   ├── 02_bootstrap/            # Core components (cilium, argocd, traefik) + manual secrets
+│   │   ├── apps-<env>.yaml      # `enabled:` list of bootstrap components to render
+│   │   └── <NN_component>/      # Chart.yaml, values*.yaml, settings.yaml, resources*/
+│   ├── 03_meta/                 # Argo CD / Kargo self-configuration (see 03_meta/README.md)
+│   ├── 04_apps_generator/       # Chart generating per-app Argo Applications/Projects and Kargo
+│   │                            # Projects/Warehouses/Stages (see 04_apps_generator/README.md)
+│   ├── 05_apps/                 # Application definitions
+│   │   ├── apps-<env>.yaml      # `enabled:` list -- only listed apps are rendered per environment
+│   │   └── <app-name>/
+│   │       ├── Chart.yaml                  # Helm chart; dependencies pull in the real chart(s)
+│   │       ├── settings.yaml               # optional per-app generator settings
+│   │       ├── values.yaml                 # base values
+│   │       ├── values-<env>.yaml           # environment overlay
+│   │       ├── values-<label>.part.yaml    # values fragment (network, secrets, ...)
+│   │       ├── values-<label>-<env>.part.yaml
+│   │       └── resources[-<env>]/          # additional plain K8s manifests
+│   ├── gitops-values.yaml       # Repository-wide settings shared by the 03_meta / 04 charts
+│   └── scripts/                 # Utility scripts
 │
 └── helm-charts/                 # Separate repository (custom Helm charts)
     ├── templates/               # generic-service chart templates (Deployment, Service, etc.)
@@ -27,6 +35,10 @@ k8s/                             # Parent directory
     └── charts/                  # Subcharts
         └── externalsecrets/     # ExternalSecrets subchart for Bitwarden integration
 ```
+
+Flow: Kargo watches `05_apps` / `02_bootstrap`, the generator pre-renders each app to plain
+manifests onto the `stage/<env>` branches via a promotion pull request, and Argo CD syncs those
+rendered directories. Argo no longer renders Helm itself.
 
 This structure depends on the actual way repositories were checked out. This is the recommended way though.
 
@@ -49,17 +61,49 @@ Applications can reference these charts or use external charts from public repos
 
 ## Application Definition Patterns
 
-### External Helm Charts
-For charts from external repositories, create `app.yaml`:
+Every app is a directory containing a `Chart.yaml` (there is no `app.yaml` any more). To deploy
+an external chart, declare it as a dependency:
 ```yaml
-helm:
-  chart: <chart-name>
-  version: <version>
-  repo: <repository-url>
+apiVersion: v2
+name: <app>
+type: application
+version: 0.1.0
+dependencies:
+  - name: <chart-name>
+    version: <version>
+    repository: <repository-url>   # https:// or oci://
+    # alias: <name>                # moves the values key if needed
 ```
+Values for the dependency go under its chart name (or alias) in `values.yaml`.
 
-### Local Helm Charts
-Use `Chart.yaml` instead of `app.yaml` only when custom templates are required or multiple Helm charts need to be combined as dependencies. For everything else, prefer the simpler `app.yaml` form.
+Helper charts (`externalsecrets`, `networkpolicy`, `generic-service`, ...) are plain
+dependencies too, pinned **per app**; there is no global chart version any more.
+Renovate bumps them through the Helm dependency manager.
+
+Local templates (`templates/`) can sit next to the dependencies in the same chart when needed.
+
+### Values files
+
+Detected by filename (`04_apps_generator/templates/_scan.tpl`); a `.yaml` that matches none of
+these is an error, not ignored:
+
+| File | Meaning |
+|------|---------|
+| `values.yaml` | base, always first |
+| `values-<env>.yaml` | environment overlay (`test` / `prod`) |
+| `values-<label>.part.yaml` | fragment, e.g. `values-network.part.yaml` (`networkpolicy:`), `values-secrets.part.yaml` (`externalsecrets:`) |
+| `values-<label>-<env>.part.yaml` | environment variant of a fragment |
+
+### Enabling an app
+
+Add it to `05_apps/apps-test.yaml` and/or `05_apps/apps-prod.yaml` (`enabled:` list). An app
+directory that is not listed is not rendered. Bootstrap components use `02_bootstrap/apps-<env>.yaml`.
+
+### settings.yaml
+
+Optional per-app generator settings (`applicationName`, `additionalNamespaces`, `autoSync`,
+`selfHeal`, `prune`, `serverSideApply`, `skipCrds`, `kargo.*`). Defaults live in
+`04_apps_generator/values.yaml` (`defaultSettings`).
 
 ## ExternalSecrets Pattern (Bitwarden)
 
@@ -69,16 +113,19 @@ Use `Chart.yaml` instead of `app.yaml` only when custom templates are required o
 - `bitwarden-notes` - Fetches the notes field (supports multiline)
 - `bitwarden-attachments` - Fetches attachment content (requires Bitwarden Pro)
 
-### secrets.yaml Structure
+### Secrets fragment structure
+Put this under `externalsecrets:` in `values-secrets.part.yaml` (`values-secrets-<env>.part.yaml` for
+per-environment UUIDs):
 ```yaml
-secrets:
-  <kubernetes-secret-name>:
-    commonRemoteKey: "<bitwarden-item-uuid>"  # Default UUID for all fields
-    fields:
-      <field-name>:
-        storeRefName: bitwarden-login|bitwarden-fields|bitwarden-notes
-        remoteProperty: username|password|<field-name>  # Property to fetch
-        remoteKey: "<uuid>"  # Override commonRemoteKey for this field
+externalsecrets:
+  secrets:
+    <kubernetes-secret-name>:
+      commonRemoteKey: "<bitwarden-item-uuid>"  # Default UUID for all fields
+      fields:
+        <field-name>:
+          storeRefName: bitwarden-login|bitwarden-fields|bitwarden-notes
+          remoteProperty: username|password|<field-name>  # Property to fetch
+          remoteKey: "<uuid>"  # Override commonRemoteKey for this field
 ```
 
 ### Bitwarden Free Tier Limitations
@@ -89,27 +136,29 @@ secrets:
 ### Pattern for Multiline Secrets (Free Tier)
 Create separate Bitwarden Secure Note items, each with content in the notes field:
 ```yaml
-secrets:
-  my-secret:
-    fields:
-      multiline-content:
-        storeRefName: bitwarden-notes
-        remoteKey: "<secure-note-uuid>"
+externalsecrets:
+  secrets:
+    my-secret:
+      fields:
+        multiline-content:
+          storeRefName: bitwarden-notes
+          remoteKey: "<secure-note-uuid>"
 ```
 
 ### Pattern for Passwords
 Use a Login item with password field and custom fields:
 ```yaml
-secrets:
-  password-secret:
-    commonRemoteKey: "<login-item-uuid>"
-    fields:
-      password:
-        storeRefName: bitwarden-login
-        remoteProperty: password
-      other-secret:
-        storeRefName: bitwarden-fields
-        remoteProperty: <custom-field-name>
+externalsecrets:
+  secrets:
+    password-secret:
+      commonRemoteKey: "<login-item-uuid>"
+      fields:
+        password:
+          storeRefName: bitwarden-login
+          remoteProperty: password
+        other-secret:
+          storeRefName: bitwarden-fields
+          remoteProperty: <custom-field-name>
 ```
 
 ## Environment-Specific Overrides
@@ -118,7 +167,7 @@ Files can have environment suffixes:
 - `values.yaml` - Base values
 - `values-test.yaml` - Test environment overrides
 - `values-prod.yaml` - Production environment overrides
-- `secrets.yaml` / `secrets-test.yaml` / `secrets-prod.yaml` - Same pattern for secrets
+- `values-secrets.part.yaml` / `values-secrets-test.part.yaml` / `values-secrets-prod.part.yaml` - Same pattern for secrets fragments
 
 ## Helm Chart Patterns
 
@@ -130,7 +179,7 @@ Files can have environment suffixes:
 
 ### Generic Pattern for External Charts with Secrets
 1. Set chart to use existing/external secrets (`existingSecrets.enabled: true` or similar)
-2. Create `secrets.yaml` to define ExternalSecrets from Bitwarden
+2. Create `values-secrets.part.yaml` to define ExternalSecrets from Bitwarden
 3. Put non-sensitive config in `values.yaml` or `resources/` ConfigMaps
 4. Reference secret names in `values.yaml`
 
@@ -138,18 +187,24 @@ Files can have environment suffixes:
 
 | File | Purpose |
 |------|---------|
-| `app.yaml` | External Helm chart reference |
-| `Chart.yaml` | Local Helm chart definition |
+| `Chart.yaml` | Helm chart definition; dependencies reference the actual chart(s) |
+| `settings.yaml` | Optional per-app generator settings (application name, namespaces, sync options) |
 | `values.yaml` | Helm values (non-sensitive) |
-| `secrets.yaml` | ExternalSecrets configuration |
-| `network.yaml` | CiliumNetworkPolicy via the networkpolicy preset chart (separate from the app). Alternatively the generic-service chart's built-in `networkPolicy` can be used in `values.yaml`. |
+| `values-<env>.yaml` | Environment-specific overrides |
+| `values-secrets[-<env>].part.yaml` | ExternalSecrets configuration (`externalsecrets:` key) |
+| `values-network[-<env>].part.yaml` | CiliumNetworkPolicy via the `networkpolicy` preset chart (`networkpolicy:` key). Alternatively the generic-service chart's built-in `networkpolicy` can be used in `values.yaml`. |
 | `resources/*.yaml` | Additional K8s manifests deployed to the cluster |
 | `resources-prod/*.yaml` | Production-only additional manifests |
 | `resources-test/*.yaml` | Test-only additional manifests |
-| `*-test.yaml` / `*-prod.yaml` | Environment-specific overrides |
+| `apps-<env>.yaml` | (in `05_apps/` and `02_bootstrap/`) `enabled:` list of apps rendered for that environment |
 | `<dir>/.overlay.yaml` | Declares `<dir>` as an *overlay* — see below. Tooling metadata, not a deployment input. |
 
 ## Overlays
+
+> **Known gap:** the Argo/Kargo generator (`04_apps_generator`) does not generate the
+> `traefik-external` overlay yet, and the overlay tooling below (`install.sh`, PR diff)
+> still assumes the pre-Kargo `app.yaml`/wrapper layout. Treat this
+> section as describing the intended contract until that is reconciled.
 
 An **overlay** is a subdirectory of an app directory that declares a *second release of
 the same chart*, with its values layered on top of the parent's. It exists because a
@@ -165,9 +220,7 @@ name: traefik-external     # required; must match the Argo Application that depl
 
 The marker is hidden and listed in `.helmignore` because, unlike every other file in the
 directory, it is metadata read only by tooling (`install.sh --overlay`, the PR helm-diff
-workflow) and never by Argo. Argo *cannot* read it: the apps-wrapper chart globs
-`apps/*/**` within `03_apps/`, so it cannot reach `02_bootstrap/`, which is why the
-bootstrap Applications are hand-written templates.
+workflow) and never by Argo. Argo does not read it.
 
 What layers and what does not:
 
@@ -186,11 +239,8 @@ Deploy or render an overlay with:
 scripts/install.sh -d 02_bootstrap/03_traefik --overlay external --env prod --template
 ```
 
-`scripts/check-argo-coverage.py` (run by the PR diff workflow) gates the contract: every
-declared overlay must be deployed by an Application of the declared name with matching
-namespace and value files, and every Application that layers values from a subdirectory
-must have a marker. That second direction catches a forgotten `.overlay.yaml` — the
-failure mode a hidden marker makes more likely.
+There is currently no automated check that declared overlays match a deployed Application
+(the former `check-argo-coverage.py` depended on the removed apps-wrapper chart).
 
 > **One overlay exists in this repo** (`02_bootstrap/03_traefik/external` →
 > `traefik-external`). The feature is deliberately minimal; if a second one appears,
@@ -200,7 +250,7 @@ failure mode a hidden marker makes more likely.
 
 ## Network Policy Pattern
 
-Use `network.yaml` with the networkpolicy preset chart for apps that need namespace isolation:
+Use `values-network.part.yaml` (key `networkpolicy:`, with the `networkpolicy` chart as a dependency in `Chart.yaml`) with the networkpolicy preset chart for apps that need namespace isolation:
 
 ```yaml
 preset:
@@ -215,11 +265,11 @@ preset:
     toWorld: true                # broad internet access (avoid unless needed)
 ```
 
-Apps without a network policy (in either `network.yaml` or `values.yaml`) will be flagged by the Kyverno `require-namespace-networkpolicy` ClusterPolicy (Audit mode).
+Apps without a network policy (in either `values-network.part.yaml` or `values.yaml`) will be flagged by the Kyverno `require-namespace-networkpolicy` ClusterPolicy (Audit mode).
 
 ## Env-Specific Resource Directories
 
-For resources that differ per environment (e.g. CA certificates, cluster-specific config), use `resources-prod/` and `resources-test/` instead of `resources/`. The application-wrapper automatically adds the env-specific path source based on the `environment` value in the cluster's values file.
+For resources that differ per environment (e.g. CA certificates, cluster-specific config), use `resources-prod/` and `resources-test/` instead of `resources/`. The generator (`04_apps_generator`) includes the `resources-<env>` directory matching the environment being rendered.
 
 Example: `step-ca/resources-prod/` contains prod CA certs; a `resources-test/` directory would contain test CA certs.
 

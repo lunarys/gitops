@@ -1,0 +1,6 @@
+# Prod runs the control plane, test only a controller for its shard -- two
+# different releases rather than one tuned per environment, so nearly
+# everything lives in values-prod.yaml / values-test.yaml.
+
+testShardIdentity:
+  enabled: false

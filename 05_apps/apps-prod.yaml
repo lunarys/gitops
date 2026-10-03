@@ -1,0 +1,31 @@
+# -- Only apps listed here will be rendered.
+enabled:
+  - bitwarden
+  - longhorn
+  - smb-driver
+  - local-path-provisioner
+  - keda
+  - step-ca
+
+  - adguard-home
+  - adguard-sync
+
+  - cert-manager
+  #- kyverno
+  #- policy-reporter
+  - crowdsec
+  - crowdsec-web-ui
+  - cloudnative-pg
+  - pgadmin
+  - postgresdb-user-operator
+
+  - authentik
+
+  - home-assistant
+  - teamspeak
+  - nodered
+  - mosquitto
+  - n8n
+
+  - jellyfin
+  - heimdall

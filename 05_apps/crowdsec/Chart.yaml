@@ -1,0 +1,18 @@
+apiVersion: v2
+name: crowdsec
+description: CrowdSec security engine — LAPI, agent and AppSec
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: crowdsec
+    version: 0.24.0
+    repository: https://crowdsecurity.github.io/helm-charts
+
+  - name: externalsecrets
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts
+
+  - name: networkpolicy
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts

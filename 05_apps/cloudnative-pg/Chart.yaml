@@ -1,0 +1,43 @@
+apiVersion: v2
+# Keeps the name the local chart in this directory already had. Naming it
+# cloudnative-pg would work too -- a chart may depend on a subchart of its own
+# name, as apps/longhorn does -- but .Chart.Name is unused by the templates
+# here, so there is nothing to gain from the rename.
+name: postgresdb
+description: >-
+  The CloudNativePG operator, the barman-cloud backup plugin, and the PostgreSQL
+  cluster they run. One unit: the operator is namespace-scoped
+  (config.clusterWide: false), the plugin's RBAC is hand-scoped to this
+  namespace, and the templates here emit CRs owned by both.
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: cloudnative-pg
+    version: 0.29.0
+    repository: https://cloudnative-pg.github.io/charts
+
+  - name: plugin-barman-cloud
+    version: 0.7.1
+    repository: https://cloudnative-pg.github.io/charts
+
+  - name: externalsecrets
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts
+
+  # Three instances, because the chart renders one preset per release. See the
+  # comment at the top of values-network.part.yaml.
+  - name: networkpolicy
+    alias: netpol-operator
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts
+
+  - name: networkpolicy
+    alias: netpol-plugin
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts
+
+  - name: networkpolicy
+    alias: netpol-database
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts

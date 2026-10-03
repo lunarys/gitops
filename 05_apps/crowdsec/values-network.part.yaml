@@ -1,0 +1,26 @@
+networkpolicy:
+  # TODO: selector
+
+  preset:
+    endpointSelector:
+      matchLabels:
+        k8s-app: crowdsec
+
+    namespaceIsolation: true
+    ingress:
+      fromIngressController: true  # Traefik bouncer plugin -> LAPI
+      fromNamespaces:
+        - traefik-external
+    egress:
+      toKubeApi: true
+      toFQDNs:
+        # https://docs.crowdsec.net/docs/next/configuration/network_management/
+        - api.crowdsec.net
+        - blocklists.api.crowdsec.net
+        - papi.api.crowdsec.net
+        # agent failed without these
+        - version.crowdsec.net
+        - cdn-hub.crowdsec.net
+        - hub-data.crowdsec.net
+      toNetworkLabels:
+        - custom.network/postgresdb

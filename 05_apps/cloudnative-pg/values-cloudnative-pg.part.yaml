@@ -1,0 +1,19 @@
+# Values for the cloudnative-pg operator subchart.
+cloudnative-pg:
+  # Pins resource names to what a standalone `cloudnative-pg-operator` release
+  # produced, so merging into one chart renames nothing that is deployed.
+  # Without it every resource here would be renamed after the merged release.
+  #
+  # Note this does NOT preserve app.kubernetes.io/instance -- that label is
+  # .Release.Name and nothing can hold it steady across a merge, which is why
+  # values-network.part.yaml selects on app.kubernetes.io/name instead.
+  fullnameOverride: cloudnative-pg-operator
+
+  # https://github.com/cloudnative-pg/charts/tree/main/charts/cloudnative-pg
+  replicaCount: 2
+
+  config:
+    clusterWide: false  # can be disabled if only running a single database in the namespace
+
+    data:
+      INHERITED_LABELS: "custom.network/*"

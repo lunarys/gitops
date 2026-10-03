@@ -1,0 +1,23 @@
+{{- /*
+  Same as argo-resources-private-test, prod cluster. Not gated on the test
+  Stage, same reasoning as the public argo-resources-prod Stage: this
+  renders structure, not workloads.
+*/ -}}
+{{- if .Values.privateRepoEnabled }}
+{{- include "apps-kargo.stage" (dict
+      "root" $
+      "repo" .Values.privateRepo
+      "warehouseName" "sources-private"
+      "name" "argo-resources-private-prod"
+      "shard" (index .Values.kargo.shards "prod")
+      "targetBranch" (printf "%sprod" .Values.renderedBranchPrefix)
+      "passes" (list
+        (dict
+          "valuesFile" "values-argo-prod.yaml"
+          "outDir" .Values.renderedArgoDir
+          "appRoot" "apps"
+          "appsDir" .Values.appsDir
+          "appName" .Values.argoResourcesPrivateName)
+      )
+    ) }}
+{{- end }}

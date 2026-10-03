@@ -1,0 +1,8 @@
+apiVersion: v2
+name: apps-generator
+description: >-
+  Generates the meta resources for every application: the Argo CD Applications
+  and AppProjects that reconcile pre-rendered manifests, and the Kargo Projects,
+  Warehouses and Stages that produce them.
+type: application
+version: 0.1.0
