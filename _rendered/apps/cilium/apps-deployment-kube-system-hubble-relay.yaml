@@ -8,7 +8,7 @@ metadata:
     k8s-app: hubble-relay
     app.kubernetes.io/name: hubble-relay
     app.kubernetes.io/part-of: cilium
-    helm.sh/chart: cilium-1.20.0
+    helm.sh/chart: cilium-1.20.2
 
 spec:
   replicas: 1
@@ -26,7 +26,7 @@ spec:
         k8s-app: hubble-relay
         app.kubernetes.io/name: hubble-relay
         app.kubernetes.io/part-of: cilium
-        helm.sh/chart: cilium-1.20.0
+        helm.sh/chart: cilium-1.20.2
     spec:
       securityContext:
         fsGroup: 65532
@@ -45,7 +45,7 @@ spec:
             runAsUser: 65532
             seccompProfile:
               type: RuntimeDefault
-          image: "quay.io/cilium/hubble-relay:v1.20.0@sha256:2ca16981c7eb98df0ba9c9d18896bb9ca628b5cbd40dc9801339f4741f91ee94"
+          image: "quay.io/cilium/hubble-relay:v1.20.2@sha256:d309c977870e9dbede7122a10eee09a4c9d66685e8d52af62d9c3c113f815b0f"
           imagePullPolicy: IfNotPresent
           command:
             - hubble-relay
