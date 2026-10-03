@@ -129,12 +129,15 @@ spec:
     - uses: helm-template
       config:
         path: '{{ $chartPath }}'
-        # A directory, not a file: no .yaml suffix. useReleaseName then names it
-        # after the release rather than the chart, which matters wherever
-        # applicationName overrides the directory -- with the chart name the
-        # Argo CD Application would point at a path that does not exist.
-        outPath: '{{ printf "./out/%s" (include "kargo.expr" "vars.outRoot") }}'
-        useReleaseName: true
+        # Flat: one file per rendered resource, `[group-]kind-namespace-name.yaml`,
+        # directly in the app's directory. NOT the default "helm" layout, which
+        # hands outPath to Helm's --output-dir and nests every file under
+        # <chart name>/templates/ -- or <chart name>/charts/<dep>/templates/ for
+        # a dependency's resources. Those `charts/` directories are matched by
+        # the root .gitignore the stage branch inherits from main, so git-commit
+        # silently left every dependency's output out of the render.
+        outPath: '{{ printf "./out/%s" $outDir }}'
+        outLayout: flat
         releaseName: '{{ $app }}'
         namespace: '{{ $namespace }}'
         # Already workspace-relative, prefixed by the caller.
