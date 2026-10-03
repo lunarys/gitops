@@ -5,13 +5,13 @@ metadata:
   name: argocd-server
   namespace: argocd
   labels:
-    helm.sh/chart: argo-cd-10.2.1
+    helm.sh/chart: argo-cd-10.9.6
     app.kubernetes.io/name: argocd-server
     app.kubernetes.io/instance: argocd
     app.kubernetes.io/component: server
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: "v3.4.5"
+    app.kubernetes.io/version: "v3.5.3"
 spec:
   replicas: 1
   revisionHistoryLimit: 3
@@ -22,23 +22,23 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 5e7fa38d0dd595c60fe67743e25711dcb2b8c157ba6f8d487600547524386321
-        checksum/cm: b0b6b921240482a590e9adf0b82f8c1e112deaa66b61b76954b72485ed739f60
+        checksum/cmd-params: 3ba60854280504915a978703de6a06ec31e5104e5659f51a575fe39b8d98f74a
+        checksum/cm: 6b2c558be42f571db69d5a9b57ef92472ef9980191072dbbbe9a47d77e2f996d
       labels:
-        helm.sh/chart: argo-cd-10.2.1
+        helm.sh/chart: argo-cd-10.9.6
         app.kubernetes.io/name: argocd-server
         app.kubernetes.io/instance: argocd
         app.kubernetes.io/component: server
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: "v3.4.5"
+        app.kubernetes.io/version: "v3.5.3"
     spec:
       terminationGracePeriodSeconds: 30
       serviceAccountName: argocd-server
       automountServiceAccountToken: true
       containers:
       - name: server
-        image: quay.io/argoproj/argocd:v3.4.5
+        image: quay.io/argoproj/argocd:v3.5.3
         imagePullPolicy: IfNotPresent
         args:
         - /usr/local/bin/argocd-server
@@ -47,6 +47,12 @@ spec:
         env:
           - name: ARGOCD_SERVER_NAME
             value: argocd-server
+          - name: GRPC_ENABLE_TXT_SERVICE_CONFIG
+            valueFrom:
+              configMapKeyRef:
+                name: argocd-cmd-params-cm
+                key: server.grpc.enable.txt.service.config
+                optional: true
           - name: ARGOCD_SERVER_INSECURE
             valueFrom:
               configMapKeyRef:
@@ -428,6 +434,7 @@ spec:
       - name: tls-certs
         configMap:
           name: argocd-tls-certs-cm
+          optional: true
       - name: styles
         configMap:
           name: argocd-styles-cm
