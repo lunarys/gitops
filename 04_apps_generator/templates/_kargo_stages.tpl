@@ -131,6 +131,13 @@ spec:
               value: {{ has "resources" ($app.resourceDirs | default (list)) | quote }}
             - name: copyEnvResources
               value: {{ has (printf "resources-%s" $env) ($app.resourceDirs | default (list)) | quote }}
+            # The Stage requestedFreight above takes Freight from, so the
+            # commit can link to that Stage's render of it -- or "" when this
+            # Stage takes Freight straight from the Warehouse, which the commit
+            # then says outright. The same condition as `stages:` above, so the
+            # two cannot disagree.
+            - name: upstreamStage
+              value: {{ ternary "test" "" (and (eq $env "prod") (not (empty .upstream))) | quote }}
         # Both environments sync and report health.
         #
         # Omitting this would be strictly worse than including it: the Stage

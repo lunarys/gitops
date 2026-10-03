@@ -20,7 +20,11 @@
       may name a different repo than repoURL. The caller's `valuesFiles` var
       arrives already prefixed with ./src, so this layout cannot be changed on
       one side alone;
-    - the `commit` output, which the caller pins its argocd-update to.
+    - the `commit` output, which the caller pins its argocd-update to;
+    - the Freight metadata key named after the Stage, which this task writes
+      once its commit has landed and the downstream Stage's run of this same
+      task reads back through `upstreamStage` -- the one way a promotion can
+      learn what an earlier Stage did with the same Freight.
 
   The `valuesFiles` var arrives as a JSON-encoded string (the Stage CRD
   rejects a list-valued var) and is coerced back into a list by expression
@@ -63,11 +67,31 @@
 {{- $srcCommit := include "kargo.expr" "commitFrom(vars.repoURL).ID" -}}
 {{- $srcBranch := include "kargo.expr" "commitFrom(vars.repoURL).Branch" -}}
 {{- $srcCommitURL := printf "%s/commit/%s" $sourceRepoWebURL $srcCommit -}}
+{{- /*
+  The upstream Stage's render of this same Freight, read from what that
+  promotion's set-metadata step (the last step below) wrote. Always one
+  explicit line rather than one that disappears, so a missing link says why:
+
+    none, promoted directly from the Warehouse  -- no upstream Stage at all
+    <stage>, <no details available>             -- an upstream Stage exists but
+                                                   left nothing, e.g. Freight it
+                                                   took before this was written
+    <stage>, <commit url>[ via <pr url>]
+
+  The `?? {}` covers Freight with no metadata at all, for which
+  freightMetadata() returns nil. Checked against Kargo v1.11.4's EvaluateTemplate
+  with expr v1.17.8, all three shapes plus a Freight carrying only other keys.
+*/ -}}
+{{- $upstream := include "kargo.expr" `let u = vars.upstreamStage; let p = u == "" ? nil : (freightMetadata(ctx.targetFreight.name) ?? {})[u]; u == "" ? "none, promoted directly from the Warehouse" : p == nil ? u + ", <no details available>" : u + ", " + p.commitURL + (p.pr == "" ? "" : " via " + p.pr)` -}}
 {{- $rollbackLine := include "kargo.expr" `ctx.meta.promotion.rollback ? "This is a rollback." : ""` -}}
 {{- $subject := printf "chore(%s): render %s" $app $alias -}}
 {{- $prTitle := printf "chore(%s): render onto %s" $app $targetBranch -}}
 {{- $rendered := printf "Rendered `%s` for %s into `%s`/,\nreconciled by Argo CD on `%s`." $repoPath $env $outDir $targetBranch -}}
-{{- $provenance := printf "Freight: %s (%s)\nSource:  %s on `%s`\nCommit:  %s" $alias $freight $srcCommit $srcBranch $srcCommitURL -}}
+{{- /*
+  The source commit once, as a URL: GitHub shows a commit URL as its short SHA,
+  so a separate bare-SHA line only ever repeated it.
+*/ -}}
+{{- $provenance := printf "Freight:  %s (%s)\nSource:   %s on `%s`\nUpstream: %s" $alias $freight $srcCommitURL $srcBranch $upstream -}}
 apiVersion: kargo.akuity.io/v1alpha1
 kind: ClusterPromotionTask
 metadata:
@@ -99,6 +123,11 @@ spec:
       value: "false"
     - name: copyEnvResources
       value: "false"
+    # The Stage this one takes Freight from, or "" when it takes it straight
+    # from the Warehouse. No default, like the rest: "" would claim there is no
+    # upstream Stage, and a commit that says so wrongly is worse than a
+    # promotion that fails until the generator has caught up.
+    - name: upstreamStage
   steps:
     - uses: git-clone
       config:
@@ -275,3 +304,27 @@ spec:
       as: output
       config:
         commit: '{{ include "kargo.expr" `status("wait-for-pr") == "Succeeded" ? task.outputs["wait-for-pr"].commit : task.outputs["commit"].commit` }}'
+    {{- /*
+      What the downstream Stage's commit message links back to (see $upstream
+      above): where this render landed, and the pull request it went through
+      if there was one. Last, so it is written only once the commit is really on
+      the stage branch -- a promotion that fails or is aborted on the way leaves
+      the previous record in place rather than one pointing at a commit that
+      never landed.
+
+      Keyed by Stage name, so each Stage's record sits beside the others':
+      set-metadata replaces a key's whole value, never merges into it. The key
+      is computed, which a literal `values:` map cannot do -- Kargo evaluates
+      map values, not keys -- so the whole map is one expression. The space in
+      `} }` is required: `}}` would end the expression early.
+
+      The web URL is derived here rather than passed in: unlike repoURL, which
+      this task can only see as an expression, renderedRepoURL needs nothing
+      but its `.git` trimmed, and expr has trimSuffix for that.
+    */}}
+    - uses: set-metadata
+      config:
+        updates:
+          - kind: Freight
+            name: '{{ $freight }}'
+            values: '{{ include "kargo.expr" `{(ctx.stage): {"commitURL": trimSuffix(vars.renderedRepoURL, ".git") + "/commit/" + task.outputs["output"].commit, "pr": status("open-pr") != "Skipped" ? task.outputs["open-pr"].pr.url : ""} }` }}'

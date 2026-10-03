@@ -112,7 +112,13 @@ ${{ "{{" }} {{ . }} {{ "}}" }}
   time and carries all of it; these two say only what is true of the branch.
 */ -}}
 {{- $prTitle := printf "chore(%s): render onto %s" .name .targetBranch -}}
-{{- $provenance := printf "Freight: %s (%s)\nSource:  %s on `%s`\nCommit:  %s" $alias $freight $srcCommit $srcBranch $srcCommitURL -}}
+{{- /*
+  Same shape as the per-app task's. The source commit once, as a URL -- GitHub
+  shows a commit URL as its short SHA, so a bare-SHA line only repeated it --
+  and an Upstream line that is constant here: every one of these Stages takes
+  Freight directly (see requestedFreight below).
+*/ -}}
+{{- $provenance := printf "Freight:  %s (%s)\nSource:   %s on `%s`\nUpstream: none, promoted directly from the Warehouse" $alias $freight $srcCommitURL $srcBranch -}}
 {{- /*
   Renders to nothing at all on an ordinary promotion, leaving a trailing blank
   line that git strips from the message; only a rollback says anything. A
