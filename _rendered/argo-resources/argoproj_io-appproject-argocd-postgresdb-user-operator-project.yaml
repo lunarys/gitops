@@ -1,0 +1,20 @@
+# Source: apps-generator/templates/argo-resources.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: postgresdb-user-operator-project
+  namespace: argocd
+spec:
+  description: Project for application postgresdb-user-operator
+  sourceRepos:
+    # The Application's actual source (_argo_application.tpl), which is
+    # mainRepo unless renderedRepo overrides it.
+    - https://github.com/lunarys/gitops.git
+  destinations:
+    - namespace: cloudnative-pg
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  orphanedResources:
+    warn: false
