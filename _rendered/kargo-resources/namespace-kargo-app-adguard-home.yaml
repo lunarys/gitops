@@ -1,0 +1,8 @@
+---
+# Source: apps-generator/templates/kargo-resources.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kargo-app-adguard-home
+  labels:
+    kargo.akuity.io/project: "true"

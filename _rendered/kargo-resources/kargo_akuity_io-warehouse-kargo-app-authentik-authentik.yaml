@@ -1,0 +1,30 @@
+# Source: apps-generator/templates/kargo-resources.yaml
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Warehouse
+metadata:
+  name: authentik
+  namespace: kargo-app-authentik
+spec:
+  interval: 5m
+  freightCreationPolicy: Automatic
+  subscriptions:
+    - git:
+        repoURL: https://github.com/lunarys/gitops.git
+        branch: main
+        commitSelectionStrategy: NewestFromBranch
+        includePaths:
+          - 05_apps/authentik/
+        excludePaths:
+          # Docs and examples sit inside the app directory but cannot affect the
+          # rendered output, so they should not produce release candidates.
+          #
+          # regex rather than glob for the markdown rule, because it has to
+          # match at any depth (adguard-home/docker/README.md is two levels in)
+          # and the glob dialect Kargo uses is not documented -- whether `**`
+          # spans separators, and whether `a/**/*.md` also matches `a/READ.md`,
+          # varies by library and would fail silently. Plain strings, as used
+          # for the directories below, are exact path matches.
+          - regex:^05_apps/authentik/.*\.md$
+          - 05_apps/authentik/example/
+          - 05_apps/authentik/examples/
+        discoveryLimit: 20

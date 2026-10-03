@@ -1,0 +1,11 @@
+# Source: apps-generator/templates/kargo-resources.yaml
+apiVersion: kargo.akuity.io/v1alpha1
+kind: ProjectConfig
+metadata:
+  name: kargo-app-authentik
+  namespace: kargo-app-authentik
+spec:
+  promotionPolicies:
+    - stageSelector:
+        name: prod
+      autoPromotionEnabled: false

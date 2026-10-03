@@ -1,0 +1,98 @@
+# Source: apps-generator/templates/kargo-resources.yaml
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: prod
+  namespace: kargo-app-keda
+spec:
+  # spec.shard, NOT the kargo.akuity.io/shard label. The Stage admission webhook
+  # treats spec.shard as authoritative and derives the label from it, silently
+  # stripping any label that does not match. Setting only the label -- as older
+  # docs describe -- means no controller ever claims the Stage, with no error.
+  #
+  # A Stage runs on the shard of the cluster it changes, so a promotion never
+  # half-runs against a cluster that is powered off: it does not start at all.
+  shard: prod
+  requestedFreight:
+    - origin:
+        kind: Warehouse
+        name: keda
+      sources:
+        # Production takes Freight only after test has had it. Emitted only when
+        # the app is actually enabled in test -- a prod-only app has no test
+        # Stage to gate on and would deadlock waiting for one.
+        stages:
+          - test
+  promotionTemplate:
+    spec:
+      steps:
+        - task:
+            name: render-and-open-pr
+            # Cluster-scoped so one definition serves every per-app Project.
+            kind: ClusterPromotionTask
+          as: render
+          vars:
+            - name: repoURL
+              value: https://github.com/lunarys/gitops.git
+            # The task only ever sees repoURL as a Kargo expression
+            # (`vars.repoURL`), never the literal -- it is a shared task, not
+            # this Stage. Passed separately so the task's commit provenance can
+            # link to the source commit without needing mainRepo's literal
+            # value itself.
+            - name: sourceRepoWebURL
+              value: https://github.com/lunarys/gitops
+            # Where the render is committed/pushed/PR'd. Same as repoURL
+            # unless renderedRepo overrides it -- see gitops-values.yaml.
+            - name: renderedRepoURL
+              value: https://github.com/lunarys/gitops.git
+            - name: app
+              value: keda
+            # The directory, which may differ from the application name.
+            - name: appDir
+              value: keda
+            - name: appRoot
+              value: 05_apps
+            - name: env
+              value: prod
+            - name: targetBranch
+              value: stage/prod
+            # The exact values files this app has, in layering order, derived
+            # from the directory at render time. The task cannot work this out
+            # for itself: valuesFiles is a plain []string with no glob support,
+            # Kargo has no split(), and the task does not know the labels.
+            #
+            # Because only files that exist are listed, the task needs no
+            # ignoreMissingValueFiles -- a misnamed file is one the generator
+            # rejects outright rather than one Helm silently skips.
+            #
+            # UNVERIFIED: that a list-valued var populates a list-typed step
+            # config field. The docs call vars "static values of any type" and
+            # say results are coerced to "array" among others, but show no
+            # example. Settle this in the lab before trusting it; the fallback
+            # is a fixed file list in the task with ignoreMissingValueFiles,
+            # which loses fragments but nothing else.
+            - name: valuesFiles
+              value:
+                - ./src/05_apps/keda/values.yaml
+            - name: namespace
+              value: keda
+            - name: outRoot
+              value: _rendered/apps
+            - name: promotionBranch
+              value: kargo/promotion/keda-prod
+            # skipCrds is a RENDER decision now, not an Argo sync option.
+            - name: includeCRDs
+              value: "false"
+            - name: openPR
+              value: "true"
+        # Both environments sync and report health.
+        #
+        # Omitting this would be strictly worse than including it: the Stage
+        # would then reference no Argo CD Application, so Kargo has no implicit
+        # health signal and "verified in test" degrades to "the promotion
+        # finished". There is no scenario where this step fails for lack of a
+        # cluster, because the promotion only runs on that cluster's shard.
+        #
+        # argoSyncEnabled is the one exception: false while first trying
+        # renderedRepo against a scratch repo, so nothing here ever asks a real
+        # Argo CD to sync from it.

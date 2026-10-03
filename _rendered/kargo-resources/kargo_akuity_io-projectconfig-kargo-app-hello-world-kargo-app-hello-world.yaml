@@ -1,0 +1,11 @@
+# Source: apps-generator/templates/kargo-resources.yaml
+apiVersion: kargo.akuity.io/v1alpha1
+kind: ProjectConfig
+metadata:
+  name: kargo-app-hello-world
+  namespace: kargo-app-hello-world
+spec:
+  promotionPolicies:
+    - stageSelector:
+        name: test
+      autoPromotionEnabled: false
