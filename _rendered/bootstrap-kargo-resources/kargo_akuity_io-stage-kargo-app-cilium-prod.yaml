@@ -97,6 +97,13 @@ spec:
               value: "true"
             - name: copyEnvResources
               value: "true"
+            # The Stage requestedFreight above takes Freight from, so the
+            # commit can link to that Stage's render of it -- or "" when this
+            # Stage takes Freight straight from the Warehouse, which the commit
+            # then says outright. The same condition as `stages:` above, so the
+            # two cannot disagree.
+            - name: upstreamStage
+              value: "test"
         # Both environments sync and report health.
         #
         # Omitting this would be strictly worse than including it: the Stage
