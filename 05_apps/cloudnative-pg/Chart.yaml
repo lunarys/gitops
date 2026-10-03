@@ -22,7 +22,7 @@ dependencies:
     repository: https://cloudnative-pg.github.io/charts
 
   - name: externalsecrets
-    version: 4.6.0
+    version: 5.1.0
     repository: oci://ghcr.io/lunarys/charts
 
   # Three instances, because the chart renders one preset per release. See the
