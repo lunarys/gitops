@@ -36,10 +36,10 @@ metadata:
     kargo.akuity.io/keep-namespace: "true"
 ---
 {{- /*
-  Kargo already defaults to manual promotion, so this block is belt-and-braces.
-  It is worth the objects: auto-promotion into the test cluster is the one
-  failure this design must not have, because that cluster is powered off most of
-  the time and promotions would queue against a controller that is not running.
+  Whether each Stage auto-promotes, from the app's kargo.autoPromote setting
+  (default off for both -- see defaultSettings in values.yaml). Written out even
+  when false, though Kargo already defaults to manual: the ProjectConfig then
+  says what the policy is instead of leaving it to a default.
 
   One policy per Stage this app actually has -- inTest/inProd, supplied by the
   caller from the same enabled lists that decide whether kargo-resources.yaml
@@ -56,11 +56,11 @@ spec:
     {{- if .inTest }}
     - stageSelector:
         name: test
-      autoPromotionEnabled: false
+      autoPromotionEnabled: {{ include "apps-generator.autoPromote" (dict "app" .app "env" "test") }}
     {{- end }}
     {{- if .inProd }}
     - stageSelector:
         name: prod
-      autoPromotionEnabled: false
+      autoPromotionEnabled: {{ include "apps-generator.autoPromote" (dict "app" .app "env" "prod") }}
     {{- end }}
 {{- end }}

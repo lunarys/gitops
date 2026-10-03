@@ -89,6 +89,19 @@ defaultSettings:
       test: true
       prod: true
 
+    # Promote new Freight into the environment without anyone clicking
+    # promote. Same two shapes as openPR: a bool for both environments, or per
+    # environment. Prod still waits for test where the app has a test Stage --
+    # auto-promotion only removes the click, not the gate -- and with openPR on
+    # the promotion still parks on its PR until someone merges it.
+    #
+    # Off for test by default for a reason beyond caution: the test cluster is
+    # powered off most of the time, and promotions auto-started against it
+    # queue on a controller that is not running.
+    autoPromote:
+      test: false
+      prod: false
+
     # Extra Warehouse excludePaths, relative to the app directory. The generator
     # already excludes markdown at any depth and example/ + examples/; this is
     # for the app-specific ones -- docker/, .old/, resources.disabled/ and the

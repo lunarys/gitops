@@ -30,22 +30,35 @@
 {{- end }}
 
 {{- /*
-  Whether this app opens a PR against the stage branch for this environment.
+  A per-environment bool under the app's `kargo` settings, for this environment.
 
-  Accepts either shape, because an app overriding it in settings.yaml is likely
-  to write the scalar form and a silent wrong answer here means a promotion
-  quietly bypasses review:
+  Accepts either shape, because an app overriding one in settings.yaml is likely
+  to write the scalar form, and a silent wrong answer here means a promotion
+  quietly bypasses review or starts on its own:
 
     openPR: false              -- applies to both environments
     openPR: {test: false, prod: true}
+
+  An environment missing from the map falls back to `fallback`, which each
+  caller sets to the conservative answer for its own setting.
 */ -}}
-{{- define "apps-generator.openPR" -}}
-{{- $v := dig "kargo" "openPR" (dict) .app.settings -}}
+{{- define "apps-generator.kargoPerEnv" -}}
+{{- $v := dig "kargo" .key (dict) .app.settings -}}
 {{- if kindIs "bool" $v -}}
 {{ $v }}
 {{- else -}}
-{{ dig .env true $v }}
+{{ dig .env .fallback $v }}
 {{- end -}}
+{{- end }}
+
+{{- /* Whether this app opens a PR against the stage branch for this environment. */ -}}
+{{- define "apps-generator.openPR" -}}
+{{ include "apps-generator.kargoPerEnv" (dict "app" .app "env" .env "key" "openPR" "fallback" true) }}
+{{- end }}
+
+{{- /* Whether new Freight is promoted into this environment automatically. */ -}}
+{{- define "apps-generator.autoPromote" -}}
+{{ include "apps-generator.kargoPerEnv" (dict "app" .app "env" .env "key" "autoPromote" "fallback" false) }}
 {{- end }}
 
 {{- /*
