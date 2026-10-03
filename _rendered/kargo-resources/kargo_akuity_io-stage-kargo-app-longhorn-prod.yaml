@@ -98,10 +98,11 @@ spec:
             - name: copyEnvResources
               value: "false"
             # The Stage requestedFreight above takes Freight from, so the
-            # commit can link to that Stage's render of it -- or "" when this
-            # Stage takes Freight straight from the Warehouse, which the commit
-            # then says outright. The same condition as `stages:` above, so the
-            # two cannot disagree.
+            # commit can link to that Stage's render of it -- or "<none>" when
+            # this Stage takes Freight straight from the Warehouse, which the
+            # commit then says outright. Not "": Kargo treats an empty var as
+            # missing and rejects the Promotion. The same condition as
+            # `stages:` above, so the two cannot disagree.
             - name: upstreamStage
               value: "test"
         # Both environments sync and report health.
