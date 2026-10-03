@@ -9,5 +9,5 @@ dependencies:
     repository: https://kubernetes-csi.github.io/csi-driver-smb
 
   - name: networkpolicy
-    version: 4.6.0
+    version: 5.1.0
     repository: oci://ghcr.io/lunarys/charts

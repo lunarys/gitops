@@ -29,15 +29,15 @@ dependencies:
   # comment at the top of values-network.part.yaml.
   - name: networkpolicy
     alias: netpol-operator
-    version: 4.6.0
+    version: 5.1.0
     repository: oci://ghcr.io/lunarys/charts
 
   - name: networkpolicy
     alias: netpol-plugin
-    version: 4.6.0
+    version: 5.1.0
     repository: oci://ghcr.io/lunarys/charts
 
   - name: networkpolicy
     alias: netpol-database
-    version: 4.6.0
+    version: 5.1.0
     repository: oci://ghcr.io/lunarys/charts
