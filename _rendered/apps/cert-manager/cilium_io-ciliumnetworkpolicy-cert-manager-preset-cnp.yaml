@@ -1,0 +1,64 @@
+# Source: cert-manager/charts/networkpolicy/templates/networkpolicy-preset.yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  
+  name: cert-manager-preset-cnp
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEndpoints:
+        - {}
+    - fromEntities:
+        - kube-apiserver
+        - host
+        - remote-node
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: traefik
+  egress:
+    - toEndpoints:
+        - {}
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: step-ca
+    - toEntities:
+        - kube-apiserver
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        - matchName: "acme-v02.api.letsencrypt.org"
+        - matchName: "acme-staging-v02.api.letsencrypt.org"
+        - matchName: "step-ca.svc.elda"
+    - 
+      toEndpoints:
+      - matchLabels:
+          io.kubernetes.pod.namespace: traefik
+      toPorts:
+      - ports:
+        - port: "8000"
+          protocol: TCP
+        rules:
+          http:
+          - method: GET
+            path: ^/.well-known/acme-challenge/.*
+    - 
+      toEntities:
+      - world
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: TCP
+        rules:
+          http:
+          - method: GET
+            path: ^/.well-known/acme-challenge/.*
