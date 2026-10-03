@@ -1,0 +1,7 @@
+networkpolicy:
+  preset:
+    ingress:
+      # Traefik reaches the API server; the Kubernetes API reaches the webhooks
+      # server. The controller accepts nothing.
+      fromIngressController: true
+      fromKubeApi: true

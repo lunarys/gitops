@@ -2,14 +2,9 @@ networkpolicy:
   preset:
     namespaceIsolation: true
 
-    ingress:
-      # Traefik reaches the API server. The controller accepts nothing.
-      fromIngressController: true
-      fromKubeApi: true
-
     egress:
-      # Promotions read and write Kubernetes: Stages, Promotions and Freight
-      # here, and Argo CD Applications during argocd-update.
+      # This cluster's API: Argo CD Applications during argocd-update, and in
+      # prod the Kargo resources themselves.
       toKubeApi: true
 
       # No host list, deliberately.
