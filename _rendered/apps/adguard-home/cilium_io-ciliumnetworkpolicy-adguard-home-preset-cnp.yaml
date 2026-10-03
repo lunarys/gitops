@@ -1,0 +1,48 @@
+# Source: adguard-home/charts/adguard-home/charts/networkpolicy/templates/networkpolicy-preset.yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  
+  name: adguard-home-preset-cnp
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEndpoints:
+        - {}
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: adguard-sync
+    - fromCIDR:
+        - 10.0.0.0/20
+        - fda0:f54f:5876::/48
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: traefik
+    - fromEndpoints:
+        - matchLabels:
+            custom.network/homeassistant-integrated: "egress"
+          matchExpressions:
+            - key: io.kubernetes.pod.namespace
+              operator: Exists
+    - fromEndpoints:
+        - matchLabels:
+            custom.network/heimdall-integrated: "egress"
+          matchExpressions:
+            - key: io.kubernetes.pod.namespace
+              operator: Exists
+  egress:
+    - toEndpoints:
+        - {}
+    - toEntities:
+        - world
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+          rules:
+            dns:
+              - matchPattern: "*"
