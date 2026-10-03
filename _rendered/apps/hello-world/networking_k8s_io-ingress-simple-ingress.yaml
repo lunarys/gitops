@@ -1,0 +1,19 @@
+# Source: test/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: simple-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: hello-world-test-ipallowlist@kubernetescrd
+spec:
+  rules:
+    - host: hello.test.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: hello-world 
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
