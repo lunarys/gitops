@@ -10,7 +10,7 @@ metadata:
     custom.network/heimdall-integrated: ingress
     app.kubernetes.io/name: adguard-home
     app.kubernetes.io/instance: adguard-home
-    app.kubernetes.io/version: "v0.107.78"
+    app.kubernetes.io/version: "v0.107.79"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
