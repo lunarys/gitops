@@ -26,11 +26,13 @@
   rejects a list-valued var) and is coerced back into a list by expression
   evaluation -- checked against Kargo's source, see the caller.
 
-  UNVERIFIED, in the order they will break (lab is down):
-    1. that `status()` inside a task takes the plain step alias, given that
-       outputs require `task.outputs[...]` because aliases are namespaced after
-       inflation;
-    2. that `kind: ClusterPromotionTask` is accepted on the task reference.
+  Inside this task, steps are aliased `<task alias>::<step alias>` once
+  inflated, so a sibling step's output is `task.outputs[...]` -- a bare
+  `outputs[...]` finds nothing. status() needs no such prefix: it matches the
+  plain alias within the caller's own task namespace. compose-output also
+  propagates its result to the task alias itself, which is what the caller's
+  `outputs['render']` reads. All checked against Kargo v1.11.4's
+  pkg/promotion and pkg/expressions/function.
 */ -}}
 {{- $app := include "kargo.expr" "vars.app" -}}
 {{- $env := include "kargo.expr" "vars.env" -}}
@@ -198,7 +200,7 @@ spec:
         repoURL: '{{ $renderedRepoURL }}'
         # Set explicitly rather than inferred from the URL.
         provider: github
-        sourceBranch: '{{ include "kargo.expr" `outputs["push-pr"].branch` }}'
+        sourceBranch: '{{ include "kargo.expr" `task.outputs["push-pr"].branch` }}'
         targetBranch: '{{ $targetBranch }}'
         title: {{ $prTitle | quote }}
         description: |-{{ $rendered | nindent 10 }}
@@ -225,7 +227,7 @@ spec:
       config:
         repoURL: '{{ $renderedRepoURL }}'
         provider: github
-        prNumber: '{{ include "kargo.expr" `outputs["open-pr"].pr.id` }}'
+        prNumber: '{{ include "kargo.expr" `task.outputs["open-pr"].pr.id` }}'
     {{- /*
       What the caller pins argocd-update to: the commit the stage branch will be
       at once this promotion is done.
