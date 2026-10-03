@@ -82,7 +82,7 @@
   freightMetadata() returns nil. Checked against Kargo v1.11.4's EvaluateTemplate
   with expr v1.17.8, all three shapes plus a Freight carrying only other keys.
 */ -}}
-{{- $upstream := include "kargo.expr" `let u = vars.upstreamStage; let p = u == "" ? nil : (freightMetadata(ctx.targetFreight.name) ?? {})[u]; u == "" ? "none, promoted directly from the Warehouse" : p == nil ? u + ", <no details available>" : u + ", " + p.commitURL + (p.pr == "" ? "" : " via " + p.pr)` -}}
+{{- $upstream := include "kargo.expr" `let u = vars.upstreamStage; let p = u == "<none>" ? nil : (freightMetadata(ctx.targetFreight.name) ?? {})[u]; u == "<none>" ? "none, promoted directly from the Warehouse" : p == nil ? u + ", <no details available>" : u + ", " + p.commitURL + (p.pr == "" ? "" : " via " + p.pr)` -}}
 {{- $rollbackLine := include "kargo.expr" `ctx.meta.promotion.rollback ? "This is a rollback." : ""` -}}
 {{- $subject := printf "chore(%s): render %s" $app $alias -}}
 {{- $prTitle := printf "chore(%s): render onto %s" $app $targetBranch -}}
@@ -123,10 +123,13 @@ spec:
       value: "false"
     - name: copyEnvResources
       value: "false"
-    # The Stage this one takes Freight from, or "" when it takes it straight
-    # from the Warehouse. No default, like the rest: "" would claim there is no
-    # upstream Stage, and a commit that says so wrongly is worse than a
-    # promotion that fails until the generator has caught up.
+    # The Stage this one takes Freight from, or "<none>" when it takes it
+    # straight from the Warehouse -- a name no Stage can have. NOT "": Kargo
+    # treats an empty var as unset, on the Stage and as a task default alike
+    # (pkg/api/promotion.go, v1.11.4), and the API server drops it anyway since
+    # the field is omitempty. No default, like the rest: "<none>" would claim
+    # there is no upstream Stage, and a commit that says so wrongly is worse
+    # than a promotion that fails until the generator has caught up.
     - name: upstreamStage
   steps:
     - uses: git-clone
