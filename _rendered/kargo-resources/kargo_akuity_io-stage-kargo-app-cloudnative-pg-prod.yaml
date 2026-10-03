@@ -90,6 +90,13 @@ spec:
               value: "true"
             - name: openPR
               value: "true"
+            # Whether resources/ and resources-<env>/ exist, so the task's copy
+            # steps run only for directories that are there -- Kargo's copy
+            # step errors on a missing source rather than skipping it.
+            - name: copyResources
+              value: "true"
+            - name: copyEnvResources
+              value: "false"
         # Both environments sync and report health.
         #
         # Omitting this would be strictly worse than including it: the Stage
