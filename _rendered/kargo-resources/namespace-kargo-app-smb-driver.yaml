@@ -1,0 +1,7 @@
+# Source: apps-generator/templates/kargo-resources.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kargo-app-smb-driver
+  labels:
+    kargo.akuity.io/project: "true"

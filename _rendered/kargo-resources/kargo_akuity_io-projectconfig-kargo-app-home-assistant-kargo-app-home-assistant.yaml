@@ -1,0 +1,11 @@
+# Source: apps-generator/templates/kargo-resources.yaml
+apiVersion: kargo.akuity.io/v1alpha1
+kind: ProjectConfig
+metadata:
+  name: kargo-app-home-assistant
+  namespace: kargo-app-home-assistant
+spec:
+  promotionPolicies:
+    - stageSelector:
+        name: prod
+      autoPromotionEnabled: false
