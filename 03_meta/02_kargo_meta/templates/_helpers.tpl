@@ -188,7 +188,7 @@ spec:
         */}}
         - uses: delete
           config:
-            path: ./out/{{ $pass.outDir }}
+            path: ./out/{{ $root.Values.renderedRoot }}/{{ $pass.outDir }}
             strict: false
         {{- /*
           Helm's .Files cannot read outside the chart directory, and the apps
@@ -223,7 +223,7 @@ spec:
               know whether a second call into the same outPath would
               accumulate or clobber -- genuinely unverified upstream.
             */}}
-            outPath: ./out/{{ $pass.outDir }}
+            outPath: ./out/{{ $root.Values.renderedRoot }}/{{ $pass.outDir }}
             outLayout: flat
             # Cosmetic: verified that no generator template reads .Release.Name,
             # so this cannot affect the output. Matches render.sh so a local
