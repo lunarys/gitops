@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/part-of: cilium
     app.kubernetes.io/name: cilium-envoy
     name: cilium-envoy
-    helm.sh/chart: cilium-1.20.0
+    helm.sh/chart: cilium-1.20.2
 spec:
   selector:
     matchLabels:
@@ -31,11 +31,11 @@ spec:
         name: cilium-envoy
         app.kubernetes.io/name: cilium-envoy
         app.kubernetes.io/part-of: cilium
-        helm.sh/chart: cilium-1.20.0
+        helm.sh/chart: cilium-1.20.2
     spec:
       containers:
       - name: cilium-envoy
-        image: "quay.io/cilium/cilium-envoy:v1.37.5-1782911245-7cffc778c923f68a77954a53b1a98d6b5353f004@sha256:583057dd4f7d54cd41efff3c413aa0b148ac201f522e2c3336851fa89c78b039"
+        image: "quay.io/cilium/cilium-envoy:v1.37.6-1789133542-cbec91f666af0bf742da986d43832932dbb26b82@sha256:af7382699576b9e65e9184efa52eeca0b58aea70ad6e511bf260c91d9f740463"
         imagePullPolicy: IfNotPresent
         command:
         - /usr/bin/cilium-envoy-starter

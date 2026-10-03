@@ -6,7 +6,7 @@ metadata:
   namespace: kube-system
   labels:
     app.kubernetes.io/part-of: cilium
-    helm.sh/chart: cilium-1.20.0
+    helm.sh/chart: cilium-1.20.2
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
