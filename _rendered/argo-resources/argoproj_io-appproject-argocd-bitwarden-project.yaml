@@ -1,0 +1,20 @@
+# Source: apps-generator/templates/argo-resources.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: bitwarden-project
+  namespace: argocd
+spec:
+  description: Project for application bitwarden
+  sourceRepos:
+    # The Application's actual source (_argo_application.tpl), which is
+    # mainRepo unless renderedRepo overrides it.
+    - https://github.com/lunarys/gitops.git
+  destinations:
+    - namespace: bitwarden
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  orphanedResources:
+    warn: false

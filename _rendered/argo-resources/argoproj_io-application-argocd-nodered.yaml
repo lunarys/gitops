@@ -1,0 +1,31 @@
+# Source: apps-generator/templates/argo-resources.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nodered
+  namespace: argocd
+  annotations:
+    # Restricts which Kargo Stage may drive this Application. Stage names are
+    # bare `test`/`prod` because the Kargo Project already namespaces them.
+    kargo.akuity.io/authorized-stage: kargo-app-nodered:prod
+spec:
+  project: nodered-project
+  destination:
+    namespace: nodered
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: https://github.com/lunarys/gitops.git
+    targetRevision: stage/prod
+    path: _rendered/apps/nodered
+    directory:
+      recurse: true
+  syncPolicy:
+    automated:
+      enabled: false
+      selfHeal: true
+    syncOptions:
+      # Workload namespaces are created by Argo. This is NOT true of the Kargo
+      # Project namespaces, which are emitted as explicit labelled Namespace
+      # manifests instead -- see _kargo_project.tpl.
+      - CreateNamespace=true
+      - ServerSideApply=true
