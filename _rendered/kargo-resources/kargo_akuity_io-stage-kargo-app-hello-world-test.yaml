@@ -61,16 +61,20 @@ spec:
             # ignoreMissingValueFiles -- a misnamed file is one the generator
             # rejects outright rather than one Helm silently skips.
             #
-            # UNVERIFIED: that a list-valued var populates a list-typed step
-            # config field. The docs call vars "static values of any type" and
-            # say results are coerced to "array" among others, but show no
-            # example. Settle this in the lab before trusting it; the fallback
-            # is a fixed file list in the task with ignoreMissingValueFiles,
-            # which loses fragments but nothing else.
+            # A JSON-encoded STRING, not a YAML list: the Stage CRD types a
+            # var's value as string, and the API server rejects a list there
+            # ("expected string, got ... []interface {}") -- the docs' "static
+            # values of any type" notwithstanding.
+            #
+            # The task gets a list back regardless. Checked against Kargo
+            # v1.11.4's pkg/expressions/json_templates.go (EvaluateTemplate):
+            # this var has no expression delimiters, so it stays a plain
+            # string; the task's whole-field vars.valuesFiles expression then
+            # evaluates to that string, which is json.Unmarshal'ed into an
+            # array (after number/bool fail) before the step config is
+            # marshalled -- so helm-template's valuesFiles sees a []string.
             - name: valuesFiles
-              value:
-                - ./src/05_apps/hello-world/values.yaml
-                - ./src/05_apps/hello-world/values-network.part.yaml
+              value: "[\"./src/05_apps/hello-world/values.yaml\",\"./src/05_apps/hello-world/values-network.part.yaml\"]"
             - name: namespace
               value: hello-world
             - name: outRoot
