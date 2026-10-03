@@ -1,0 +1,91 @@
+# Source: adguard-sync/charts/adguard-sync/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    helm.sh/chart: adguard-sync-4.6.0
+    
+    app.kubernetes.io/name: adguard-sync
+    app.kubernetes.io/instance: adguard-sync
+    app.kubernetes.io/version: "v0.9.2"
+    app.kubernetes.io/managed-by: Helm
+  name: adguard-sync
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: adguard-sync
+      app.kubernetes.io/instance: adguard-sync
+  template:
+    metadata:
+      annotations:
+        
+        prometheus.io/scrape: 'false'
+      labels:
+        
+        app.kubernetes.io/name: adguard-sync
+        app.kubernetes.io/instance: adguard-sync
+    spec:
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: adguard-sync
+          image: ghcr.io/bakito/adguardhome-sync:v0.9.2
+          imagePullPolicy: IfNotPresent
+          resources:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          #readiness & liveness
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          ports:
+            - containerPort: 8080
+              name: default
+              protocol: TCP
+          #config values that comes from the configmap 
+          envFrom:
+            - secretRef:
+                name: adguard-origin-credentials
+            - secretRef:
+                name: adguard-replica-credentials
+          env:
+            # settings from 'env'
+            - name: "TZ"
+              value: "Europe/Berlin"
+          volumeMounts:
+            
+            
+            - name: config-values-mount-via-subpath
+              mountPath: /config/adguardhome-sync.yaml
+              subPath: config.yaml
+              readOnly: true
+      volumes:
+        - name: config-values-mount-via-subpath
+          configMap:
+            name: adguard-sync-config
+            items:
+              - key: config.yaml
+                path: config.yaml
