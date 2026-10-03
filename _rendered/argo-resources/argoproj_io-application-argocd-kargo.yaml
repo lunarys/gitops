@@ -2,21 +2,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: crowdsec-web-ui
+  name: kargo
   namespace: argocd
   annotations:
     # Restricts which Kargo Stage may drive this Application. Stage names are
     # bare `test`/`prod` because the Kargo Project already namespaces them.
-    kargo.akuity.io/authorized-stage: kargo-app-crowdsec-web-ui:test
+    kargo.akuity.io/authorized-stage: kargo-app-kargo:test
 spec:
-  project: crowdsec-web-ui-project
+  project: kargo-project
   destination:
-    namespace: crowdsec
+    namespace: kargo
     server: https://kubernetes.default.svc
   source:
     repoURL: https://github.com/lunarys/gitops.git
     targetRevision: stage/test
-    path: _rendered/apps/crowdsec-web-ui
+    path: _rendered/apps/kargo
     directory:
       recurse: true
   syncPolicy:
