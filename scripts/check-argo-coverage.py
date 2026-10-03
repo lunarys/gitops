@@ -30,8 +30,8 @@ divergences are reported, not enforced, so that this check can gate the overlay 
 without first requiring install.sh to be reconciled with the wrapper.
 
 Usage:
-  check-argo-coverage.py --repo . --wrapper-chart 03_apps --env prod \
-                         --app-roots "03_apps/apps 02_bootstrap"
+  check-argo-coverage.py --repo . --wrapper-chart <chart> --env prod \
+                         --app-roots "05_apps 02_bootstrap"
 """
 
 import argparse
@@ -226,9 +226,9 @@ def resolve_unit(repo, unit, env, install_script="scripts/install.sh"):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", default=".")
-    ap.add_argument("--wrapper-chart", default="03_apps")
+    ap.add_argument("--wrapper-chart", default="")
     ap.add_argument("--env", default="prod")
-    ap.add_argument("--app-roots", default="03_apps/apps 02_bootstrap")
+    ap.add_argument("--app-roots", default="05_apps 02_bootstrap")
     ap.add_argument("--install-script", default="scripts/install.sh",
                     help="install.sh to resolve units with; relative to --repo, or "
                          "absolute when it comes from a separate checkout")

@@ -9,8 +9,11 @@ These are placed in a quite similar, private repository.
 
 
 - `01_k0s` - k0s cluster configuration and setup scripts
-- `02_bootstrap` - Core cluster components bootstrapped before ArgoCD takes over
-- `03_apps/apps` - All application deployments, managed as ArgoCD app-of-apps
+- `02_bootstrap` - Core cluster components (Cilium, ArgoCD, Traefik) bootstrapped before ArgoCD takes over
+- `03_meta` - Argo CD and Kargo self-configuration (app-of-apps, Kargo project/warehouse/stages)
+- `04_apps_generator` - Helm chart that generates the per-app Argo Applications/Projects and Kargo resources
+- `05_apps` - All application deployments, one directory per app
+- `gitops-values.yaml` - Repository-wide settings shared by the `03_meta` and `04_apps_generator` charts
 - `scripts` - Utility scripts
 
 Conventions, patterns, and security architecture are documented in [AGENTS.md](AGENTS.md),
@@ -28,8 +31,9 @@ a few components are bootstrapped in order:
 
 ## Core Components
 
-- **Orchestration** — [ArgoCD](https://argo-cd.readthedocs.io/) manages all deployments.
-Changes to this repo are reconciled automatically into the cluster.
+- **Orchestration** — [Kargo](https://kargo.io/) pre-renders every app and promotes the result
+from test to prod via pull requests on the `stage/<env>` branches;
+[ArgoCD](https://argo-cd.readthedocs.io/) syncs the rendered manifests into the cluster.
 - **Networking** — [Cilium](https://cilium.io/) as the CNI with eBPF-based network policies
 and L2 load balancing. [Traefik](https://traefik.io/) handles ingress — a separate internal
 instance (IP allowlist) and an external instance (CrowdSec, rate limiting, GeoBlock).

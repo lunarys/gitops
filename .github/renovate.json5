@@ -20,42 +20,6 @@
                 "*.image.{\"depName\": name, \"currentValue\": tag}"
             ],
             datasourceTemplate: "docker"
-        },
-        {
-          customType: "jsonata",
-          fileFormat: "yaml",
-          managerFilePatterns: ["/(^|/)apps/.+/(.*-)?app.yaml$/"],
-          matchStrings: [
-            "helm.( \
-              $repo := $exists(repo) and $type(repo)='string' ? repo : 'oci://ghcr.io/lunarys/charts'; \
-              $isHttp := $match($repo, /^https?:\\/\\//); \
-              { \
-                'datasource': ($isHttp ? 'helm' : 'docker'), \
-                'depName': chart, \
-                'currentValue': version, \
-                'registryUrl': ($isHttp ? $repo : undefined), \
-                'packageName': ($isHttp ? chart : ($substringAfter($repo, 'oci://') & '/' & chart)) \
-              } \
-            )"
-          ]
-        },
-        {
-            customType: "jsonata",
-            fileFormat: "yaml",
-            managerFilePatterns: ["03_apps/values.yaml"],
-            matchStrings: [
-                "{\"currentValue\": secretsChartVersion, \"packageName\": $substringAfter(mainHelmRepo, 'oci://') & '/' & secretsChart, 'depName': secretsChart}"
-            ],
-            datasourceTemplate: "docker"
-        },
-        {
-            customType: "jsonata",
-            fileFormat: "yaml",
-            managerFilePatterns: ["03_apps/values.yaml"],
-            matchStrings: [
-                "{\"currentValue\": networkPolicyChartVersion, \"packageName\": $substringAfter(mainHelmRepo, 'oci://') & '/' & networkPolicyChart, 'depName': networkPolicyChart}"
-            ],
-            datasourceTemplate: "docker"
         }
     ],
     "packageRules": [
