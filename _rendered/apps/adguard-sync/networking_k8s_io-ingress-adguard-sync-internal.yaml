@@ -1,0 +1,25 @@
+# Source: adguard-sync/charts/adguard-sync/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: adguard-sync-internal
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-https-redirect@kubernetescrd"
+    cert-manager.io/cluster-issuer: "step-ca-internal"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - adguard-sync.svc.elda
+      secretName: adguard-sync-internal-cert
+  rules:
+    - host: adguard-sync.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: adguard-sync
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix

@@ -1,0 +1,41 @@
+---
+# Source: adguard-sync/charts/adguard-sync/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: adguard-sync-config
+data:
+  config.yaml: |-
+    api:
+      metrics:
+        enabled: false
+      port: 8080
+    continueOnError: true
+    cron: '*/10 * * * *'
+    features:
+      clientSettings: true
+      dhcp:
+        serverConfig: false
+        staticLeases: false
+      dns:
+        accessLists: true
+        rewrites: true
+        serverConfig: true
+      filters: true
+      generalSettings: true
+      queryLogConfig: true
+      services: true
+      statsConfig: true
+      theme: true
+      tlsConfig: false
+    origin:
+      autoSetup: false
+      dhcpServerEnabled: false
+      url: http://10.0.0.5/
+    printConfigOnly: false
+    replicas:
+    - autoSetup: false
+      dhcpServerEnabled: false
+      url: http://adguard-home.adguard-home.svc.cluster.local/
+      webURL: http://adguard.svc.elda/
+    runOnStart: true
