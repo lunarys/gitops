@@ -94,13 +94,9 @@ defaultSettings:
     # environment. Prod still waits for test where the app has a test Stage --
     # auto-promotion only removes the click, not the gate -- and with openPR on
     # the promotion still parks on its PR until someone merges it.
-    #
-    # Off for test by default for a reason beyond caution: the test cluster is
-    # powered off most of the time, and promotions auto-started against it
-    # queue on a controller that is not running.
     autoPromote:
-      test: false
-      prod: false
+      test: true
+      prod: true
 
     # Extra Warehouse excludePaths, relative to the app directory. The generator
     # already excludes markdown at any depth and example/ + examples/; this is
