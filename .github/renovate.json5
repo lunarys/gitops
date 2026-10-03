@@ -15,9 +15,15 @@
             customType: "jsonata",
             fileFormat: "yaml",
             managerFilePatterns: ["/(^|/)(.*-)?values(-prod|-test)?\\.ya?ml$/"],
+            // Renovate parses YAML as a list of documents, so these run against
+            // [doc], not doc. A named first step (`image`) maps over that list
+            // on its own; a leading wildcard does not -- `*.image` matches
+            // nothing against [doc] -- so `$.` anchors it. The second form is
+            // the one that matters now: every Chart.yaml wrapper nests its
+            // values under the dependency alias (`<alias>.image`).
             matchStrings: [
                 "image.{\"depName\": name, \"currentValue\": tag}",
-                "*.image.{\"depName\": name, \"currentValue\": tag}"
+                "$.*.image.{\"depName\": name, \"currentValue\": tag}"
             ],
             datasourceTemplate: "docker"
         }
