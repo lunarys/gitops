@@ -2,7 +2,7 @@
 apiVersion: kargo.akuity.io/v1alpha1
 kind: Stage
 metadata:
-  name: prod
+  name: test
   namespace: kargo-app-crowdsec-web-ui
 spec:
   # spec.shard, NOT the kargo.akuity.io/shard label. The Stage admission webhook
@@ -12,17 +12,13 @@ spec:
   #
   # A Stage runs on the shard of the cluster it changes, so a promotion never
   # half-runs against a cluster that is powered off: it does not start at all.
-  shard: prod
+  shard: test
   requestedFreight:
     - origin:
         kind: Warehouse
         name: crowdsec-web-ui
       sources:
-        # Production takes Freight only after test has had it. Emitted only when
-        # the app is actually enabled in test -- a prod-only app has no test
-        # Stage to gate on and would deadlock waiting for one.
-        stages:
-          - test
+        direct: true
   promotionTemplate:
     spec:
       steps:
@@ -53,9 +49,9 @@ spec:
             - name: appRoot
               value: 05_apps
             - name: env
-              value: prod
+              value: test
             - name: targetBranch
-              value: stage/prod
+              value: stage/test
             # The exact values files this app has, in layering order, derived
             # from the directory at render time. The task cannot work this out
             # for itself: valuesFiles is a plain []string with no glob support,
@@ -78,13 +74,13 @@ spec:
             # array (after number/bool fail) before the step config is
             # marshalled -- so helm-template's valuesFiles sees a []string.
             - name: valuesFiles
-              value: "[\"./src/05_apps/crowdsec-web-ui/values.yaml\"]"
+              value: "[\"./src/05_apps/crowdsec-web-ui/values.yaml\",\"./src/05_apps/crowdsec-web-ui/values-test.yaml\"]"
             - name: namespace
               value: crowdsec
             - name: outRoot
               value: _rendered/apps
             - name: promotionBranch
-              value: kargo/promotion/crowdsec-web-ui-prod
+              value: kargo/promotion/crowdsec-web-ui-test
             # skipCrds is a RENDER decision now, not an Argo sync option.
             - name: includeCRDs
               value: "false"
@@ -104,7 +100,7 @@ spec:
             # missing and rejects the Promotion. The same condition as
             # `stages:` above, so the two cannot disagree.
             - name: upstreamStage
-              value: "test"
+              value: "<none>"
         # Both environments sync and report health.
         #
         # Omitting this would be strictly worse than including it: the Stage

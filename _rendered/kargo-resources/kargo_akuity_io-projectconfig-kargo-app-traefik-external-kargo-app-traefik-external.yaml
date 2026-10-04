@@ -2,8 +2,8 @@
 apiVersion: kargo.akuity.io/v1alpha1
 kind: ProjectConfig
 metadata:
-  name: kargo-app-crowdsec-web-ui
-  namespace: kargo-app-crowdsec-web-ui
+  name: kargo-app-traefik-external
+  namespace: kargo-app-traefik-external
 spec:
   promotionPolicies:
     - stageSelector:

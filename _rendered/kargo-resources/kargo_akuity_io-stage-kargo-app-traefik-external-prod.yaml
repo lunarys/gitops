@@ -3,7 +3,7 @@ apiVersion: kargo.akuity.io/v1alpha1
 kind: Stage
 metadata:
   name: prod
-  namespace: kargo-app-crowdsec-web-ui
+  namespace: kargo-app-traefik-external
 spec:
   # spec.shard, NOT the kargo.akuity.io/shard label. The Stage admission webhook
   # treats spec.shard as authoritative and derives the label from it, silently
@@ -16,7 +16,7 @@ spec:
   requestedFreight:
     - origin:
         kind: Warehouse
-        name: crowdsec-web-ui
+        name: traefik-external
       sources:
         # Production takes Freight only after test has had it. Emitted only when
         # the app is actually enabled in test -- a prod-only app has no test
@@ -46,10 +46,10 @@ spec:
             - name: renderedRepoURL
               value: https://github.com/lunarys/gitops.git
             - name: app
-              value: crowdsec-web-ui
+              value: traefik-external
             # The directory, which may differ from the application name.
             - name: appDir
-              value: crowdsec-web-ui
+              value: traefik-external
             - name: appRoot
               value: 05_apps
             - name: env
@@ -78,13 +78,13 @@ spec:
             # array (after number/bool fail) before the step config is
             # marshalled -- so helm-template's valuesFiles sees a []string.
             - name: valuesFiles
-              value: "[\"./src/05_apps/crowdsec-web-ui/values.yaml\"]"
+              value: "[\"./src/05_apps/traefik-external/values.yaml\",\"./src/05_apps/traefik-external/values-network.part.yaml\",\"./src/05_apps/traefik-external/values-secrets.part.yaml\",\"./src/05_apps/traefik-external/values-prod.yaml\",\"./src/05_apps/traefik-external/values-secrets-prod.part.yaml\"]"
             - name: namespace
-              value: crowdsec
+              value: traefik-external
             - name: outRoot
               value: _rendered/apps
             - name: promotionBranch
-              value: kargo/promotion/crowdsec-web-ui-prod
+              value: kargo/promotion/traefik-external-prod
             # skipCrds is a RENDER decision now, not an Argo sync option.
             - name: includeCRDs
               value: "false"
