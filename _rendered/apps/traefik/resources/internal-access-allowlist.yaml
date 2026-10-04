@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: common-internal-access-allowlist
+spec:
+  ipAllowList:
+    sourceRange:
+      - 10.0.0.0/20
+      - fda0:f54f:5876::/48 # IPv6 ULA LAN (dual-stack clients source from here)

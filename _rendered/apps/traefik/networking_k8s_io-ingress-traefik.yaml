@@ -1,0 +1,19 @@
+# Source: test/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd"
+spec:
+  rules:
+    - host: traefik.test.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: traefik
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
