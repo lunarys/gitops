@@ -1,0 +1,32 @@
+# Source: longhorn/charts/longhorn/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: longhorn-ingress
+  namespace: longhorn-system
+  labels:
+    app.kubernetes.io/name: longhorn
+    helm.sh/chart: longhorn-1.12.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: longhorn
+    app.kubernetes.io/version: v1.12.0
+    app: longhorn-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "step-ca-internal"
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd"
+spec:
+  rules:
+  - host: longhorn.test.svc.elda
+    http:
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: longhorn-frontend
+              port:
+                number: 80
+  tls:
+  - hosts:
+    - longhorn.test.svc.elda
+    secretName: longhorn-internal-cert

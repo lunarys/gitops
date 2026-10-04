@@ -1,0 +1,16 @@
+# Source: longhorn/charts/longhorn/templates/default-resource.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: longhorn-default-resource
+  namespace: longhorn-system
+  labels:
+    app.kubernetes.io/name: longhorn
+    helm.sh/chart: longhorn-1.12.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: longhorn
+    app.kubernetes.io/version: v1.12.0
+data:
+  default-resource.yaml: |-
+    backup-target: cifs://erolas.elda/k8s-test-longhorn-backup
+    backup-target-credential-secret: cifs-secret
