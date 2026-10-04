@@ -1,0 +1,21 @@
+# Source: keda/charts/keda/templates/manager/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: keda-operator    
+    helm.sh/chart: keda-2.20.1
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: keda-operator
+    app.kubernetes.io/version: 2.20.1
+    app.kubernetes.io/instance: keda
+  name: keda-operator
+  namespace: keda
+spec:
+  ports:
+  - name: metricsservice
+    port: 9666
+    targetPort: 9666
+  selector:
+    app: keda-operator

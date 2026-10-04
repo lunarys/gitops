@@ -1,0 +1,131 @@
+# Source: keda/charts/keda/templates/metrics-server/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keda-operator-metrics-apiserver
+  namespace: keda
+  labels:
+    app: keda-operator-metrics-apiserver
+    app.kubernetes.io/name: keda-operator-metrics-apiserver    
+    helm.sh/chart: keda-2.20.1
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: keda-operator
+    app.kubernetes.io/version: 2.20.1
+    app.kubernetes.io/instance: keda
+spec:
+  revisionHistoryLimit: 10
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keda-operator-metrics-apiserver
+  template:
+    metadata:
+      labels:
+        app: keda-operator-metrics-apiserver
+        app.kubernetes.io/name: keda-operator-metrics-apiserver        
+        helm.sh/chart: keda-2.20.1
+        app.kubernetes.io/component: operator
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/part-of: keda-operator
+        app.kubernetes.io/version: 2.20.1
+        app.kubernetes.io/instance: keda
+    spec:
+      enableServiceLinks: true
+      serviceAccountName: keda-metrics-server
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: keda-operator-metrics-apiserver
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: "ghcr.io/kedacore/keda-metrics-apiserver:2.20.1"
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 6443
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 6443
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 3
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+          env:
+            - name: WATCH_NAMESPACE
+              value: ""
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: KEDA_HTTP_DEFAULT_TIMEOUT
+              value: "3000"
+            - name: KEDA_HTTP_MIN_TLS_VERSION
+              value: TLS12
+            - name: KEDA_HTTP_TLS_CIPHER_LIST
+              value: ""
+            - name: KEDA_SERVICE_MIN_TLS_VERSION
+              value: TLS13
+            - name: KEDA_SERVICE_TLS_CIPHER_LIST
+              value: ""
+          command:
+           - /keda-adapter
+          args:
+          - --port=8080
+          - --secure-port=6443
+          - --logtostderr=true
+          - --stderrthreshold=ERROR
+          - --disable-compression=true
+          - --metrics-service-address=keda-operator.keda.svc.cluster.local:9666
+          - --client-ca-file=/certs/ca.crt
+          - --tls-cert-file=/certs/tls.crt
+          - --tls-private-key-file=/certs/tls.key
+          - --cert-dir=/certs
+          - --v=0
+          - --zap-log-level=info
+          - --zap-encoder=console
+          - --zap-time-encoding=rfc3339
+          ports:
+            - containerPort: 6443
+              name: https
+              protocol: TCP
+            - containerPort: 8080
+              name: metrics
+              protocol: TCP
+          volumeMounts:
+          - mountPath: /certs
+            name: certificates
+            readOnly: true
+          resources:
+            limits:
+              cpu: 1
+              memory: 1000Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+      volumes:
+      - name: certificates
+        secret:
+          defaultMode: 420
+          secretName: kedaorg-certs
+      dnsPolicy: ClusterFirst
+      hostNetwork: false
+      nodeSelector:
+        kubernetes.io/os: linux

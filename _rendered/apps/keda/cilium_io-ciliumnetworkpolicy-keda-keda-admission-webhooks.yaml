@@ -1,0 +1,27 @@
+# Source: keda/charts/keda/templates/webhooks/ciliumnetworkpolicy.yaml
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: keda-admission-webhooks
+  namespace: keda
+  labels:
+    app: keda-admission-webhooks
+    name: keda-admission-webhooks
+    app.kubernetes.io/name: keda-admission-webhooks    
+    helm.sh/chart: keda-2.20.1
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: keda-operator
+    app.kubernetes.io/version: 2.20.1
+    app.kubernetes.io/instance: keda
+spec:
+  endpointSelector:
+    matchLabels:
+      app: keda-admission-webhooks
+  egress:
+    - toEntities:
+        - kube-apiserver
+        - cluster
+  ingress:
+    - fromEntities:
+        - cluster
