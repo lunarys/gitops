@@ -1,0 +1,14 @@
+---
+# Source: heimdall/charts/heimdall/charts/longhornstorage/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: heimdall-config-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-encrypted
+  volumeName: "pvc-99e17d16-75ff-4e5e-9aee-28914ff6b3db"
+  resources:
+    requests:
+      storage: 200Mi

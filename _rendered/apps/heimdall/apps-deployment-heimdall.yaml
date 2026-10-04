@@ -1,0 +1,97 @@
+# Source: heimdall/charts/heimdall/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    helm.sh/chart: heimdall-4.6.0
+    
+    custom.network/heimdall-integrated: egress
+    app.kubernetes.io/name: heimdall
+    app.kubernetes.io/instance: heimdall
+    app.kubernetes.io/version: "2.8.1"
+    app.kubernetes.io/managed-by: Helm
+  name: heimdall
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: heimdall
+      app.kubernetes.io/instance: heimdall
+  template:
+    metadata:
+      annotations:
+        
+        prometheus.io/scrape: 'false'
+      labels:
+        
+        custom.network/heimdall-integrated: egress
+        app.kubernetes.io/name: heimdall
+        app.kubernetes.io/instance: heimdall
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 3000
+        runAsNonRoot: false
+        runAsUser: 0
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: heimdall
+          image: lscr.io/linuxserver/heimdall:2.8.1
+          imagePullPolicy: IfNotPresent
+          resources:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+              - SETGID
+              - SETUID
+              - CHOWN
+              - DAC_OVERRIDE
+              - NET_BIND_SERVICE
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+          #readiness & liveness
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          ports:
+            - containerPort: 80
+              name: default
+              protocol: TCP
+          #config values that comes from the configmap 
+          envFrom:
+          env:
+            # settings from 'env'
+            - name: "PGID"
+              value: "1000"
+            - name: "PUID"
+              value: "1000"
+            - name: "TZ"
+              value: "Europe/Berlin"
+          volumeMounts:
+            
+            
+            - name: longhorn-config
+              mountPath: /config
+              readOnly: false
+      volumes:
+        
+        
+        - name: longhorn-config
+          persistentVolumeClaim:
+            claimName: heimdall-config-pvc

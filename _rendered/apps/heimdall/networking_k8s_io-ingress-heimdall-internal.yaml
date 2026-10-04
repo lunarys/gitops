@@ -1,0 +1,25 @@
+# Source: heimdall/charts/heimdall/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: heimdall-internal
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-https-redirect@kubernetescrd"
+    cert-manager.io/cluster-issuer: "step-ca-internal"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - dashboard.svc.elda
+      secretName: heimdall-internal-cert
+  rules:
+    - host: dashboard.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: heimdall
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
