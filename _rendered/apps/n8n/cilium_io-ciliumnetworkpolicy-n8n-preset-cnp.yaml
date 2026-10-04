@@ -1,0 +1,30 @@
+# Source: n8n/charts/n8n/charts/networkpolicy/templates/networkpolicy-preset.yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  
+  name: n8n-preset-cnp
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEndpoints:
+        - {}
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: traefik
+  egress:
+    - toEndpoints:
+        - {}
+    - toEntities:
+        - world
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+          rules:
+            dns:
+              - matchPattern: "*"

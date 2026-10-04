@@ -1,0 +1,25 @@
+# Source: n8n/charts/n8n/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: n8n-internal
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-https-redirect@kubernetescrd"
+    cert-manager.io/cluster-issuer: "step-ca-internal"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - n8n.svc.elda
+      secretName: n8n-internal-cert
+  rules:
+    - host: n8n.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: n8n
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix

@@ -1,0 +1,22 @@
+# Source: n8n/charts/n8n/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: n8n
+  labels:
+    helm.sh/chart: n8n-4.6.0
+    
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/instance: n8n
+    app.kubernetes.io/version: "2.35.7"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: default-service-endpoint
+      protocol: TCP
+      port: 80
+      targetPort: 5678
+  selector:
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/instance: n8n
