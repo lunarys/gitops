@@ -1,0 +1,21 @@
+# Source: cloudnative-pg-operator/charts/cloudnative-pg/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: cnpg-webhook-service
+  namespace: cloudnative-pg
+  labels:
+    helm.sh/chart: cloudnative-pg-0.29.0
+    app.kubernetes.io/name: cloudnative-pg
+    app.kubernetes.io/instance: cloudnative-pg-operator
+    app.kubernetes.io/version: "1.30.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+  - port: 443
+    targetPort: webhook-server
+    name: webhook-server
+  selector:
+    app.kubernetes.io/name: cloudnative-pg
+    app.kubernetes.io/instance: cloudnative-pg-operator
