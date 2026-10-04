@@ -1,0 +1,95 @@
+# Source: mosquitto/charts/mosquitto/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    helm.sh/chart: mosquitto-4.6.0
+    
+    custom.network/mqtt-client: ingress
+    app.kubernetes.io/name: mosquitto
+    app.kubernetes.io/instance: mosquitto
+    app.kubernetes.io/version: "2.0.22"
+    app.kubernetes.io/managed-by: Helm
+  name: mosquitto
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mosquitto
+      app.kubernetes.io/instance: mosquitto
+  template:
+    metadata:
+      annotations:
+        
+        prometheus.io/scrape: 'false'
+      labels:
+        
+        custom.network/mqtt-client: ingress
+        app.kubernetes.io/name: mosquitto
+        app.kubernetes.io/instance: mosquitto
+    spec:
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsNonRoot: true
+        runAsUser: 1883
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mosquitto
+          image: eclipse-mosquitto:2.0.22
+          imagePullPolicy: IfNotPresent
+          resources:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+          #readiness & liveness
+          livenessProbe:
+            tcpSocket:
+              port: 1883
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            tcpSocket:
+              port: 1883
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          ports:
+            - containerPort: 1883
+              name: default
+              protocol: TCP
+          #config values that comes from the configmap 
+          envFrom:
+          env:
+          volumeMounts:
+            - name: mosquitto-config
+              mountPath: /mosquitto/config
+              readOnly: true
+            - name: mosquitto-users
+              mountPath: /mosquitto/passwd
+              readOnly: true
+              subPath: mosquitto_passwd
+            
+            
+            - name: longhorn-data
+              mountPath: /mosquitto/data
+              readOnly: false
+      volumes:
+        - name: mosquitto-config
+          configMap:
+            name: mosquitto-config
+        - name: mosquitto-users
+          secret:
+            secretName: mosquitto-users
+        
+        
+        - name: longhorn-data
+          persistentVolumeClaim:
+            claimName: mosquitto-data-pvc

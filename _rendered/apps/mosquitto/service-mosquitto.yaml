@@ -1,0 +1,27 @@
+# Source: mosquitto/charts/mosquitto/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: mosquitto
+  labels:
+    helm.sh/chart: mosquitto-4.6.0
+    
+    custom.network/mqtt-client: ingress
+    app.kubernetes.io/name: mosquitto
+    app.kubernetes.io/instance: mosquitto
+    app.kubernetes.io/version: "2.0.22"
+    app.kubernetes.io/managed-by: Helm
+    custom.network/lb-pool: static
+  annotations:
+    lbipam.cilium.io/ips: 10.0.4.5
+spec:
+  type: LoadBalancer
+  allocateLoadBalancerNodePorts: false
+  ports:
+    - name: default-service-endpoint
+      protocol: TCP
+      port: 1883
+      targetPort: 1883
+  selector:
+    app.kubernetes.io/name: mosquitto
+    app.kubernetes.io/instance: mosquitto
