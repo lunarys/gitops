@@ -1,0 +1,8 @@
+# Source: cnpg-plugin-barman-cloud/charts/plugin-barman-cloud/templates/certificate-issuer.yaml
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: cnpg-plugin-barman-cloud-selfsigned-issuer
+  namespace: cloudnative-pg
+spec:
+  selfSigned: {}
