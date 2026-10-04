@@ -1,0 +1,32 @@
+# Source: cloudnative-pg-operator/charts/networkpolicy/templates/networkpolicy-preset.yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  
+  name: networkpolicy-cnpg
+spec:
+  endpointSelector: 
+    matchLabels:
+      app.kubernetes.io/instance: cloudnative-pg-operator
+  ingress:
+    - fromEntities:
+        - kube-apiserver
+        - host
+        - remote-node
+  egress:
+    - toEntities:
+        - kube-apiserver
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - 
+      toEndpoints:
+      - {}
