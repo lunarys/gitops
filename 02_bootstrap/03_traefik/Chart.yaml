@@ -27,7 +27,12 @@ dependencies:
   - name: traefik
     version: 41.1.0 
     repository: https://traefik.github.io/charts
+
   - name: autoscale
     version: 4.6.0
     repository: oci://ghcr.io/lunarys/charts
     condition: autoscale.enabled
+
+  - name: networkpolicy
+    version: 5.1.0
+    repository: oci://ghcr.io/lunarys/charts
