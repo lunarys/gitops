@@ -1,0 +1,113 @@
+# Source: keda/charts/keda/templates/webhooks/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keda-admission-webhooks
+  namespace: keda
+  labels:
+    app: keda-admission-webhooks
+    name: keda-admission-webhooks
+    app.kubernetes.io/name: keda-admission-webhooks    
+    helm.sh/chart: keda-2.20.1
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: keda-operator
+    app.kubernetes.io/version: 2.20.1
+    app.kubernetes.io/instance: keda
+spec:
+  revisionHistoryLimit: 10
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keda-admission-webhooks
+  template:
+    metadata:
+      labels:
+        app: keda-admission-webhooks
+        name: keda-admission-webhooks
+        app.kubernetes.io/name: keda-admission-webhooks        
+        helm.sh/chart: keda-2.20.1
+        app.kubernetes.io/component: operator
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/part-of: keda-operator
+        app.kubernetes.io/version: 2.20.1
+        app.kubernetes.io/instance: keda
+    spec:
+      enableServiceLinks: true
+      serviceAccountName: keda-webhook
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: keda-admission-webhooks
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: "ghcr.io/kedacore/keda-admission-webhooks:2.20.1"
+          command:
+          - /keda-admission-webhooks
+          args:
+          - "--zap-log-level=info"
+          - "--zap-encoder=console"
+          - "--zap-time-encoding=rfc3339"
+          - "--cert-dir=/certs"
+          - "--health-probe-bind-address=:8081"
+          - --metrics-bind-address=:8080
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 25
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 20
+            periodSeconds: 3
+            timeoutSeconds: 1
+            failureThreshold: 3
+            successThreshold: 1
+          ports:
+          - containerPort: 9443
+            name: http
+            protocol: TCP
+          env:
+            - name: WATCH_NAMESPACE
+              value: ""
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+          - mountPath: /certs
+            name: certificates
+            readOnly: true
+          resources:
+            limits:
+              cpu: 1
+              memory: 1000Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+      volumes:
+      - name: certificates
+        secret:
+          defaultMode: 420
+          secretName: kedaorg-certs
+      hostNetwork: false
+      nodeSelector:
+        kubernetes.io/os: linux

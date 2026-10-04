@@ -1,0 +1,26 @@
+# Source: keda/charts/keda/templates/metrics-server/ciliumnetworkpolicy.yaml
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: keda-operator-metrics-apiserver
+  namespace: keda
+  labels:
+    app: keda-operator-metrics-apiserver
+    app.kubernetes.io/name: keda-operator-metrics-apiserver    
+    helm.sh/chart: keda-2.20.1
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: keda-operator
+    app.kubernetes.io/version: 2.20.1
+    app.kubernetes.io/instance: keda
+spec:
+  endpointSelector:
+    matchLabels:
+      app: keda-operator-metrics-apiserver
+  egress:
+    - toEntities:
+        - kube-apiserver
+        - cluster
+  ingress:
+    - fromEntities:
+        - cluster
