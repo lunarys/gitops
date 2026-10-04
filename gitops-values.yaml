@@ -125,15 +125,10 @@ appOfAppsName: app-of-apps
 # bootstrap-kargo-resources.
 appsKargoName: apps-kargo
 
-# -- Private companion repository, wired into the same Kargo pipeline as
-# mainRepo. The per-app `privateSettings` sidecar merge from the pre-Kargo
-# architecture is not ported -- no app in 05_apps needs it.
-#
-# privateRepoEnabled: false (or unset) renders none of the private
-# resources. Still false: gitops-private's apps aren't Chart.yaml-shaped yet
-# and its branch doesn't exist (see sourceBranch) -- flip once both are true.
+# -- Private companion repository, wired into the same Kargo pipeline as mainRepo. 
+# privateRepoEnabled: false (or unset) renders none of the private resources.
 privateRepo: https://github.com/lunarys/gitops-private.git
-privateRepoEnabled: false
+privateRepoEnabled: true
 
 # -- Names of the two Applications that reconcile gitops-private's rendered
 # output. Plain directory names plus a suffix, unlike appOfAppsName: each
