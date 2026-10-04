@@ -1,0 +1,30 @@
+# Source: postgresdb-user-operator/charts/postgresdb-user-operator/templates/postgresdatabase-editor-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: postgresdb-user-operator-postgresdatabase-editor-role
+  labels:
+    helm.sh/chart: postgresdb-user-operator-0.3.7
+    app.kubernetes.io/name: postgresdb-user-operator
+    app.kubernetes.io/instance: postgresdb-user-operator
+    app.kubernetes.io/version: "0.3.7"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - postgres.crds.lunarys.lab
+  resources:
+  - postgresdatabases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - postgres.crds.lunarys.lab
+  resources:
+  - postgresdatabases/status
+  verbs:
+  - get

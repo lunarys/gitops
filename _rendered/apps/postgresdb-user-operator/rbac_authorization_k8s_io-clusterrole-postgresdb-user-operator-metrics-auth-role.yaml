@@ -1,0 +1,24 @@
+# Source: postgresdb-user-operator/charts/postgresdb-user-operator/templates/metrics-auth-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: postgresdb-user-operator-metrics-auth-role
+  labels:
+    helm.sh/chart: postgresdb-user-operator-0.3.7
+    app.kubernetes.io/name: postgresdb-user-operator
+    app.kubernetes.io/instance: postgresdb-user-operator
+    app.kubernetes.io/version: "0.3.7"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create

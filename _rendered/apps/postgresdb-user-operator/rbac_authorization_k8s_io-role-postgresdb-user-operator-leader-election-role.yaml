@@ -1,0 +1,43 @@
+# Source: postgresdb-user-operator/charts/postgresdb-user-operator/templates/leader-election-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: postgresdb-user-operator-leader-election-role
+  labels:
+    helm.sh/chart: postgresdb-user-operator-0.3.7
+    app.kubernetes.io/name: postgresdb-user-operator
+    app.kubernetes.io/instance: postgresdb-user-operator
+    app.kubernetes.io/version: "0.3.7"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
