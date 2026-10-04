@@ -71,6 +71,8 @@ spec:
           envFrom:
           env:
             # settings from 'env'
+            - name: "CONFIG_AUTH_ENABLED"
+              value: "false"
             - name: "CONFIG_INSTANCE_LAPI_AUTH_PASSWORD"
               valueFrom:
                 secretKeyRef:
