@@ -1,0 +1,23 @@
+# Source: teamspeak/charts/teamspeak/templates/services.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: teamspeak-admin
+  labels:
+    helm.sh/chart: teamspeak-4.6.0
+    
+    custom.network/external-access: ingress
+    app.kubernetes.io/name: teamspeak
+    app.kubernetes.io/instance: teamspeak
+    app.kubernetes.io/version: "3.13.8"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: query
+      protocol: TCP
+      port: 10011
+      targetPort: 10011
+  selector:
+    app.kubernetes.io/name: teamspeak
+    app.kubernetes.io/instance: teamspeak

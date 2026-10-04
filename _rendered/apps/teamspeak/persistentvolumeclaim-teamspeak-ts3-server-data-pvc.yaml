@@ -1,0 +1,14 @@
+---
+# Source: teamspeak/charts/teamspeak/charts/longhornstorage/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: teamspeak-ts3-server-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-retain
+  volumeName: "pvc-35928dca-0da6-4366-a46e-f8b491b448d0"
+  resources:
+    requests:
+      storage: 50Mi

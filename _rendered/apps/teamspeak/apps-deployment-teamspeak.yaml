@@ -1,0 +1,88 @@
+# Source: teamspeak/charts/teamspeak/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    helm.sh/chart: teamspeak-4.6.0
+    
+    custom.network/external-access: ingress
+    app.kubernetes.io/name: teamspeak
+    app.kubernetes.io/instance: teamspeak
+    app.kubernetes.io/version: "3.13.8"
+    app.kubernetes.io/managed-by: Helm
+  name: teamspeak
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: teamspeak
+      app.kubernetes.io/instance: teamspeak
+  template:
+    metadata:
+      annotations:
+        
+        prometheus.io/scrape: 'false'
+      labels:
+        
+        custom.network/external-access: ingress
+        app.kubernetes.io/name: teamspeak
+        app.kubernetes.io/instance: teamspeak
+    spec:
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsNonRoot: true
+        runAsUser: 9987
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: teamspeak
+          image: docker.io/teamspeak:3.13.8
+          imagePullPolicy: IfNotPresent
+          resources:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+          #readiness & liveness
+          livenessProbe:
+            tcpSocket:
+              port: 10011
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            tcpSocket:
+              port: 10011
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          ports:
+            - containerPort: 9987
+              name: default
+              protocol: UDP
+            - containerPort: 10011
+              name: query
+              protocol: TCP
+          #config values that comes from the configmap 
+          envFrom:
+          env:
+            # settings from 'env'
+            - name: "TS3SERVER_LICENSE"
+              value: "accept"
+          volumeMounts:
+            
+            
+            - name: longhorn-ts3-server-data
+              mountPath: /var/ts3server
+              readOnly: false
+      volumes:
+        
+        
+        - name: longhorn-ts3-server-data
+          persistentVolumeClaim:
+            claimName: teamspeak-ts3-server-data-pvc
