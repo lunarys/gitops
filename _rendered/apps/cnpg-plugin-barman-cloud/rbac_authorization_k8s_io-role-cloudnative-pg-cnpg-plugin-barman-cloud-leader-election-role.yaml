@@ -1,0 +1,44 @@
+# Source: cnpg-plugin-barman-cloud/charts/plugin-barman-cloud/templates/additional-rbac/leader_election.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    helm.sh/chart: plugin-barman-cloud-0.7.1
+    app.kubernetes.io/name: plugin-barman-cloud
+    app.kubernetes.io/instance: cnpg-plugin-barman-cloud
+    app.kubernetes.io/version: "v0.14.0"
+    app.kubernetes.io/managed-by: Helm
+  name: cnpg-plugin-barman-cloud-leader-election-role
+  namespace: cloudnative-pg
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch

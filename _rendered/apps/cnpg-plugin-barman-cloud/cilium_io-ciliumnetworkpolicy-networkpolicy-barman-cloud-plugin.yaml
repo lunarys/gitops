@@ -1,0 +1,34 @@
+# Source: cnpg-plugin-barman-cloud/charts/networkpolicy/templates/networkpolicy-preset.yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  
+  name: networkpolicy-barman-cloud-plugin
+spec:
+  endpointSelector: 
+    matchLabels:
+      app.kubernetes.io/instance: cnpg-plugin-barman-cloud
+  ingress:
+    - fromEntities:
+        - kube-apiserver
+        - host
+        - remote-node
+    - 
+      fromEndpoints:
+      - matchLabels:
+          app.kubernetes.io/instance: cloudnative-pg-operator
+          io.kubernetes.pod.namespace: cloudnative-pg
+  egress:
+    - toEntities:
+        - kube-apiserver
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+          rules:
+            dns:
+              - matchPattern: "*"
