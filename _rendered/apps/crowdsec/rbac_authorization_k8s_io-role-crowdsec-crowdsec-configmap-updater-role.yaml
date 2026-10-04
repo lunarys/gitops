@@ -1,0 +1,21 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: crowdsec 
+  name: crowdsec-configmap-updater-role
+  labels:
+    k8s-app: crowdsec
+    type: capi-register-job
+    version: v1
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "-1"
+rules:
+    - apiGroups: [""]
+      resources: ["secrets"]
+      resourceNames: ["crowdsec-capi-credentials", "crowdsec-lapi-cscli-credentials"]
+      verbs: ["get", "patch"]
+    - apiGroups: [""]
+      resources: ["secrets"]
+      verbs: ["create"]
