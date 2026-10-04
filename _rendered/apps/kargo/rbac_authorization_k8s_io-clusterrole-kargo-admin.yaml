@@ -1,0 +1,97 @@
+# Source: kargo/charts/kargo/templates/users/cluster-roles.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kargo-admin
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+  
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  - namespaces
+  # secrets permissions are granted dynamically at the project-level
+  - serviceaccounts # writes on serviceaccounts are granted dynamically at the project-level
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - rolebindings # writes on rolebindings are granted dynamically at the project-level
+  - roles # writes on roles are granted dynamically at the project-level
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - kargo.akuity.io
+  resources:
+  - clusterconfigs
+  - clusterpromotiontasks
+  - freights
+  - projects
+  - projectconfigs
+  - promotiontasks
+  - stages
+  - warehouses
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - kargo.akuity.io
+  resources:
+  - stages
+  verbs:
+  - promote # promotion permission for all stages
+- apiGroups:
+  - kargo.akuity.io
+  resources:
+  - promotions
+  verbs: # nearly full access to all promotions, but they are immutable
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - watch
+- apiGroups:
+  - kargo.akuity.io
+  resources:
+  - freights/status
+  verbs:
+  - patch # for manual approvals
+- apiGroups:
+  - argoproj.io
+  resources:
+  - analysisruns
+  verbs: # view and delete analysisruns
+  - delete
+  - get
+  - list
+  - watch
+- apiGroups:
+  - argoproj.io
+  resources:
+  - analysistemplates
+  verbs:
+  - "*" # full access to analysistemplates
+- apiGroups:
+  - argoproj.io
+  resources:
+  - clusteranalysistemplates
+  verbs:
+  - "*" # full access to clusteranalysistemplates

@@ -1,0 +1,28 @@
+# Source: kargo/charts/kargo/templates/api/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kargo-api
+  namespace: kargo
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: api
+  
+data:
+  KARGO_NAMESPACE: kargo
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "CONSOLE"
+  SYSTEM_RESOURCES_NAMESPACE: "kargo-system-resources"
+  SHARED_RESOURCES_NAMESPACE: "kargo-shared-resources"
+  PERMISSIVE_CORS_POLICY_ENABLED: "false"
+  ADMIN_ACCOUNT_ENABLED: "true"
+  ADMIN_ACCOUNT_TOKEN_ISSUER: https://kargo.svc.elda
+  ADMIN_ACCOUNT_TOKEN_AUDIENCE: "kargo.svc.elda"
+  ADMIN_ACCOUNT_TOKEN_TTL: "24h"
+  ARGOCD_NAMESPACE: argocd
+  ARGOCD_URLS: prod=https://argocd.svc.elda,test=https://argocd.test.svc.elda
+  ROLLOUTS_INTEGRATION_ENABLED: "true"

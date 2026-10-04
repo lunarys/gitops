@@ -1,0 +1,78 @@
+# Source: kargo/charts/kargo/templates/management-controller/cluster-roles.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kargo-management-controller
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: management-controller
+  
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - secrets
+  - serviceaccounts
+  verbs:
+  - "*"
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  - rolebindings
+  - roles
+  verbs:
+  - "*"
+- apiGroups:
+  - kargo.akuity.io
+  resources:
+  - projects
+  verbs:
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - kargo.akuity.io
+  resources:
+  - clusterconfigs/status
+  - projects/status
+  - projectconfigs/status
+  verbs:
+  - patch
+- apiGroups:
+  - kargo.akuity.io
+  resources:
+  - projectconfigs
+  verbs:
+  - create
+- apiGroups:
+  - kargo.akuity.io
+  resources:
+  - clusterconfigs
+  - stages
+  - warehouses
+  - projectconfigs
+  verbs:
+  - get
+  - list
+  - watch

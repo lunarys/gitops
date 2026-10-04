@@ -1,0 +1,22 @@
+# Source: kargo/charts/kargo/templates/external-webhooks-server/cert.yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kargo-external-webhooks-server
+  namespace: kargo
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: external-webhooks-server
+  
+spec:
+  dnsNames:
+  - "localhost"
+  issuerRef:
+    group: cert-manager.io
+    kind: Issuer
+    name: kargo-selfsigned-cert-issuer
+  secretName:  kargo-external-webhooks-server-cert

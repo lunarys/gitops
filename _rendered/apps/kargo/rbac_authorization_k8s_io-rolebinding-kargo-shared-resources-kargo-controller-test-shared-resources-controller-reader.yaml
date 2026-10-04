@@ -1,0 +1,14 @@
+# Source: kargo/templates/test-shard-identity.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kargo-controller-test-shared-resources-controller-reader
+  namespace: kargo-shared-resources
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kargo-shared-resources-controller-reader
+subjects:
+  - kind: ServiceAccount
+    name: kargo-controller-test
+    namespace: kargo

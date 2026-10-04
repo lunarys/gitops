@@ -1,0 +1,31 @@
+# Source: kargo/charts/kargo/templates/common/cluster-roles.yaml
+# This role is bound to the API server's and the Kargo admin's ServiceAccounts
+# in project namespaces as they are created. This dynamically extends their most
+# sensitive permissions on a per-namespace basis instead of granting them
+# cluster-wide.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kargo-project-admin
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+  
+rules:
+- apiGroups:
+    - ""
+  resources:
+    - configmaps
+    - serviceaccounts
+  verbs:
+    - "*"
+- apiGroups:
+    - rbac.authorization.k8s.io
+  resources:
+    - rolebindings
+    - roles
+  verbs:
+    - "*"

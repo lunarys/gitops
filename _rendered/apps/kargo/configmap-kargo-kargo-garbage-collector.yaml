@@ -1,0 +1,22 @@
+# Source: kargo/charts/kargo/templates/garbage-collector/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kargo-garbage-collector
+  namespace: kargo
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: garbage-collector
+  
+data:
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "CONSOLE"
+  NUM_WORKERS: "3"
+  MAX_RETAINED_PROMOTIONS: "20"
+  MIN_PROMOTION_DELETION_AGE: "336h"
+  MAX_RETAINED_FREIGHT: "20"
+  MIN_FREIGHT_DELETION_AGE: "336h"

@@ -1,0 +1,26 @@
+# Source: kargo/charts/kargo/templates/management-controller/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kargo-management-controller
+  namespace: kargo
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: management-controller
+  
+data:
+  EXTERNAL_WEBHOOK_SERVER_BASE_URL: https://kargo.svc.elda/webhooks
+  KARGO_NAMESPACE: kargo
+  CLUSTER_SECRETS_NAMESPACE: "kargo-cluster-secrets"
+  SYSTEM_RESOURCES_NAMESPACE: "kargo-system-resources"
+  SHARED_RESOURCES_NAMESPACE: "kargo-shared-resources"
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "CONSOLE"
+  MAX_CONCURRENT_NAMESPACE_RECONCILES: "4"
+  MAX_CONCURRENT_PROJECT_RECONCILES: "4"
+  MAX_CONCURRENT_PROJECT_CONFIG_RECONCILES: "4"
+  MAX_CONCURRENT_SERVICE_ACCOUNT_RECONCILES: "4"
