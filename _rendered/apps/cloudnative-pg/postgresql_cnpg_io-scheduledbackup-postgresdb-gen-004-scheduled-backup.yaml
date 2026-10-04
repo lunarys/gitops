@@ -1,0 +1,18 @@
+# Source: postgresdb/templates/pg-backup.yaml
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: postgresdb-gen-004-scheduled-backup
+  labels:
+    app.kubernetes.io/component: database-backup
+spec:
+  schedule: "0 */10 * * * *"
+  backupOwnerReference: self  # vs. cluster
+  immediate: false
+  cluster:
+    name: postgresdb-gen-004
+
+  # configure backup type - https://cloudnative-pg.io/plugin-barman-cloud/docs/usage/#performing-a-base-backup
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
