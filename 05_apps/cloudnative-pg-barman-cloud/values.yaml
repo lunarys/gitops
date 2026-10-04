@@ -1,0 +1,6 @@
+plugin-barman-cloud:
+  # It creates a clusterrole and clusterrolebinding, but should only run in the cloudnative-pg namespace
+  #  -> create rbac separately (resources/rbac.yaml, which binds sa/cnpg-plugin-barman-cloud by literal name)
+  # TODO: could be removed when the included rbac is less permissive / supports namespaced install
+  rbac:
+    create: false

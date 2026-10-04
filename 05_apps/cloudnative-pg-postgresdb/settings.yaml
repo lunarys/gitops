@@ -1,0 +1,18 @@
+# Keeps the Application name it was deployed under. Renaming it would make
+# the change look like a delete plus a create, which hides it from Argo's diff.
+applicationName: postgresdb
+
+# Shares the namespace with the operator and the barman-cloud plugin. They are
+# separate apps so each has its own Application and promotes on its own, but
+# the operator only watches its own namespace (config.clusterWide: false) and
+# the plugin's RBAC is scoped to it.
+namespace: cloudnative-pg
+
+serverSideApply: false
+
+kargo:
+  excludePaths:
+    # Neither affects the rendered output, but both would otherwise produce a
+    # release candidate whenever they change.
+    - .old/
+    - resources.disabled/

@@ -13,8 +13,10 @@ enabled:
   #- crowdsec
   #- crowdsec-web-ui
 
-  - cloudnative-pg
-  - postgresdb-user-operator
+  - cloudnative-pg-operator
+  - cloudnative-pg-barman-cloud
+  - cloudnative-pg-postgresdb
+  - cloudnative-pg-user-operator
 
   # testing only
   - hello-world

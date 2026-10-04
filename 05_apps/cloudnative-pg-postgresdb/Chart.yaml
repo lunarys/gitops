@@ -1,0 +1,18 @@
+apiVersion: v2
+name: postgresdb
+description: >-
+  The PostgreSQL cluster run by the CloudNativePG operator, with its scheduled
+  backups to S3 via the barman-cloud plugin. The operator and the plugin are
+  separate apps (cloudnative-pg-operator, cloudnative-pg-barman-cloud) and must be
+  installed first: templates/ emits CRs of both their CRDs.
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: externalsecrets
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts
+
+  - name: networkpolicy
+    version: 5.1.0
+    repository: oci://ghcr.io/lunarys/charts

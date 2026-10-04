@@ -1,0 +1,8 @@
+# Shared with the database it runs -- config.clusterWide is false, so the
+# operator only reconciles Clusters in its own namespace.
+namespace: cloudnative-pg
+
+# The chart ships its CRDs. Server-side apply (the default) is required for
+# them: the Cluster CRD is far past the 256KB last-applied-configuration
+# annotation that client-side apply writes.
+skipCrds: false

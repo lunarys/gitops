@@ -1,0 +1,10 @@
+# Keeps the Application name it was deployed under. Renaming it would make
+# the change look like a delete plus a create, which hides it from Argo's diff.
+applicationName: cnpg-plugin-barman-cloud
+
+# Must run next to the operator: resources/rbac.yaml binds the plugin's
+# ServiceAccount in this namespace only.
+namespace: cloudnative-pg
+
+skipCrds: false
+serverSideApply: false

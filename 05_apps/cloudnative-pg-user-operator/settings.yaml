@@ -1,3 +1,7 @@
+# Keeps the Application name it was deployed under. Renaming it would make
+# the change look like a delete plus a create, which hides it from Argo's diff.
+applicationName: postgresdb-user-operator
+
 # Stays in the CloudNativePG namespace rather than defaulting to its own.
 #
 # Not optional here: the database's network policy allows ingress from

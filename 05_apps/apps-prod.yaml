@@ -16,9 +16,11 @@ enabled:
   #- policy-reporter
   - crowdsec
   - crowdsec-web-ui
-  - cloudnative-pg
-  - pgadmin
-  - postgresdb-user-operator
+  - cloudnative-pg-operator
+  - cloudnative-pg-barman-cloud
+  - cloudnative-pg-postgresdb
+  - cloudnative-pg-pgadmin
+  - cloudnative-pg-user-operator
 
   - authentik
 

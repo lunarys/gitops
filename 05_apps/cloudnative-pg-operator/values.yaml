@@ -1,0 +1,9 @@
+cloudnative-pg:
+  # https://github.com/cloudnative-pg/charts/tree/main/charts/cloudnative-pg
+  replicaCount: 2
+
+  config:
+    clusterWide: false  # can be disabled if only running a single database in the namespace
+
+    data:
+      INHERITED_LABELS: "custom.network/*"
