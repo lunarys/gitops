@@ -9,12 +9,33 @@ spec:
   ingress:
     - fromEndpoints:
         - {}
+    - fromCIDR:
+        - 10.0.0.0/20
+        - fda0:f54f:5876::/48
     - fromEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: traefik
+    - 
+      fromEndpoints:
+      - matchLabels:
+          io.kubernetes.pod.namespace: cert-manager
+      - matchLabels:
+          io.kubernetes.pod.namespace: step-ca
+      toPorts:
+      - ports:
+        - port: "8000"
+          protocol: TCP
+        rules:
+          http:
+          - method: GET
+            path: ^/.well-known/acme-challenge/.*
   egress:
     - toEndpoints:
         - {}
+    - toEntities:
+        - cluster
+    - toEntities:
+        - kube-apiserver
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: kube-system
