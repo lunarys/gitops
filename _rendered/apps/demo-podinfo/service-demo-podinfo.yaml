@@ -1,0 +1,24 @@
+---
+# Source: demo-podinfo/charts/demo-podinfo/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: demo-podinfo
+  labels:
+    helm.sh/chart: demo-podinfo-4.6.0
+    
+    custom.network/external-ingress: ingress
+    app.kubernetes.io/name: demo-podinfo
+    app.kubernetes.io/instance: demo-podinfo
+    app.kubernetes.io/version: "6.14.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: default-service-endpoint
+      protocol: TCP
+      port: 80
+      targetPort: 9898
+  selector:
+    app.kubernetes.io/name: demo-podinfo
+    app.kubernetes.io/instance: demo-podinfo

@@ -1,0 +1,25 @@
+# Source: demo-podinfo/charts/demo-podinfo/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-podinfo-internal
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-https-redirect@kubernetescrd"
+    cert-manager.io/cluster-issuer: "step-ca-internal"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - demo.test.svc.elda
+      secretName: demo-podinfo-internal-cert
+  rules:
+    - host: demo.test.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: demo-podinfo
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
