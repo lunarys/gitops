@@ -18,7 +18,11 @@ spec:
         kind: Warehouse
         name: crowdsec
       sources:
-        direct: true
+        # Production takes Freight only after test has had it. Emitted only when
+        # the app is actually enabled in test -- a prod-only app has no test
+        # Stage to gate on and would deadlock waiting for one.
+        stages:
+          - test
   promotionTemplate:
     spec:
       steps:
@@ -100,7 +104,7 @@ spec:
             # missing and rejects the Promotion. The same condition as
             # `stages:` above, so the two cannot disagree.
             - name: upstreamStage
-              value: "<none>"
+              value: "test"
         # Both environments sync and report health.
         #
         # Omitting this would be strictly worse than including it: the Stage
