@@ -74,7 +74,7 @@ spec:
             # array (after number/bool fail) before the step config is
             # marshalled -- so helm-template's valuesFiles sees a []string.
             - name: valuesFiles
-              value: "[\"./src/02_bootstrap/03_traefik/values.yaml\",\"./src/02_bootstrap/03_traefik/values-test.yaml\"]"
+              value: "[\"./src/02_bootstrap/03_traefik/values.yaml\",\"./src/02_bootstrap/03_traefik/values-network.part.yaml\",\"./src/02_bootstrap/03_traefik/values-test.yaml\"]"
             - name: namespace
               value: traefik
             - name: outRoot
