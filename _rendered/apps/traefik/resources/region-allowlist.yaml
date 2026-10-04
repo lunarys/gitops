@@ -1,0 +1,24 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: common-region-allowlist
+spec:
+  plugin:
+    geoblock:
+      allowLocalRequests: true
+      #silentStartUp: false
+      #allowLocalRequests: false
+      #logLocalRequests: false
+      #logAllowedRequests: false
+      #logApiRequests: false
+      blackListMode: false
+      #addCountryHeader: false
+      #ipDatabaseCachePath: "/var/lib/geoblock/ip-cache.db"
+      api: "https://get.geojs.io/v1/ip/country/{ip}"
+      #allowUnknownCountries: false
+      #unknownCountryApiResponse: "nil"
+      cacheSize: 50 # not sure about what number to use - number of addresses kept in cache
+      excludedPathPatterns:
+        - "^[^/]+/.well-known/acme-challenge/"
+      countries:
+        - "DE"
