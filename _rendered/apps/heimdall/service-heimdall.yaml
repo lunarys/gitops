@@ -1,0 +1,23 @@
+# Source: heimdall/charts/heimdall/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: heimdall
+  labels:
+    helm.sh/chart: heimdall-4.6.0
+    
+    custom.network/heimdall-integrated: egress
+    app.kubernetes.io/name: heimdall
+    app.kubernetes.io/instance: heimdall
+    app.kubernetes.io/version: "2.8.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: default-service-endpoint
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app.kubernetes.io/name: heimdall
+    app.kubernetes.io/instance: heimdall
