@@ -2,10 +2,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: cloudnative-pg-project
+  name: postgresdb-project
   namespace: argocd
 spec:
-  description: Project for application cloudnative-pg
+  description: Project for application postgresdb
   sourceRepos:
     # The Application's actual source (_argo_application.tpl), which is
     # mainRepo unless renderedRepo overrides it.
