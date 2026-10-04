@@ -1,0 +1,43 @@
+# Source: kargo/charts/kargo/templates/controller/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kargo-controller
+  namespace: kargo
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: controller
+    
+  
+data:
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "CONSOLE"
+  KARGO_NAMESPACE: kargo
+  SYSTEM_RESOURCES_NAMESPACE: "kargo-system-resources"
+  SHARD_NAME: test
+  KUBECONFIG: /etc/kargo/kubeconfigs/kubeconfig.yaml
+  SHARED_RESOURCES_NAMESPACE: "kargo-shared-resources"
+  ALLOW_CREDENTIALS_OVER_HTTP: "false"
+  GITCLIENT_NAME: "Kargo"
+  GITCLIENT_EMAIL: "no-reply@kargo.io"
+  GIT_PUSH_INTEGRATION_POLICY: "AlwaysRebase"
+  GITCLIENT_SIGNING_KEY_TYPE: "gpg"
+  GITHUB_PUSH_MAX_REVISIONS: "10"
+  GITHUB_PUSH_VERIFY_UNTRUSTED_COMMITS: "false"
+  CACHE_BY_TAG_POLICY: "Allow"
+  MAX_IMAGE_CACHE_ENTRIES: "100000"
+  IMAGE_REGISTRY_RATE_LIMIT: "20"
+  MAX_OCI_PUSH_ARTIFACT_SIZE: "1073741824"
+  ARGOCD_INTEGRATION_ENABLED: "true"
+  ARGOCD_NAMESPACE: argocd
+  ARGOCD_WATCH_ARGOCD_NAMESPACE_ONLY: "false"
+  ROLLOUTS_INTEGRATION_ENABLED: "false"
+  MAX_CONCURRENT_CONTROL_FLOW_RECONCILES: "4"
+  MAX_CONCURRENT_PROMOTION_RECONCILES: "4"
+  MAX_CONCURRENT_STAGE_RECONCILES: "4"
+  MAX_CONCURRENT_WAREHOUSE_RECONCILES: "4"
+  MIN_WAREHOUSE_RECONCILIATION_INTERVAL: "5m0s"
