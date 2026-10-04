@@ -80,7 +80,7 @@ defaultSettings:
     freightCreationPolicy: Automatic
 
     # How many candidate commits Kargo keeps per Warehouse.
-    discoveryLimit: 20
+    discoveryLimit: 8
 
     # Open a PR against the stage branch and block until it merges, rather than
     # pushing straight to it. Per environment: reviewing the same chart bump
