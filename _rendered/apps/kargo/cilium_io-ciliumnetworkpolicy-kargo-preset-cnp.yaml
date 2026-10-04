@@ -1,0 +1,41 @@
+# Source: kargo/charts/networkpolicy/templates/networkpolicy-preset.yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  
+  name: kargo-preset-cnp
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEndpoints:
+        - {}
+  egress:
+    - toEndpoints:
+        - {}
+    - toEntities:
+        - kube-apiserver
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - 
+      toFQDNs:
+      - matchPattern: '*'
+      toPorts:
+      - ports:
+        - port: "443"
+          protocol: TCP
+    - 
+      toCIDR:
+      - 10.0.1.40/32
+      toPorts:
+      - ports:
+        - port: "6443"
+          protocol: TCP
