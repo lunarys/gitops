@@ -1,0 +1,208 @@
+# Source: crowdsec/charts/crowdsec/templates/lapi-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crowdsec-lapi
+  labels:
+    k8s-app: crowdsec
+    type: lapi
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: crowdsec
+      type: lapi
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        checksum/lapi-secret: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        checksum/lapi-configmap: 89a86a69247e8a946b5fe63311e1360ee06989dc9ef9a361dbe77c748b33e4af
+      labels:
+        k8s-app: crowdsec
+        type: lapi
+        version: v1
+        custom.network/external-ingress: ingress
+        custom.network/postgresdb: egress
+    spec:
+      containers:
+      - name: crowdsec-lapi
+        image: "crowdsecurity/crowdsec:v1.7.8"
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: LOCAL_API_URL
+            value: http://localhost:8080
+          - name: DISABLE_AGENT
+            value: "true"
+          - name: INSECURE_SKIP_VERIFY
+            value: "false"
+          
+          - name: CS_LAPI_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: crowdsec-secrets
+                key: cs_lapi_secret
+          - name: REGISTRATION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: crowdsec-secrets
+                key: registration_token
+          - name: CUSTOM_HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: BOUNCER_KEY_traefik
+            valueFrom:
+              secretKeyRef:
+                key: bouncer_api_key
+                name: crowdsec-secrets
+          - name: ENROLL_KEY
+            valueFrom:
+              secretKeyRef:
+                key: enroll_key
+                name: crowdsec-secrets
+          - name: ENROLL_TAGS
+            valueFrom:
+              secretKeyRef:
+                key: enroll_tags
+                name: crowdsec-secrets
+          - name: ENROLL_INSTANCE_NAME
+            valueFrom:
+              secretKeyRef:
+                key: enroll_instance_name
+                name: crowdsec-secrets
+          - name: WEB_UI_USER
+            valueFrom:
+              secretKeyRef:
+                key: web_ui_user
+                name: crowdsec-secrets
+          - name: WEB_UI_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: web_ui_password
+                name: crowdsec-secrets
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                key: username
+                name: crowdsec-pgcreds
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: password
+                name: crowdsec-pgcreds
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                key: dbname
+                name: crowdsec-pgcreds
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                key: host
+                name: crowdsec-pgcreds
+          - name: DB_PORT
+            valueFrom:
+              secretKeyRef:
+                key: port
+                name: crowdsec-pgcreds
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 500m
+            memory: 500Mi
+
+        livenessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+          httpGet:
+            path: /health
+            port: lapi
+            scheme: HTTP
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+          httpGet:
+            path: /health
+            port: lapi
+            scheme: HTTP
+        startupProbe:
+          failureThreshold: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+          httpGet:
+            path: /health
+            port: lapi
+            scheme: HTTP
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+
+        ports:
+          - name: lapi
+            containerPort: 8080
+            protocol: TCP
+          - name: metrics
+            containerPort: 6060
+            protocol: TCP
+        
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - |
+                cscli bouncers prune --force 2>/dev/null || true;
+                cscli machines prune --force 2>/dev/null || true;
+                cscli machines add "$WEB_UI_USER" --password "$WEB_UI_PASSWORD" --force 2>/dev/null || true;
+        volumeMounts:
+          - name: crowdsec-docker-start-script
+            mountPath: /docker_start.sh
+            subPath: docker_start.sh
+          - name: crowdsec-capi-credentials-volume
+            mountPath: /staging/etc/crowdsec/online_api_credentials.yaml
+            subPath: online_api_credentials.yaml
+          
+          
+          - name: crowdsec-profiles-volume
+            mountPath: /etc/crowdsec/profiles.yaml
+            subPath: profiles.yaml
+          
+          
+          
+          
+          - name: crowdsec-config-local-volume
+            mountPath: /etc/crowdsec/config.yaml.local
+            subPath: config.yaml.local
+          
+
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: crowdsec-docker-start-script
+        configMap:
+          name: crowdsec-docker-start-script-configmap
+      - name: crowdsec-capi-credentials-volume
+        secret:
+          secretName: crowdsec-capi-credentials
+      
+      - name: crowdsec-profiles-volume
+        configMap:
+          name: crowdsec-profiles
+      
+      
+      
+      - name: crowdsec-config-local-volume
+        configMap:
+          name: crowdsec-config-local
+      priorityClassName:

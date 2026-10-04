@@ -1,0 +1,34 @@
+# Source: crowdsec/charts/crowdsec/templates/lapi-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crowdsec-config-local
+data:
+  config.yaml.local: |
+    api:
+      client:
+        # the log processor will remove delete itself from LAPI when stopping.    
+        unregister_on_exit: true
+      server:
+        # This is needed for agent autoregistration
+        auto_registration: # Activate if not using TLS for authentication
+          enabled: true
+          token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
+          allowed_ranges:
+            - "10.243.0.0/16"  # test cluster
+            - "10.245.0.0/16"  # prod cluster
+    # Using a database is strongly encouraged.
+    db_config:
+      type: postgresql
+      user: ${DB_USER}
+      password: ${DB_PASSWORD}
+      db_name: ${DB_NAME}
+      host: ${DB_HOST}
+      port: ${DB_PORT}
+      #flush:
+         # bouncers autodelete seems to have deleted bouncers that were still active
+      #  bouncers_autodelete:
+      #    api_key: 1h
+         # agents autodelete seems to have the webui token that was still needed
+      #  agents_autodelete:
+      #    login_password: 1h
