@@ -1,0 +1,50 @@
+# Source: postgresdb/charts/networkpolicy/templates/networkpolicy-preset.yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  
+  name: networkpolicy-postgresdb
+spec:
+  endpointSelector: 
+    matchLabels:
+      cnpg.io/podRole: instance
+  ingress:
+    - fromEndpoints:
+        - {}
+    - fromEndpoints:
+        - matchLabels:
+            custom.network/postgresdb: "egress"
+          matchExpressions:
+            - key: io.kubernetes.pod.namespace
+              operator: Exists
+      toPorts:
+        - ports:
+            - port: "5432"
+    - 
+      fromEndpoints:
+      - matchLabels:
+          app.kubernetes.io/instance: postgresdb-user-operator
+          io.kubernetes.pod.namespace: cloudnative-pg
+  egress:
+    - toEndpoints:
+        - {}
+    - toEntities:
+        - kube-apiserver
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - 
+      toFQDNs:
+      - matchName: s3.svc.elda
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: TCP
