@@ -1,0 +1,100 @@
+# Source: n8n/charts/n8n/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    helm.sh/chart: n8n-4.6.0
+    
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/instance: n8n
+    app.kubernetes.io/version: "2.35.7"
+    app.kubernetes.io/managed-by: Helm
+  name: n8n
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: n8n
+      app.kubernetes.io/instance: n8n
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        
+        prometheus.io/scrape: 'false'
+      labels:
+        
+        app.kubernetes.io/name: n8n
+        app.kubernetes.io/instance: n8n
+    spec:
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: n8n
+          image: docker.n8n.io/n8nio/n8n:2.35.7
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 500Mi
+            requests:
+              memory: 250Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+          #readiness & liveness
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5678
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          ports:
+            - containerPort: 5678
+              name: default
+              protocol: TCP
+          #config values that comes from the configmap 
+          envFrom:
+            - secretRef:
+                name: n8n-encryption-key
+          env:
+            # settings from 'env'
+            - name: "GENERIC_TIMEZONE"
+              value: "Europe/Berlin"
+            - name: "N8N_BLOCK_ENV_ACCESS_IN_NODE"
+              value: "true"
+            - name: "N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS"
+              value: "true"
+            - name: "N8N_PORT"
+              value: "5678"
+            - name: "N8N_PROXY_HOPS"
+              value: "1"
+            - name: "N8N_SECURE_COOKIE"
+              value: "false"
+            - name: "TZ"
+              value: "Europe/Berlin"
+            - name: "WEBHOOK_URL"
+              value: "http://n8n.svc.elda/"
+          volumeMounts:
+            
+            
+            - name: longhorn-data
+              mountPath: /home/node/.n8n
+              readOnly: false
+      volumes:
+        
+        
+        - name: longhorn-data
+          persistentVolumeClaim:
+            claimName: n8n-data-pvc
