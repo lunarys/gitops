@@ -1,0 +1,25 @@
+# Source: pgadmin/charts/pgadmin/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pgadmin-internal
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-https-redirect@kubernetescrd"
+    cert-manager.io/cluster-issuer: "step-ca-internal"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - pgadmin.svc.elda
+      secretName: pgadmin-internal-cert
+  rules:
+    - host: pgadmin.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: pgadmin
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix

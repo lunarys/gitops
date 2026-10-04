@@ -1,0 +1,25 @@
+# Source: pgadmin/charts/pgadmin/charts/autoscale/templates/scale-switch.yaml
+# Implement an external switch that is used as a metric to scale the target resource
+# or turn it on/off
+# Reference: https://keda.sh/docs/2.18/reference/scaledobject-spec/
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: pgadmin-scale-switch
+spec:
+  scaleTargetRef:
+    name: pgadmin
+  pollingInterval:  30
+  cooldownPeriod: 0
+  initialCooldownPeriod: 0
+  minReplicaCount: 0
+  maxReplicaCount: 1
+  advanced:
+    restoreToOriginalReplicaCount: true
+  triggers:
+    - type: metrics-api
+      name: nodered
+      metadata:
+        targetValue: "1"
+        url: "http://nodered.nodered.svc/autoscaler/pgadmin"
+        valueLocation: "value"
