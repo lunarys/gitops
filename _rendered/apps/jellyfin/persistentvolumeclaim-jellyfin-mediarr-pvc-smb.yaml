@@ -1,0 +1,14 @@
+# Source: jellyfin/charts/jellyfin/charts/smbstorage/templates/pvc-static.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "jellyfin-mediarr-pvc-smb"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  # empty to disable dynamic provisioning via storageclass
+  volumeName: "jellyfin-mediarr-pv-smb"
+  storageClassName: ""

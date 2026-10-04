@@ -1,0 +1,36 @@
+# Source: jellyfin/charts/jellyfin/charts/smbstorage/templates/pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "jellyfin-mediarr-pv-smb"
+  annotations:
+    pv.kubernetes.io/provisioned-by: smb.csi.k8s.io
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete  # available values: Delete, Retain
+  # empty to disable dynamic provisioning via storageclass
+  storageClassName: ""
+  claimRef:
+    name: "jellyfin-mediarr-pvc-smb"
+    namespace: "jellyfin"
+  mountOptions:
+    - dir_mode=0770
+    - file_mode=0660
+    - gid=2000
+    - noperm
+    - mfsymlinks
+    - cache=strict
+    - noserverino  # required to prevent data corruption
+  csi:
+    driver: smb.csi.k8s.io
+    # volumeHandle format: {smb-server-address}#{sub-dir-name}#{share-name}
+    # make sure this value is unique for every share in the cluster
+    volumeHandle: "erolas.elda/mediarr##"
+    volumeAttributes:
+      source: "//erolas.elda/mediarr"
+    nodeStageSecretRef:
+      name: "jellyfin-mediarr-smb-creds"
+      namespace: "jellyfin"

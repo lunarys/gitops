@@ -1,0 +1,24 @@
+# Source: jellyfin/charts/jellyfin/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: jellyfin
+  labels:
+    helm.sh/chart: jellyfin-4.6.0
+    
+    custom.network/jellyfin-tools: ingress
+    custom.network/heimdall-integrated: ingress
+    app.kubernetes.io/name: jellyfin
+    app.kubernetes.io/instance: jellyfin
+    app.kubernetes.io/version: "10.11.11"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: default-service-endpoint
+      protocol: TCP
+      port: 80
+      targetPort: 8096
+  selector:
+    app.kubernetes.io/name: jellyfin
+    app.kubernetes.io/instance: jellyfin

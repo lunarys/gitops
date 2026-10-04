@@ -1,0 +1,13 @@
+# Source: jellyfin/charts/jellyfin/charts/longhornstorage/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-config-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-retain
+  volumeName: "pvc-67dbe02d-bb6f-43f7-b6cf-dc80fd598543"
+  resources:
+    requests:
+      storage: 10Gi
