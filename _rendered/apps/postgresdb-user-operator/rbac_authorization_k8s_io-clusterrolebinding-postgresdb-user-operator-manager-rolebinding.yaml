@@ -1,0 +1,19 @@
+# Source: postgresdb-user-operator/charts/postgresdb-user-operator/templates/manager-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: postgresdb-user-operator-manager-rolebinding
+  labels:
+    helm.sh/chart: postgresdb-user-operator-0.3.7
+    app.kubernetes.io/name: postgresdb-user-operator
+    app.kubernetes.io/instance: postgresdb-user-operator
+    app.kubernetes.io/version: "0.3.7"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: 'postgresdb-user-operator-manager-role'
+subjects:
+- kind: ServiceAccount
+  name: 'postgresdb-user-operator'
+  namespace: 'cloudnative-pg'

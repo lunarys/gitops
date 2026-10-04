@@ -1,0 +1,24 @@
+# Source: postgresdb-user-operator/charts/postgresdb-user-operator/templates/metrics-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresdb-user-operator-metrics-service
+  labels:
+    control-plane: controller-manager
+    helm.sh/chart: postgresdb-user-operator-0.3.7
+    app.kubernetes.io/name: postgresdb-user-operator
+    app.kubernetes.io/instance: postgresdb-user-operator
+    app.kubernetes.io/version: "0.3.7"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: postgresdb-user-operator
+    control-plane: controller-manager
+    app.kubernetes.io/name: postgresdb-user-operator
+    app.kubernetes.io/instance: postgresdb-user-operator
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
