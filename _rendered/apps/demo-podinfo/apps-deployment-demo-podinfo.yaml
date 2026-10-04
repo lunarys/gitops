@@ -1,0 +1,68 @@
+# Source: demo-podinfo/charts/demo-podinfo/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    helm.sh/chart: demo-podinfo-4.6.0
+    
+    custom.network/external-ingress: ingress
+    app.kubernetes.io/name: demo-podinfo
+    app.kubernetes.io/instance: demo-podinfo
+    app.kubernetes.io/version: "6.14.1"
+    app.kubernetes.io/managed-by: Helm
+  name: demo-podinfo
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: demo-podinfo
+      app.kubernetes.io/instance: demo-podinfo
+  template:
+    metadata:
+      annotations:
+        
+        prometheus.io/scrape: 'false'
+      labels:
+        
+        custom.network/external-ingress: ingress
+        app.kubernetes.io/name: demo-podinfo
+        app.kubernetes.io/instance: demo-podinfo
+    spec:
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: demo-podinfo
+          image: ghcr.io/stefanprodan/podinfo:6.14.1
+          imagePullPolicy: IfNotPresent
+          resources:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+          #readiness & liveness
+          ports:
+            - containerPort: 9898
+              name: default
+              protocol: TCP
+          #config values that comes from the configmap 
+          envFrom:
+          env:
+          volumeMounts:
+            - name: data
+              mountPath: /data
+              readOnly: false
+            
+            
+      volumes:
+        - name: data
+          emptyDir:
+            sizeLimit: 100Mi

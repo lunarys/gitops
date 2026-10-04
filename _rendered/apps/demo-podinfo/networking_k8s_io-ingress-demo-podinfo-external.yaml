@@ -1,0 +1,19 @@
+# Source: demo-podinfo/charts/demo-podinfo/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-podinfo-external
+  annotations:
+spec:
+  ingressClassName: traefik-external
+  rules:
+    - host: demo.ext.test.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: demo-podinfo
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
