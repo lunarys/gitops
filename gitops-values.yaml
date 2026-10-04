@@ -131,10 +131,14 @@ privateRepo: https://github.com/lunarys/gitops-private.git
 privateRepoEnabled: true
 
 # -- Names of the two Applications that reconcile gitops-private's rendered
-# output. Plain directory names plus a suffix, unlike appOfAppsName: each
-# reconciles one directory, no second pass to merge with.
-argoResourcesPrivateName: argo-resources-private
-kargoResourcesPrivateName: kargo-resources-private
+# output, in step with their public counterparts appOfAppsName / appsKargoName.
+# The Stages writing their directories keep the directory names
+# (argo-resources-private-<env>, kargo-resources-private).
+#
+# app-of-apps-private is also the legacy (pre-Kargo) private wrapper's
+# Application name: enabling privateRepo replaces that Application in place.
+appOfAppsPrivateName: app-of-apps-private
+appsKargoPrivateName: apps-kargo-private
 
 # -- Kargo control plane.
 kargo:

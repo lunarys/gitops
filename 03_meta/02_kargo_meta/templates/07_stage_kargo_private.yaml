@@ -17,7 +17,7 @@
           "outDir" .Values.renderedKargoDir
           "appRoot" "apps"
           "appsDir" .Values.appsDir
-          "appName" .Values.kargoResourcesPrivateName)
+          "appName" .Values.appsKargoPrivateName)
       )
     ) }}
 {{- end }}

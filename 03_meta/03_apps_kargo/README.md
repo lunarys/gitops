@@ -5,8 +5,8 @@ control plane:
   (per-app Namespace, Kargo Project, ProjectConfig, Warehouse, Stage(s);
   root = `05_apps`) and `_rendered/bootstrap-kargo-resources/`, the same for
   `02_bootstrap`'s portable components (root = `02_bootstrap`)
-- `kargo-resources-private` -- same idea, for `gitops-private`'s apps.
-  Gated on `privateRepoEnabled`.
+- `apps-kargo-private` -- same idea, for `gitops-private`'s apps (written by
+  the `kargo-resources-private` Stage). Gated on `privateRepoEnabled`.
 - `apps-kargo-project` -- the AppProject both belong to, scoped narrowly to
   `kargo-app-*` and `kargo-apps-generator`
 

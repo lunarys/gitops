@@ -10,7 +10,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ .Values.argoResourcesPrivateName }}
+  name: {{ .Values.appOfAppsPrivateName }}
   namespace: {{ .Values.argo.namespace }}
   annotations:
     kargo.akuity.io/authorized-stage: {{ .Values.kargo.generatorProject }}:argo-resources-private-{{ .Values.environment }}

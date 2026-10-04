@@ -5,7 +5,7 @@ to take over:
   Application with two sources: the `05_apps` tree (`_rendered/argo-resources/`)
   and `02_bootstrap`'s portable components
   (`_rendered/bootstrap-argo-resources/`)
-- `argo-resources-private` -- same idea, for `gitops-private`'s apps
+- `app-of-apps-private` -- same idea, for `gitops-private`'s apps
   (`gitops-private`'s own `_rendered/argo-resources/`, never rendered onto
   `mainRepo`). Gated on `privateRepoEnabled`.
 - `app-of-apps-project` -- the AppProject both belong to

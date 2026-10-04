@@ -18,7 +18,7 @@
           "outDir" .Values.renderedArgoDir
           "appRoot" "apps"
           "appsDir" .Values.appsDir
-          "appName" .Values.argoResourcesPrivateName)
+          "appName" .Values.appOfAppsPrivateName)
       )
     ) }}
 {{- end }}
