@@ -1,0 +1,24 @@
+# Source: jellyfin/charts/jellyfin/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jellyfin-internal
+  annotations:
+    cert-manager.io/cluster-issuer: "step-ca-internal"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - jellyfin.svc.elda
+      secretName: jellyfin-internal-cert
+  rules:
+    - host: jellyfin.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: jellyfin
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix

@@ -1,0 +1,129 @@
+# Source: jellyfin/charts/jellyfin/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    helm.sh/chart: jellyfin-4.6.0
+    
+    custom.network/jellyfin-tools: ingress
+    custom.network/heimdall-integrated: ingress
+    app.kubernetes.io/name: jellyfin
+    app.kubernetes.io/instance: jellyfin
+    app.kubernetes.io/version: "10.11.11"
+    app.kubernetes.io/managed-by: Helm
+  name: jellyfin
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: jellyfin
+      app.kubernetes.io/instance: jellyfin
+  template:
+    metadata:
+      annotations:
+        
+        prometheus.io/scrape: 'false'
+      labels:
+        
+        custom.network/jellyfin-tools: ingress
+        custom.network/heimdall-integrated: ingress
+        app.kubernetes.io/name: jellyfin
+        app.kubernetes.io/instance: jellyfin
+    spec:
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: jellyfin
+          image: ghcr.io/jellyfin/jellyfin:10.11.11
+          imagePullPolicy: IfNotPresent
+          resources:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+          #readiness & liveness
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8096
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8096
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          ports:
+            - containerPort: 8096
+              name: default
+              protocol: TCP
+          #config values that comes from the configmap 
+          envFrom:
+          env:
+            # settings from 'env'
+            - name: "TZ"
+              value: "Europe/Berlin"
+          volumeMounts:
+            - name: smb-media
+              mountPath: /media/movies1
+              readOnly: false
+              subPath: movies
+            - name: smb-mediarr
+              mountPath: /media/movies2
+              readOnly: false
+              subPath: movies
+            - name: smb-mediarr
+              mountPath: /media/anime1
+              readOnly: false
+              subPath: anime
+            - name: smb-media
+              mountPath: /media/shows1
+              readOnly: false
+              subPath: shows
+            - name: smb-mediarr
+              mountPath: /media/shows2
+              readOnly: false
+              subPath: shows
+            - name: smb-media
+              mountPath: /media/music1
+              readOnly: false
+              subPath: music
+            - name: smb-media
+              mountPath: /media/family1
+              readOnly: false
+              subPath: family
+            - name: cache
+              mountPath: /cache
+              readOnly: false
+            
+            
+            - name: longhorn-config
+              mountPath: /config
+              readOnly: false
+      volumes:
+        - name: cache
+          emptyDir:
+            sizeLimit: 10Gi
+        
+        - name: smb-media
+          persistentVolumeClaim:
+            claimName: jellyfin-media-pvc-smb
+        - name: smb-mediarr
+          persistentVolumeClaim:
+            claimName: jellyfin-mediarr-pvc-smb
+        
+        - name: longhorn-config
+          persistentVolumeClaim:
+            claimName: jellyfin-config-pvc
