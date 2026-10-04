@@ -1,0 +1,23 @@
+# Source: postgresdb/templates/barman-object-store.yaml
+# Object store for backups using barman-cloud plugin
+# https://cloudnative-pg.io/plugin-barman-cloud/docs/usage/
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: garage-s3-object-store
+spec:
+  configuration:
+    destinationPath: s3://cloudnative-pg-backup-prod/
+    endpointURL: "http://s3.svc.elda"
+    s3Credentials:
+      accessKeyId:
+        name: s3-credentials
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: s3-credentials
+        key: ACCESS_SECRET_KEY
+    wal:
+      compression: gzip
+    data:
+      compression: gzip
+  retentionPolicy: 60d

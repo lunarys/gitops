@@ -1,0 +1,91 @@
+# Source: postgresdb/templates/pg-cluster.yaml
+# TODO? https://github.com/cloudnative-pg/charts/tree/main/charts/cluster
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgresdb-gen-002
+  labels:
+    app.kubernetes.io/component: database
+    app.kubernetes.io/name: postgresdb
+    app.kubernetes.io/instance: postgresdb-gen-002
+    app.kubernetes.io/version: "002"
+    custom.network/postgresdb: ingress
+    
+spec:
+  # Documentation: https://cloudnative-pg.io/documentation/1.27/cloudnative-pg.v1/#postgresql-cnpg-io-v1-ClusterSpec
+  instances: 3
+  description: "General purpose PostgreSQL cluster"
+  #imageName: "ghcr.io/cloudnative-pg/postgresql:16.3-bullseye"
+  primaryUpdateStrategy: unsupervised  # default, automated. opposed to 'supervised'
+  enablePDB: true
+
+  # https://cloudnative-pg.io/documentation/1.27/applications/#secrets
+  # -> kubectl get secret -n cloudnative-pg postgresdb-superuser -o jsonpath='{.data.password}' | base64 --decode
+  enableSuperuserAccess: true
+  superuserSecret: 
+    name: "db-superuser"
+  
+  storage:
+    # currently, using a local path is sufficient
+    # it will be cleaned up if the pvc is deleted
+    # the database will be restored from a backup
+    storageClass: local-path-auto-delete
+    #storageClass: longhorn-postgres-replica-storage
+    size: 2Gi
+  walStorage:
+    storageClass: local-path-auto-delete
+    #storageClass: longhorn-postgres-replica-storage
+    size: 2Gi
+
+  # required for garage s3: https://garagehq.deuxfleurs.fr/cookbook/clients.html
+  env:
+    - name: AWS_S3_FORCE_PATH_STYLE
+      value: "true"
+    - name: AWS_DEFAULT_REGION
+      value: garage
+
+  podSecurityContext:
+    # using the default of 26 shows as the 'tape' user in the node filesystem due to local-path volumes
+    # mostly cosmetic, but cleaner in that it does not clash with a existing user in debian
+    fsGroup: 5432
+
+  # prometheus
+  #monitoring:
+  #  enablePodMonitor: true  # TODO
+
+  affinity:
+    enablePodAntiAffinity: true
+    podAntiAffinityType: required
+
+
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: garage-s3-object-store
+  # https://cloudnative-pg.io/documentation/current/recovery/
+  # https://cloudnative-pg.io/plugin-barman-cloud/docs/migration/
+  bootstrap:
+    recovery:
+      source: postgresdb-gen-001
+
+  externalClusters:
+    - name: postgresdb-gen-001  # any name, that is referenced in recovery.source  
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        isWALArchiver: true
+        parameters:
+          barmanObjectName: garage-s3-object-store
+          serverName: postgresdb-gen-001  # name of the postgresdb cluster to restore from
+
+  postgresql:
+    # https://www.postgresql.org/docs/current/auth-pg-hba-conf.html
+    pg_hba:
+      # limit superuser access
+      # postgres does a reverse lookup of the connecting IP address, 
+      # which will look something like 10-243-0-237.pgadmin.cloudnative-pg.svc.cluster.local
+      # so the prefix-based DNS rule works for this case
+      - "host all postgres .pgadmin.cloudnative-pg.svc.cluster.local scram-sha-256"
+      # use a service name for the operator that already exists
+      - "host all postgres .postgresdb-user-operator-metrics-service.cloudnative-pg.svc.cluster.local scram-sha-256"
+      - "host all postgres all reject"

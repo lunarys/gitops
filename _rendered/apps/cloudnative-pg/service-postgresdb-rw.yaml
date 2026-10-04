@@ -1,0 +1,18 @@
+# Source: postgresdb/templates/service-rw.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresdb-rw
+  labels:
+    app.kubernetes.io/component: database
+    app.kubernetes.io/name: postgresdb
+    app.kubernetes.io/instance: postgresdb-gen-002
+spec:
+  selector:
+    cnpg.io/cluster: postgresdb-gen-002
+    cnpg.io/instanceRole: primary
+  ports:
+    - name: postgres
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
