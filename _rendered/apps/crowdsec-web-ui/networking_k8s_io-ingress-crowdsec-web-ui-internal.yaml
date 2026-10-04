@@ -1,0 +1,25 @@
+# Source: crowdsec-web-ui/charts/crowdsec-web-ui/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: crowdsec-web-ui-internal
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-https-redirect@kubernetescrd"
+    cert-manager.io/cluster-issuer: "step-ca-internal"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - crowdsec.test.svc.elda
+      secretName: crowdsec-web-ui-internal-cert
+  rules:
+    - host: crowdsec.test.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: crowdsec-web-ui
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
