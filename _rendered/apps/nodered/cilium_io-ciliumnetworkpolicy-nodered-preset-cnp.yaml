@@ -1,0 +1,58 @@
+# Source: nodered/charts/nodered/charts/networkpolicy/templates/networkpolicy-preset.yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  
+  name: nodered-preset-cnp
+spec:
+  endpointSelector:
+    matchLabels:
+      
+      app.kubernetes.io/name: nodered
+      app.kubernetes.io/instance: nodered
+  ingress:
+    - fromEndpoints:
+        - {}
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: home-assistant
+        - matchLabels:
+            io.kubernetes.pod.namespace: keda
+    - fromCIDR:
+        - 10.0.0.0/20
+        - fda0:f54f:5876::/48
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: traefik
+  egress:
+    - toEndpoints:
+        - {}
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: home-assistant
+        - matchLabels:
+            io.kubernetes.pod.namespace: teamspeak
+        - matchLabels:
+            io.kubernetes.pod.namespace: mosquitto
+    - toEntities:
+        - world
+    - toCIDR:
+        - 10.0.0.0/20
+        - fda0:f54f:5876::/48
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            custom.network/postgresdb: "ingress"
+          matchExpressions:
+            - key: io.kubernetes.pod.namespace
+              operator: Exists
