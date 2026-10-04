@@ -2,21 +2,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cloudnative-pg
+  name: postgresdb
   namespace: argocd
   annotations:
     # Restricts which Kargo Stage may drive this Application. Stage names are
     # bare `test`/`prod` because the Kargo Project already namespaces them.
-    kargo.akuity.io/authorized-stage: kargo-app-cloudnative-pg:prod
+    kargo.akuity.io/authorized-stage: kargo-app-postgresdb:prod
 spec:
-  project: cloudnative-pg-project
+  project: postgresdb-project
   destination:
     namespace: cloudnative-pg
     server: https://kubernetes.default.svc
   source:
     repoURL: https://github.com/lunarys/gitops.git
     targetRevision: stage/prod
-    path: _rendered/apps/cloudnative-pg
+    path: _rendered/apps/postgresdb
     directory:
       recurse: true
   syncPolicy:
@@ -28,4 +28,4 @@ spec:
       # Project namespaces, which are emitted as explicit labelled Namespace
       # manifests instead -- see _kargo_project.tpl.
       - CreateNamespace=true
-      - ServerSideApply=true
+      - ServerSideApply=false
