@@ -2,8 +2,8 @@
 apiVersion: kargo.akuity.io/v1alpha1
 kind: Warehouse
 metadata:
-  name: cloudnative-pg
-  namespace: kargo-app-cloudnative-pg
+  name: postgresdb
+  namespace: kargo-app-postgresdb
 spec:
   interval: 5m
   freightCreationPolicy: Automatic
@@ -13,7 +13,7 @@ spec:
         branch: main
         commitSelectionStrategy: NewestFromBranch
         includePaths:
-          - 05_apps/cloudnative-pg/
+          - 05_apps/cloudnative-pg-postgresdb/
         excludePaths:
           # Docs and examples sit inside the app directory but cannot affect the
           # rendered output, so they should not produce release candidates.
@@ -24,9 +24,9 @@ spec:
           # spans separators, and whether `a/**/*.md` also matches `a/READ.md`,
           # varies by library and would fail silently. Plain strings, as used
           # for the directories below, are exact path matches.
-          - regex:^05_apps/cloudnative-pg/.*\.md$
-          - 05_apps/cloudnative-pg/example/
-          - 05_apps/cloudnative-pg/examples/
-          - 05_apps/cloudnative-pg/.old/
-          - 05_apps/cloudnative-pg/resources.disabled/
+          - regex:^05_apps/cloudnative-pg-postgresdb/.*\.md$
+          - 05_apps/cloudnative-pg-postgresdb/example/
+          - 05_apps/cloudnative-pg-postgresdb/examples/
+          - 05_apps/cloudnative-pg-postgresdb/.old/
+          - 05_apps/cloudnative-pg-postgresdb/resources.disabled/
         discoveryLimit: 20

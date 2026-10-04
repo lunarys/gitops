@@ -13,7 +13,7 @@ spec:
         branch: main
         commitSelectionStrategy: NewestFromBranch
         includePaths:
-          - 05_apps/pgadmin/
+          - 05_apps/cloudnative-pg-pgadmin/
         excludePaths:
           # Docs and examples sit inside the app directory but cannot affect the
           # rendered output, so they should not produce release candidates.
@@ -24,7 +24,7 @@ spec:
           # spans separators, and whether `a/**/*.md` also matches `a/READ.md`,
           # varies by library and would fail silently. Plain strings, as used
           # for the directories below, are exact path matches.
-          - regex:^05_apps/pgadmin/.*\.md$
-          - 05_apps/pgadmin/example/
-          - 05_apps/pgadmin/examples/
+          - regex:^05_apps/cloudnative-pg-pgadmin/.*\.md$
+          - 05_apps/cloudnative-pg-pgadmin/example/
+          - 05_apps/cloudnative-pg-pgadmin/examples/
         discoveryLimit: 20

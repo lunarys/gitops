@@ -2,8 +2,8 @@
 apiVersion: kargo.akuity.io/v1alpha1
 kind: ProjectConfig
 metadata:
-  name: kargo-app-cloudnative-pg
-  namespace: kargo-app-cloudnative-pg
+  name: kargo-app-cloudnative-pg-operator
+  namespace: kargo-app-cloudnative-pg-operator
 spec:
   promotionPolicies:
     - stageSelector:
