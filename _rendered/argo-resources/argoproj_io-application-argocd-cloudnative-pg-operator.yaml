@@ -2,21 +2,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cloudnative-pg
+  name: cloudnative-pg-operator
   namespace: argocd
   annotations:
     # Restricts which Kargo Stage may drive this Application. Stage names are
     # bare `test`/`prod` because the Kargo Project already namespaces them.
-    kargo.akuity.io/authorized-stage: kargo-app-cloudnative-pg:test
+    kargo.akuity.io/authorized-stage: kargo-app-cloudnative-pg-operator:test
 spec:
-  project: cloudnative-pg-project
+  project: cloudnative-pg-operator-project
   destination:
     namespace: cloudnative-pg
     server: https://kubernetes.default.svc
   source:
     repoURL: https://github.com/lunarys/gitops.git
     targetRevision: stage/test
-    path: _rendered/apps/cloudnative-pg
+    path: _rendered/apps/cloudnative-pg-operator
     directory:
       recurse: true
   syncPolicy:
