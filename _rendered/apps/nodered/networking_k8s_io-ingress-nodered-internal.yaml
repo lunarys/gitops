@@ -1,0 +1,25 @@
+# Source: nodered/charts/nodered/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nodered-internal
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-https-redirect@kubernetescrd"
+    cert-manager.io/cluster-issuer: "step-ca-internal"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - nodered.svc.elda
+      secretName: nodered-internal-cert
+  rules:
+    - host: nodered.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: nodered
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix

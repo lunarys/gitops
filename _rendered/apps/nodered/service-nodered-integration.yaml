@@ -1,0 +1,35 @@
+# Source: nodered/charts/nodered/templates/services.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: nodered-integration
+  labels:
+    helm.sh/chart: nodered-4.6.0
+    
+    custom.network/postgresdb: egress
+    app.kubernetes.io/name: nodered
+    app.kubernetes.io/instance: nodered
+    app.kubernetes.io/version: "4.1.1"
+    app.kubernetes.io/managed-by: Helm
+    custom.network/lb-pool: static
+  annotations:
+    lbipam.cilium.io/ips: 10.0.4.7
+spec:
+  type: LoadBalancer
+  allocateLoadBalancerNodePorts: false
+  ports:
+    - name: hmip-binrpc
+      protocol: TCP
+      port: 2062
+      targetPort: 2062
+    - name: hmip-xmlrpc
+      protocol: TCP
+      port: 2063
+      targetPort: 2063
+    - name: smtp
+      protocol: TCP
+      port: 1025
+      targetPort: 1025
+  selector:
+    app.kubernetes.io/name: nodered
+    app.kubernetes.io/instance: nodered

@@ -1,0 +1,23 @@
+# Source: nodered/charts/nodered/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: nodered
+  labels:
+    helm.sh/chart: nodered-4.6.0
+    
+    custom.network/postgresdb: egress
+    app.kubernetes.io/name: nodered
+    app.kubernetes.io/instance: nodered
+    app.kubernetes.io/version: "4.1.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: default-service-endpoint
+      protocol: TCP
+      port: 80
+      targetPort: 1880
+  selector:
+    app.kubernetes.io/name: nodered
+    app.kubernetes.io/instance: nodered

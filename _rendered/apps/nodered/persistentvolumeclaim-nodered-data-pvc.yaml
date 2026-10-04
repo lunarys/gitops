@@ -1,0 +1,13 @@
+# Source: nodered/charts/nodered/charts/longhornstorage/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nodered-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-retain
+  volumeName: "pvc-545cca2f-a761-46a1-92aa-65756f8cca54"
+  resources:
+    requests:
+      storage: 500Mi

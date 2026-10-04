@@ -1,0 +1,108 @@
+# Source: nodered/charts/nodered/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    helm.sh/chart: nodered-4.6.0
+    
+    custom.network/postgresdb: egress
+    app.kubernetes.io/name: nodered
+    app.kubernetes.io/instance: nodered
+    app.kubernetes.io/version: "4.1.1"
+    app.kubernetes.io/managed-by: Helm
+  name: nodered
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nodered
+      app.kubernetes.io/instance: nodered
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        
+        prometheus.io/scrape: 'false'
+      labels:
+        
+        custom.network/postgresdb: egress
+        app.kubernetes.io/name: nodered
+        app.kubernetes.io/instance: nodered
+    spec:
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nodered
+          image: nodered/node-red:4.1.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - --settings
+            - /configmap/settings.js
+          resources:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+          #readiness & liveness
+          livenessProbe:
+            tcpSocket:
+              port: 1880
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 1880
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          ports:
+            - containerPort: 1880
+              name: default
+              protocol: TCP
+            - containerPort: 2062
+              name: hmip-binrpc
+              protocol: TCP
+            - containerPort: 2063
+              name: hmip-xmlrpc
+              protocol: TCP
+            - containerPort: 1025
+              name: smtp
+              protocol: TCP
+          #config values that comes from the configmap 
+          envFrom:
+            - secretRef:
+                name: nodered-external-secret
+          env:
+            # settings from 'env'
+            - name: "TZ"
+              value: "Europe/Berlin"
+          volumeMounts:
+            - name: nodered-settings
+              mountPath: /configmap
+              readOnly: true
+            
+            
+            - name: longhorn-data
+              mountPath: /data
+              readOnly: false
+      volumes:
+        - name: nodered-settings
+          configMap:
+            name: nodered-settings
+        
+        
+        - name: longhorn-data
+          persistentVolumeClaim:
+            claimName: nodered-data-pvc
