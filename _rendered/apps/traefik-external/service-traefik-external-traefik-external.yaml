@@ -1,0 +1,35 @@
+# Source: traefik-external/charts/traefik/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-external
+  namespace: traefik-external
+  labels:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/instance: traefik-external-traefik-external
+    helm.sh/chart: traefik-41.1.0
+    app.kubernetes.io/managed-by: Helm
+    custom.network/lb-pool: static
+  annotations:
+    lbipam.cilium.io/ips: 10.0.6.201
+spec:
+  allocateLoadBalancerNodePorts: true
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/instance: traefik-external-traefik-external
+  ports:
+  - port: 8080
+    name: traefik
+    targetPort: traefik
+    protocol: TCP
+  - port: 80
+    name: web
+    targetPort: web
+    protocol: TCP
+    nodePort: 31255
+  - port: 443
+    name: websecure
+    targetPort: websecure
+    protocol: TCP
+    nodePort: 31060

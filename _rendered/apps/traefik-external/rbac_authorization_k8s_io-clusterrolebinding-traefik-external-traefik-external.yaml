@@ -1,0 +1,18 @@
+# Source: traefik-external/charts/traefik/templates/rbac/clusterrolebinding.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: traefik-external-traefik-external
+  labels:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/instance: traefik-external-traefik-external
+    helm.sh/chart: traefik-41.1.0
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: traefik-external-traefik-external
+subjects:
+  - kind: ServiceAccount
+    name: traefik-external
+    namespace: traefik-external

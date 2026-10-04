@@ -1,0 +1,19 @@
+# Source: traefik-external/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: traefik-external
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd"
+spec:
+  rules:
+    - host: traefik-external.test.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: traefik-external
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
