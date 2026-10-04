@@ -1,0 +1,22 @@
+# Source: pgadmin/charts/pgadmin/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: pgadmin
+  labels:
+    helm.sh/chart: pgadmin-4.6.0
+    
+    app.kubernetes.io/name: pgadmin
+    app.kubernetes.io/instance: pgadmin
+    app.kubernetes.io/version: "9.15.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: default-service-endpoint
+      protocol: TCP
+      port: 80
+      targetPort: 5050
+  selector:
+    app.kubernetes.io/name: pgadmin
+    app.kubernetes.io/instance: pgadmin
