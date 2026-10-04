@@ -1,0 +1,78 @@
+# Source: local-path-provisioner/charts/local-path-provisioner/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: local-path-config
+  namespace: local-path-provisioner
+  labels:
+    app.kubernetes.io/name: local-path-provisioner
+    helm.sh/chart: local-path-provisioner-0.0.36
+    app.kubernetes.io/instance: local-path-provisioner
+    app.kubernetes.io/version: "v0.0.36"
+    app.kubernetes.io/managed-by: Helm
+data:
+  config.json: |-
+    {
+      "nodePathMap": [
+        {
+          "node": "DEFAULT_PATH_FOR_NON_LISTED_NODES",
+          "paths": [
+            "/opt/local-path-provisioner"
+          ]
+        }
+      ],
+      "storageClassConfigs": {
+        "local-path": {
+          "nodePathMap": [
+            {
+              "node": "DEFAULT_PATH_FOR_NON_LISTED_NODES",
+              "paths": [
+                "/opt/local-path-provisioner"
+              ]
+            }
+          ]
+        },
+        "local-path-auto-delete": {
+          "nodePathMap": [
+            {
+              "node": "DEFAULT_PATH_FOR_NON_LISTED_NODES",
+              "paths": [
+                "/opt/local-path-provisioner"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  setup: |-
+    #!/bin/sh
+    set -eu
+    mkdir -m 0770 -p "$VOL_DIR"
+  teardown: |-
+    #!/bin/sh
+    set -eu
+    rm -rf "$VOL_DIR"
+  helperPod.yaml: |-
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: helper-pod
+      namespace: local-path-provisioner
+      labels:
+        app.kubernetes.io/name: local-path-provisioner
+        helm.sh/chart: local-path-provisioner-0.0.36
+        app.kubernetes.io/instance: local-path-provisioner
+        app.kubernetes.io/version: "v0.0.36"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      priorityClassName: system-node-critical
+      tolerations:
+        - key: node.kubernetes.io/disk-pressure
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: helper-pod
+          image: docker.io/library/busybox:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            {}
