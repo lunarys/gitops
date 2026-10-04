@@ -1,0 +1,35 @@
+# Source: home-assistant/charts/home-assistant/templates/services.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: home-assistant-integration
+  labels:
+    helm.sh/chart: home-assistant-4.6.0
+    
+    custom.network/homeassistant-integrated: egress
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/instance: home-assistant
+    app.kubernetes.io/version: "2026.7.4"
+    app.kubernetes.io/managed-by: Helm
+    custom.network/lb-pool: static
+  annotations:
+    lbipam.cilium.io/ips: 10.0.4.6
+spec:
+  type: LoadBalancer
+  allocateLoadBalancerNodePorts: false
+  ports:
+    - name: hmip-callback
+      protocol: TCP
+      port: 38087
+      targetPort: 38087
+    - name: homekit-bridge
+      protocol: TCP
+      port: 21063
+      targetPort: 21063
+    - name: http
+      protocol: TCP
+      port: 8123
+      targetPort: 8123
+  selector:
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/instance: home-assistant

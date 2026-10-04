@@ -1,0 +1,14 @@
+---
+# Source: home-assistant/charts/home-assistant/charts/longhornstorage/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: home-assistant-config-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-retain
+  volumeName: "pvc-a2448f0d-74d1-446b-b28c-d0f1a374f81b"
+  resources:
+    requests:
+      storage: 500Mi

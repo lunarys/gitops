@@ -1,0 +1,99 @@
+# Source: home-assistant/charts/home-assistant/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    helm.sh/chart: home-assistant-4.6.0
+    
+    custom.network/homeassistant-integrated: egress
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/instance: home-assistant
+    app.kubernetes.io/version: "2026.7.4"
+    app.kubernetes.io/managed-by: Helm
+  name: home-assistant
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: home-assistant
+      app.kubernetes.io/instance: home-assistant
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        
+        prometheus.io/scrape: 'false'
+      labels:
+        
+        custom.network/homeassistant-integrated: egress
+        app.kubernetes.io/name: home-assistant
+        app.kubernetes.io/instance: home-assistant
+    spec:
+      securityContext:
+        fsGroup: 2000
+        runAsNonRoot: false
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: home-assistant
+          image: homeassistant/home-assistant:2026.7.4
+          imagePullPolicy: IfNotPresent
+          resources:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+              - SETGID
+              - SETUID
+              - NET_RAW
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+          #readiness & liveness
+          livenessProbe:
+            httpGet:
+              path: /manifest.json
+              port: 8123
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /manifest.json
+              port: 8123
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          ports:
+            - containerPort: 38087
+              name: hmip-callback
+              protocol: TCP
+            - containerPort: 21063
+              name: homekit-bridge
+              protocol: TCP
+            - containerPort: 8123
+              name: http
+              protocol: TCP
+          #config values that comes from the configmap 
+          envFrom:
+            - secretRef:
+                name: home-assistant-external-secret
+          env:
+            # settings from 'env'
+            - name: "TZ"
+              value: "Europe/Berlin"
+          volumeMounts:
+            
+            
+            - name: longhorn-config
+              mountPath: /config
+              readOnly: false
+      volumes:
+        
+        
+        - name: longhorn-config
+          persistentVolumeClaim:
+            claimName: home-assistant-config-pvc
