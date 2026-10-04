@@ -1,0 +1,20 @@
+# Source: local-path-provisioner/charts/local-path-provisioner/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: local-path-provisioner
+  namespace: local-path-provisioner
+  labels:
+    app.kubernetes.io/name: local-path-provisioner
+    helm.sh/chart: local-path-provisioner-0.0.36
+    app.kubernetes.io/instance: local-path-provisioner
+    app.kubernetes.io/version: "v0.0.36"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: local-path-provisioner
+subjects:
+  - kind: ServiceAccount
+    name: local-path-provisioner
+    namespace: local-path-provisioner
