@@ -57,6 +57,3 @@ traefik:
   accessLog:
     enabled: true
     format: json      
-
-autoscale:
-  enabled: false

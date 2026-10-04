@@ -1,0 +1,27 @@
+apiVersion: v2
+name: traefik-external
+description: Traefik instance for requests from the internet
+type: application
+version: 0.1.0
+
+# Deliberately its own chart rather than a second release of 02_bootstrap/03_traefik:
+# the shared settings are few and stable, and a change to the internet-facing ingress
+# should always be a change in this directory. Keep the traefik version in step with
+# the internal instance unless there is a reason not to.
+dependencies:
+  - name: traefik
+    version: 41.1.0
+    repository: https://traefik.github.io/charts
+
+  - name: autoscale
+    version: 4.6.0
+    repository: oci://ghcr.io/lunarys/charts
+    condition: autoscale.enabled
+
+  - name: networkpolicy
+    version: 5.1.0
+    repository: oci://ghcr.io/lunarys/charts
+
+  - name: externalsecrets
+    version: 5.1.0
+    repository: oci://ghcr.io/lunarys/charts

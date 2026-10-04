@@ -1,5 +1,5 @@
 ingress:
-  enabled: false  # dashboard disabled in production; enabled in values-test.yaml
+  enabled: false
   host: "traefik-external.svc.elda"
 
 traefik:
@@ -10,4 +10,3 @@ traefik:
     type: LoadBalancer
     annotations:
       lbipam.cilium.io/ips: "10.0.4.201"
-

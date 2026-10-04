@@ -16,6 +16,7 @@ enabled:
   #- policy-reporter
   - crowdsec
   - crowdsec-web-ui
+  - traefik-external
   - cloudnative-pg-operator
   - cloudnative-pg-barman-cloud
   - cloudnative-pg-postgresdb

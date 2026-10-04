@@ -14,7 +14,6 @@ UNINSTALL=false
 INCLUDE_NETWORK=false
 INCLUDE_SECRETS=false
 INCLUDE_RESOURCES=false
-OVERLAY=""
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -29,10 +28,6 @@ while [[ $# -gt 0 ]]; do
       ;;
     -p|--prefix)
       PREFIX="$2"
-      shift 2
-      ;;
-    -o|--overlay)
-      OVERLAY="$2"
       shift 2
       ;;
     --dry-run)
@@ -73,11 +68,9 @@ while [[ $# -gt 0 ]]; do
     -h|--help)
       echo "Usage: $0 [OPTIONS]"
       echo "Options:"
-      echo "  -d, --directory DIR       Directory containing app.yaml (default: current directory)"
+      echo "  -d, --directory DIR       App directory: Chart.yaml or app.yaml (default: current directory)"
       echo "  -e, --env ENVIRONMENT     Environment (test, prod, dev, etc.)"
       echo "  -p, --prefix PREFIX       App file prefix for multi-app directories (e.g. policy-reporter)"
-      echo "  -o, --overlay DIR         Render the overlay in DIR: a second release of the same chart,"
-      echo "                            with DIR/values.yaml layered on top of the base values"
       echo "      --dry-run             Print the helm command that would be run (don't execute)"
       echo "      --template            Render the Helm chart templates without installing"
       echo "      --uninstall           Uninstall the Helm release"
@@ -95,7 +88,6 @@ while [[ $# -gt 0 ]]; do
       echo "  $0 --template --env test"
       echo "  $0 --template --include-all --env prod"
       echo "  $0 -d apps/kyverno --prefix policy-reporter --env prod"
-      echo "  $0 -d 02_bootstrap/03_traefik --overlay external --env prod"
       echo "  $0 -d apps/kyverno --prefix policy-reporter --env prod --uninstall"
       exit 0
       ;;
@@ -109,39 +101,7 @@ done
 
 APPFILE="${PREFIX:+${PREFIX}-}app.yaml"
 
-# --prefix and --overlay both select "which release in this directory", but with opposite
-# value semantics: a prefix *replaces* the base values, an overlay *layers* on top of them.
-if [ -n "$PREFIX" ] && [ -n "$OVERLAY" ]; then
-  echo "Error: --prefix and --overlay are mutually exclusive" >&2
-  exit 1
-fi
-case "$OVERLAY" in
-  */*|.|..)
-    echo "Error: --overlay must be a single directory name, got '$OVERLAY'" >&2
-    exit 1
-    ;;
-esac
-
 cd "$DIRECTORY"
-
-# An overlay is declared by a hidden .overlay.yaml marker, which carries the release name.
-# Hidden, and excluded via .helmignore, because unlike every other file in the directory it
-# is metadata for tooling and is never an input to a deployment. The name is never derived
-# from the directory name -- it must match the Argo Application that deploys this overlay.
-# NOTE: one overlay exists today (traefik-external); revisit before generalizing further.
-if [ -n "$OVERLAY" ]; then
-  OVERLAY_MARKER="$OVERLAY/.overlay.yaml"
-  if [ ! -f "$OVERLAY_MARKER" ]; then
-    echo "Error: $DIRECTORY/$OVERLAY_MARKER not found -- '$OVERLAY' is not a declared overlay" >&2
-    exit 1
-  fi
-  OVERLAY_NAME="$(yq -r '.name // ""' "$OVERLAY_MARKER")"
-  if [ -z "$OVERLAY_NAME" ]; then
-    echo "Error: $DIRECTORY/$OVERLAY_MARKER must declare a 'name'" >&2
-    exit 1
-  fi
-  OVERLAY_NAMESPACE="$(yq -r '.namespace // .name' "$OVERLAY_MARKER")"
-fi
 
 # Check if environment is set, if not ask for confirmation (skip for uninstall)
 if [ "$UNINSTALL" = false ] && [ -z "$ENVIRONMENT" ]; then
@@ -167,29 +127,47 @@ DIRNAME="$(basename "$(pwd)")"
 APPNAME="$(echo "$DIRNAME" | sed 's/^[0-9][0-9]*_//')"
 #GROUPNAME="$(basename "$(dirname "$(pwd)")" | cut -d_ -f2)"
 
+# Values files, mirroring 04_apps_generator's discovery (templates/_scan.tpl), so a
+# local render and a promotion render layer the same files in the same order:
+#   values.yaml, values-<label>.part.yaml, values-<env>.yaml, values-<label>-<env>.part.yaml
+# each group in byte order. A fragment whose label ends in -<environment> belongs to that
+# environment only; the environment names are the generator's.
+GENERATOR_ENVS="test prod"
+discover_values() {
+  local dir="$1" env="$2" f stem e is_env
+  local LC_ALL=C
+  if [ -f "$dir/values.yaml" ]; then printf '%s\n' "$dir/values.yaml"; fi
+  for f in "$dir"/values-*.part.yaml; do
+    [ -f "$f" ] || continue
+    stem="$(basename "$f" .part.yaml)"
+    stem="${stem#values-}"
+    is_env=false
+    for e in $GENERATOR_ENVS; do
+      if [[ "$stem" == *-"$e" ]]; then is_env=true; fi
+    done
+    if [ "$is_env" = false ]; then printf '%s\n' "$f"; fi
+  done
+  [ -n "$env" ] || return 0
+  if [ -f "$dir/values-$env.yaml" ]; then printf '%s\n' "$dir/values-$env.yaml"; fi
+  for f in "$dir"/values-*-"$env".part.yaml; do
+    if [ -f "$f" ]; then printf '%s\n' "$f"; fi
+  done
+}
+
 # Build values file options (use relative paths since we've already cd'd into DIRECTORY)
 values_file_option=""
-
-# Add base values.yaml if it exists
-if [ -f "${PREFIX:+${PREFIX}-}values.yaml" ]; then
-    values_file_option="-f ${PREFIX:+${PREFIX}-}values.yaml"
-fi
-
-# Add environment-specific values file if specified
-if [ -n "$ENVIRONMENT" ] && [ -f "${PREFIX:+${PREFIX}-}values-${ENVIRONMENT}.yaml" ]; then
-    values_file_option="$values_file_option -f ${PREFIX:+${PREFIX}-}values-${ENVIRONMENT}.yaml"
-fi
-
-# Overlay values layer on top of the base ones, so the order is
-# values.yaml -> values-<env>.yaml -> <overlay>/values.yaml -> <overlay>/values-<env>.yaml.
-# Note the consequence: the overlay's base values win over the parent's env-specific values.
-if [ -n "$OVERLAY" ]; then
-    if [ -f "$OVERLAY/values.yaml" ]; then
-        values_file_option="$values_file_option -f $OVERLAY/values.yaml"
-    fi
-    if [ -n "$ENVIRONMENT" ] && [ -f "$OVERLAY/values-${ENVIRONMENT}.yaml" ]; then
-        values_file_option="$values_file_option -f $OVERLAY/values-${ENVIRONMENT}.yaml"
-    fi
+if [ -n "$PREFIX" ]; then
+  # Multi-app directories (<prefix>-app.yaml) predate fragments: base and environment only.
+  if [ -f "${PREFIX}-values.yaml" ]; then
+    values_file_option="$values_file_option -f ${PREFIX}-values.yaml"
+  fi
+  if [ -n "$ENVIRONMENT" ] && [ -f "${PREFIX}-values-${ENVIRONMENT}.yaml" ]; then
+    values_file_option="$values_file_option -f ${PREFIX}-values-${ENVIRONMENT}.yaml"
+  fi
+else
+  for f in $(discover_values . "$ENVIRONMENT"); do
+    values_file_option="$values_file_option -f $f"
+  done
 fi
 
 if [ -n "$ENVIRONMENT" ]; then
@@ -221,12 +199,6 @@ if [ -f "$APPFILE" ]; then
     RELEASE_NAME="$PREFIX"
   else
     RELEASE_NAME="$APPNAME"
-  fi
-
-  # An overlay is its own release in its own namespace, both taken from the marker
-  if [ -n "$OVERLAY" ]; then
-    NAMESPACE="$OVERLAY_NAMESPACE"
-    RELEASE_NAME="$OVERLAY_NAME"
   fi
 
   if [ "$EXPERIMENTAL_HELM_CHART" == "true" ]; then
@@ -267,14 +239,15 @@ if [ -f "$APPFILE" ]; then
   fi
 
 elif [ -f "Chart.yaml" ]; then
-  # Local Helm chart: the directory itself is the chart
-  NAMESPACE="$APPNAME"
+  # Local Helm chart: the directory itself. Named like the generator names it:
+  # settings.yaml applicationName / namespace, else the directory.
   RELEASE_NAME="${PREFIX:-$APPNAME}"
-
-  # An overlay is its own release in its own namespace, both taken from the marker
-  if [ -n "$OVERLAY" ]; then
-    NAMESPACE="$OVERLAY_NAMESPACE"
-    RELEASE_NAME="$OVERLAY_NAME"
+  if [ -z "$PREFIX" ] && [ -f "settings.yaml" ]; then
+    RELEASE_NAME="$(yq -r ".applicationName // \"$RELEASE_NAME\"" settings.yaml)"
+  fi
+  NAMESPACE="$RELEASE_NAME"
+  if [ -z "$PREFIX" ] && [ -f "settings.yaml" ]; then
+    NAMESPACE="$(yq -r ".namespace // \"$NAMESPACE\"" settings.yaml)"
   fi
 
   if [ "$UNINSTALL" = true ]; then
@@ -297,7 +270,7 @@ elif [ -f "Chart.yaml" ]; then
   fi
 
 else
-  echo "Error: no app.yaml or Chart.yaml found in $(pwd)" >&2
+  echo "Error: no Chart.yaml or app.yaml found in $(pwd)" >&2
   exit 1
 fi
 
@@ -309,15 +282,7 @@ if [ "$INCLUDE_NETWORK" = true ] || [ "$INCLUDE_SECRETS" = true ] || [ "$INCLUDE
   else
     MAIN_HELM_REPO="$(yq ".mainHelmRepo" "$GLOBAL_VALUES")"
 
-    # Sidecar sources are taken from the overlay directory ALONE and are never inherited
-    # from the parent, mirroring how the traefik-external Application is meant to be deployed
-    # (not yet generated by 04_apps_generator -- known gap).
-    # Inheriting them would be actively wrong: traefik-external would render the internal
-    # instance's permissive network policy instead of its own restrictive one.
     SIDECAR_DIR="."
-    if [ -n "$OVERLAY" ]; then
-      SIDECAR_DIR="$OVERLAY"
-    fi
 
     if [ "$INCLUDE_NETWORK" = true ]; then
       NETWORK_FILE="$SIDECAR_DIR/${PREFIX:+${PREFIX}-}network.yaml"
@@ -382,11 +347,13 @@ if [ "$INCLUDE_NETWORK" = true ] || [ "$INCLUDE_SECRETS" = true ] || [ "$INCLUDE
           echo "kubectl apply -f \"$SIDECAR_DIR/resources-${ENVIRONMENT}/\""
         fi
       elif [ "$TEMPLATE_ONLY" = true ]; then
+        # Each file as its own document: a bare cat runs the last document of one file
+        # into the first of the next, and the diff silently loses objects.
         if [ -d "$SIDECAR_DIR/resources" ]; then
-          for f in "$SIDECAR_DIR/resources/"*.yaml; do [ -f "$f" ] && cat "$f"; done
+          for f in "$SIDECAR_DIR/resources/"*.yaml; do [ -f "$f" ] && { echo "---"; cat "$f"; echo; }; done
         fi
         if [ -n "$ENVIRONMENT" ] && [ -d "$SIDECAR_DIR/resources-${ENVIRONMENT}" ]; then
-          for f in "$SIDECAR_DIR/resources-${ENVIRONMENT}/"*.yaml; do [ -f "$f" ] && cat "$f"; done
+          for f in "$SIDECAR_DIR/resources-${ENVIRONMENT}/"*.yaml; do [ -f "$f" ] && { echo "---"; cat "$f"; echo; }; done
         fi
       else
         if [ -d "$SIDECAR_DIR/resources" ]; then kubectl apply -f "$SIDECAR_DIR/resources/"; fi

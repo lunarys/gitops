@@ -10,8 +10,9 @@ enabled:
   - cert-manager
   #- kyverno
   #- policy-reporter
-  #- crowdsec
-  #- crowdsec-web-ui
+  - crowdsec
+  - crowdsec-web-ui
+  - traefik-external  # its bouncer middleware blocks everything while crowdsec is off
 
   - cloudnative-pg-operator
   - cloudnative-pg-barman-cloud

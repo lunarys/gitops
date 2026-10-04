@@ -197,56 +197,6 @@ Files can have environment suffixes:
 | `resources-prod/*.yaml` | Production-only additional manifests |
 | `resources-test/*.yaml` | Test-only additional manifests |
 | `apps-<env>.yaml` | (in `05_apps/` and `02_bootstrap/`) `enabled:` list of apps rendered for that environment |
-| `<dir>/.overlay.yaml` | Declares `<dir>` as an *overlay* — see below. Tooling metadata, not a deployment input. |
-
-## Overlays
-
-> **Known gap:** the Argo/Kargo generator (`04_apps_generator`) does not generate the
-> `traefik-external` overlay yet, and the overlay tooling below (`install.sh`, PR diff)
-> still assumes the pre-Kargo `app.yaml`/wrapper layout. Treat this
-> section as describing the intended contract until that is reconciled.
-
-An **overlay** is a subdirectory of an app directory that declares a *second release of
-the same chart*, with its values layered on top of the parent's. It exists because a
-`<prefix>-app.yaml` sibling cannot express this: a prefix *replaces* the base values,
-whereas an overlay *layers* on them.
-
-Declared by a hidden `.overlay.yaml` in the subdirectory:
-
-```yaml
-name: traefik-external     # required; must match the Argo Application that deploys it
-# namespace: <name>        # optional, defaults to `name`
-```
-
-The marker is hidden and listed in `.helmignore` because, unlike every other file in the
-directory, it is metadata read only by tooling (`install.sh --overlay`, the PR helm-diff
-workflow) and never by Argo. Argo does not read it.
-
-What layers and what does not:
-
-| Source | Resolution |
-|--------|-----------|
-| chart values | `values.yaml` → `values-<env>.yaml` → `<dir>/values.yaml` → `<dir>/values-<env>.yaml` |
-| `network.yaml`, `secrets.yaml`, `resources/` | from `<dir>` **alone**, never inherited from the parent |
-
-The asymmetry is deliberate and load-bearing: if `network.yaml` were inherited,
-`traefik-external` would render the internal instance's permissive policy instead of its
-own restrictive one.
-
-Deploy or render an overlay with:
-
-```bash
-scripts/install.sh -d 02_bootstrap/03_traefik --overlay external --env prod --template
-```
-
-There is currently no automated check that declared overlays match a deployed Application
-(the former `check-argo-coverage.py` depended on the removed apps-wrapper chart).
-
-> **One overlay exists in this repo** (`02_bootstrap/03_traefik/external` →
-> `traefik-external`). The feature is deliberately minimal; if a second one appears,
-> revisit the design rather than extending it. The endgame that would remove the concept
-> entirely is to drive `install.sh` and the PR diff off the *rendered* Argo Applications
-> instead of filename conventions, so nothing needs restating.
 
 ## Network Policy Pattern
 
