@@ -1,0 +1,16 @@
+---
+# Source: crowdsec/charts/crowdsec/templates/acquis-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: acquis-configmap
+data:
+  acquis.yaml: |-
+    ---
+    filenames:
+      - /var/log/containers/traefik-external-*_traefik-external_*.log
+    force_inotify: true
+    poll_without_inotify: true
+    labels:
+      type: containerd
+      program: traefik
