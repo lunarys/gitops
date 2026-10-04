@@ -1,0 +1,48 @@
+# Source: home-assistant/charts/home-assistant/charts/networkpolicy/templates/networkpolicy-preset.yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  
+  name: home-assistant-preset-cnp
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEndpoints:
+        - {}
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: nodered
+    - fromCIDR:
+        - 10.0.0.0/20
+        - fda0:f54f:5876::/48
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: traefik
+  egress:
+    - toEndpoints:
+        - {}
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: mosquitto
+    - toEntities:
+        - world
+    - toCIDR:
+        - 10.0.0.0/20
+        - fda0:f54f:5876::/48
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            custom.network/homeassistant-integrated: "ingress"
+          matchExpressions:
+            - key: io.kubernetes.pod.namespace
+              operator: Exists

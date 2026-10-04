@@ -1,0 +1,25 @@
+# Source: home-assistant/charts/home-assistant/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: home-assistant-internal
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-https-redirect@kubernetescrd"
+    cert-manager.io/cluster-issuer: "step-ca-internal"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - hass.svc.elda
+      secretName: home-assistant-internal-cert
+  rules:
+    - host: hass.svc.elda
+      http:
+        paths:
+          - backend:
+              service:
+                name: home-assistant-integration
+                port:
+                  number: 8123
+            path: /
+            pathType: Prefix
