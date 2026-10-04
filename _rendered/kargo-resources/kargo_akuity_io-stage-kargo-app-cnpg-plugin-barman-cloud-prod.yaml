@@ -3,7 +3,7 @@ apiVersion: kargo.akuity.io/v1alpha1
 kind: Stage
 metadata:
   name: prod
-  namespace: kargo-app-pgadmin
+  namespace: kargo-app-cnpg-plugin-barman-cloud
 spec:
   # spec.shard, NOT the kargo.akuity.io/shard label. The Stage admission webhook
   # treats spec.shard as authoritative and derives the label from it, silently
@@ -16,9 +16,13 @@ spec:
   requestedFreight:
     - origin:
         kind: Warehouse
-        name: pgadmin
+        name: cnpg-plugin-barman-cloud
       sources:
-        direct: true
+        # Production takes Freight only after test has had it. Emitted only when
+        # the app is actually enabled in test -- a prod-only app has no test
+        # Stage to gate on and would deadlock waiting for one.
+        stages:
+          - test
   promotionTemplate:
     spec:
       steps:
@@ -42,10 +46,10 @@ spec:
             - name: renderedRepoURL
               value: https://github.com/lunarys/gitops.git
             - name: app
-              value: pgadmin
+              value: cnpg-plugin-barman-cloud
             # The directory, which may differ from the application name.
             - name: appDir
-              value: cloudnative-pg-pgadmin
+              value: cloudnative-pg-barman-cloud
             - name: appRoot
               value: 05_apps
             - name: env
@@ -74,23 +78,23 @@ spec:
             # array (after number/bool fail) before the step config is
             # marshalled -- so helm-template's valuesFiles sees a []string.
             - name: valuesFiles
-              value: "[\"./src/05_apps/cloudnative-pg-pgadmin/values.yaml\",\"./src/05_apps/cloudnative-pg-pgadmin/values-prod.yaml\"]"
+              value: "[\"./src/05_apps/cloudnative-pg-barman-cloud/values.yaml\",\"./src/05_apps/cloudnative-pg-barman-cloud/values-network.part.yaml\"]"
             - name: namespace
               value: cloudnative-pg
             - name: outRoot
               value: _rendered/apps
             - name: promotionBranch
-              value: kargo/promotion/pgadmin-prod
+              value: kargo/promotion/cnpg-plugin-barman-cloud-prod
             # skipCrds is a RENDER decision now, not an Argo sync option.
             - name: includeCRDs
-              value: "false"
+              value: "true"
             - name: openPR
               value: "true"
             # Whether resources/ and resources-<env>/ exist, so the task's copy
             # steps run only for directories that are there -- Kargo's copy
             # step errors on a missing source rather than skipping it.
             - name: copyResources
-              value: "false"
+              value: "true"
             - name: copyEnvResources
               value: "false"
             # The Stage requestedFreight above takes Freight from, so the
@@ -100,7 +104,7 @@ spec:
             # missing and rejects the Promotion. The same condition as
             # `stages:` above, so the two cannot disagree.
             - name: upstreamStage
-              value: "<none>"
+              value: "test"
         # Both environments sync and report health.
         #
         # Omitting this would be strictly worse than including it: the Stage

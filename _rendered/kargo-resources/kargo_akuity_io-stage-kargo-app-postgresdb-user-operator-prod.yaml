@@ -49,7 +49,7 @@ spec:
               value: postgresdb-user-operator
             # The directory, which may differ from the application name.
             - name: appDir
-              value: postgresdb-user-operator
+              value: cloudnative-pg-user-operator
             - name: appRoot
               value: 05_apps
             - name: env
@@ -78,7 +78,7 @@ spec:
             # array (after number/bool fail) before the step config is
             # marshalled -- so helm-template's valuesFiles sees a []string.
             - name: valuesFiles
-              value: "[\"./src/05_apps/postgresdb-user-operator/values.yaml\",\"./src/05_apps/postgresdb-user-operator/values-network.part.yaml\"]"
+              value: "[\"./src/05_apps/cloudnative-pg-user-operator/values.yaml\",\"./src/05_apps/cloudnative-pg-user-operator/values-network.part.yaml\"]"
             - name: namespace
               value: cloudnative-pg
             - name: outRoot
