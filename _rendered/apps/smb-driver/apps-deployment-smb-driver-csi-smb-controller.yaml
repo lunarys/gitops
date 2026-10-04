@@ -1,0 +1,169 @@
+# Source: smb-driver/charts/csi-driver-smb/templates/csi-smb-controller.yaml
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: csi-smb-controller
+  namespace: smb-driver
+  labels:
+    app.kubernetes.io/instance: "smb-driver"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/name: "csi-driver-smb"
+    app.kubernetes.io/version: "1.20.3"
+    helm.sh/chart: "csi-driver-smb-1.20.3"
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-smb-controller
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: "smb-driver"
+        app.kubernetes.io/managed-by: "Helm"
+        app.kubernetes.io/name: "csi-driver-smb"
+        app.kubernetes.io/version: "1.20.3"
+        helm.sh/chart: "csi-driver-smb-1.20.3"
+        app: csi-smb-controller
+    spec:
+    # runOnControlPlane=true or runOnMaster=true only takes effect if affinity is not set
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      serviceAccountName: csi-smb-controller-sa
+      nodeSelector:
+        kubernetes.io/os: linux
+      priorityClassName: "system-cluster-critical"
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: Exists
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/controlplane
+          operator: Exists
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+          operator: Exists
+        - effect: NoSchedule
+          key: CriticalAddonsOnly
+          operator: Exists      
+      containers:
+        - name: csi-provisioner
+          image: "registry.k8s.io/sig-storage/csi-provisioner:v6.3.0"
+          args:
+            - "-v=2"
+            - "--csi-address=$(ADDRESS)"
+            - "--leader-election"
+            - "--leader-election-namespace=smb-driver"
+            - "--extra-create-metadata=true"
+            - "--retry-interval-max=30m"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
+          resources:
+            limits:
+              memory: 400Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+          securityContext:
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+              - ALL
+        - name: csi-resizer
+          image: "registry.k8s.io/sig-storage/csi-resizer:v2.2.0"
+          args:
+            - "-csi-address=$(ADDRESS)"
+            - "-v=2"
+            - "-leader-election"
+            - "--leader-election-namespace=smb-driver"
+            - '-handle-volume-inuse-error=false'
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+          resources:
+            limits:
+              memory: 400Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+          securityContext:
+            capabilities:
+              drop:
+              - ALL
+        - name: liveness-probe
+          image: "registry.k8s.io/sig-storage/livenessprobe:v2.19.0"
+          args:
+            - --csi-address=/csi/csi.sock
+            - --probe-timeout=3s
+            - --http-endpoint=localhost:29642
+            - --v=2
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+          resources:
+            limits:
+              memory: 100Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+          securityContext:
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+              - ALL
+        - name: smb
+          image: "registry.k8s.io/sig-storage/smbplugin:v1.20.3"
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--v=5"
+            - "--endpoint=$(CSI_ENDPOINT)"
+            - "--metrics-address=0.0.0.0:29644"
+            - "--drivername=smb.csi.k8s.io"
+            - "--working-mount-dir=/tmp"
+          ports:
+            - containerPort: 29644
+              name: metrics
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              host: localhost
+              path: /healthz
+              port: 29642
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            periodSeconds: 30
+          env:
+            - name: CSI_ENDPOINT
+              value: unix:///csi/csi.sock
+          securityContext:
+            privileged: true
+            capabilities:
+              drop:
+              - ALL
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+      volumes:
+        - name: socket-dir
+          emptyDir: {}
