@@ -1,0 +1,23 @@
+# Source: kargo/charts/kargo/templates/external-webhooks-server/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kargo-external-webhooks-server
+  namespace: kargo
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: external-webhooks-server
+  
+data:
+  EXTERNAL_WEBHOOK_SERVER_BASE_URL: https://kargo.svc.elda/webhooks
+  KARGO_NAMESPACE: kargo
+  SYSTEM_RESOURCES_NAMESPACE: "kargo-system-resources"
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "CONSOLE"
+  TLS_ENABLED: "true"
+  TLS_CERT_PATH: /etc/kargo/tls.crt
+  TLS_KEY_PATH: /etc/kargo/tls.key

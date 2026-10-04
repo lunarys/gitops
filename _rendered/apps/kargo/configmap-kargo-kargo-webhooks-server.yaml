@@ -1,0 +1,22 @@
+# Source: kargo/charts/kargo/templates/kubernetes-webhooks-server/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kargo-webhooks-server
+  namespace: kargo
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: kubernetes-webhooks-server
+  
+data:
+  KARGO_NAMESPACE: kargo
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "CONSOLE"
+  CONTROLPLANE_USER_REGEX: ^system:serviceaccount:kargo:(kargo-api|kargo-controller|kargo-garbage-collector|kargo-management-controller)$
+  MANAGEMENT_CONTROLLER_USERNAME: system:serviceaccount:kargo:kargo-management-controller
+  EXTERNAL_WEBHOOKS_SERVER_USERNAME: system:serviceaccount:kargo:kargo-external-webhooks-server
+  CACHE_BY_TAG_POLICY: "Allow"

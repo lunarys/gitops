@@ -1,0 +1,74 @@
+# Source: kargo/charts/kargo/templates/kubernetes-webhooks-server/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kargo-webhooks-server
+  namespace: kargo
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: kubernetes-webhooks-server
+  
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kargo
+      app.kubernetes.io/instance: kargo
+      app.kubernetes.io/component: kubernetes-webhooks-server
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: kargo-1.11.4
+        app.kubernetes.io/name: kargo
+        app.kubernetes.io/instance: kargo
+        app.kubernetes.io/version: "v1.11.4"
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: kubernetes-webhooks-server
+      annotations:
+        configmap/checksum: f2f89b5b1cab72b5fc5e756f41dc929033fc20bee7650ed472f16556448a9fbb
+    spec:
+      serviceAccountName: kargo-webhooks-server
+      containers:
+      - name: webhooks-server
+        image: ghcr.io/akuity/kargo:v1.11.4
+        imagePullPolicy: IfNotPresent
+        command: ["/sbin/tini", "--", "/usr/local/bin/kargo"]
+        args: ["kubernetes-webhooks-server"]
+        env:
+        - name: GOMEMLIMIT
+          valueFrom:
+            resourceFieldRef:
+              containerName: webhooks-server
+              divisor: "1"
+              resource: limits.memory
+        - name: GOMAXPROCS
+          valueFrom:
+            resourceFieldRef:
+              containerName: webhooks-server
+              divisor: "1"
+              resource: limits.cpu
+        envFrom:
+        - configMapRef:
+            name: kargo-webhooks-server
+        ports:
+        - containerPort: 9443
+          name: webhooks-server
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
+          name: cert
+          readOnly: true
+        resources:
+          {}
+      volumes:
+      - name: cert
+        secret:
+          defaultMode: 0644
+          secretName: kargo-webhooks-server-cert

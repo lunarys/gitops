@@ -1,0 +1,21 @@
+# Source: kargo/charts/kargo/templates/kubernetes-webhooks-server/cluster-role-binding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kargo-webhooks-server-generic-gc
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: kubernetes-webhooks-server
+  
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kargo-webhooks-server-generic-gc
+subjects:
+- kind: ServiceAccount
+  namespace: kube-system
+  name: generic-garbage-collector

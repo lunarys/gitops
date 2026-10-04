@@ -1,0 +1,69 @@
+# Source: kargo/charts/kargo/templates/garbage-collector/cron-job.yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kargo-garbage-collector
+  namespace: kargo
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: garbage-collector
+  
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    metadata:
+      labels:
+        helm.sh/chart: kargo-1.11.4
+        app.kubernetes.io/name: kargo
+        app.kubernetes.io/instance: kargo
+        app.kubernetes.io/version: "v1.11.4"
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: garbage-collector
+      annotations:
+        configmap/checksum: e419ca54357429ab3d16030d62442027b10abc3dd6f10cfeb75cc2716883256f
+    spec:
+      template:
+        metadata:
+          labels:
+            helm.sh/chart: kargo-1.11.4
+            app.kubernetes.io/name: kargo
+            app.kubernetes.io/instance: kargo
+            app.kubernetes.io/version: "v1.11.4"
+            app.kubernetes.io/managed-by: Helm
+            app.kubernetes.io/component: garbage-collector
+          annotations:
+            configmap/checksum: e419ca54357429ab3d16030d62442027b10abc3dd6f10cfeb75cc2716883256f
+        spec:
+          serviceAccountName: kargo-garbage-collector
+          containers:
+          - name: garbage-collector
+            image: ghcr.io/akuity/kargo:v1.11.4
+            imagePullPolicy: IfNotPresent
+            command: ["/sbin/tini", "--", "/usr/local/bin/kargo"]
+            args: ["garbage-collector"]
+            env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  containerName: garbage-collector
+                  divisor: "1"
+                  resource: limits.memory
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  containerName: garbage-collector
+                  divisor: "1"
+                  resource: limits.cpu
+            envFrom:
+            - configMapRef:
+                name: kargo-garbage-collector
+            resources:
+              {}
+          restartPolicy: Never

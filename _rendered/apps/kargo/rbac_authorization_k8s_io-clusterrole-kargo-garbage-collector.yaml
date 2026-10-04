@@ -1,0 +1,50 @@
+# Source: kargo/charts/kargo/templates/garbage-collector/cluster-roles.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kargo-garbage-collector
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: garbage-collector
+  
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+# The garbage collector cannot actually carry our promotions because it lacks
+# permission to create Promotion resources, but having the custom promote verb
+# on Stages allows it to delete Promotion resources associated with any Stage.
+- apiGroups:
+  - kargo.akuity.io
+  resources:
+  - stages
+  verbs:
+  - promote
+- apiGroups:
+  - kargo.akuity.io
+  resources:
+  - stages
+  - warehouses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - kargo.akuity.io
+  resources:
+  - freights
+  - promotions
+  verbs:
+  - delete
+  - get
+  - list
+  - watch

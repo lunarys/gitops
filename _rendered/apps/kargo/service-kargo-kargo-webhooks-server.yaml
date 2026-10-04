@@ -1,0 +1,24 @@
+# Source: kargo/charts/kargo/templates/kubernetes-webhooks-server/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: kargo-webhooks-server
+  namespace: kargo
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: kubernetes-webhooks-server
+  
+spec:
+  type: ClusterIP
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 9443
+  selector:
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/component: kubernetes-webhooks-server

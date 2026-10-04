@@ -1,0 +1,26 @@
+# Source: kargo/charts/kargo/templates/kubernetes-webhooks-server/cluster-role.yaml
+# This cluster role is custom for the generic garbage collector. It will not
+# actually be able to carry our promotions because it lacks permission to create
+# Promotion resources, but having the custom promote verb on Stages allows it to
+# delete Promotion resources associated with any Stage when the Stage is
+# deleted. Without this, the webhook would prevent that and Stage deletions
+# would not cascade to related Promotions.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kargo-webhooks-server-generic-gc
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: kubernetes-webhooks-server
+  
+rules:
+- apiGroups:
+  - kargo.akuity.io
+  resources:
+  - stages
+  verbs:
+  - promote

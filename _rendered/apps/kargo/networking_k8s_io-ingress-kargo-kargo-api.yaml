@@ -1,0 +1,39 @@
+# Source: kargo/charts/kargo/templates/api/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kargo-api
+  namespace: kargo
+  labels:
+    helm.sh/chart: kargo-1.11.4
+    app.kubernetes.io/name: kargo
+    app.kubernetes.io/instance: kargo
+    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: api
+  annotations:
+    cert-manager.io/cluster-issuer: "step-ca-internal"
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-common-internal-access-allowlist@kubernetescrd,traefik-common-https-redirect@kubernetescrd"
+spec:
+  rules:
+  - host: "kargo.svc.elda"
+    http:
+      paths:
+      - pathType: ImplementationSpecific
+        path: /
+        backend:
+          service:
+            name: kargo-api
+            port:
+              number: 80
+      - pathType: ImplementationSpecific
+        path: /webhooks
+        backend:
+          service:
+            name: kargo-external-webhooks-server
+            port:
+              number: 443
+  tls:
+  - hosts:
+    - "kargo.svc.elda"
+    secretName: kargo-internal-cert
