@@ -1,0 +1,8 @@
+# Source: authentik/charts/authentik/templates/additional-objects.yaml
+apiVersion: postgres.crds.lunarys.lab/v1alpha1
+kind: PostgresDatabase
+metadata:
+  name: authentik
+spec:
+  deletionPolicy: Retain
+  secretName: authentik-pgcreds
