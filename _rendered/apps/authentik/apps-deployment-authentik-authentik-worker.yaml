@@ -1,0 +1,114 @@
+# Source: authentik/charts/authentik/templates/worker/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentik-worker
+  namespace: "authentik"
+  labels:
+    helm.sh/chart: "authentik-2026.5.6"
+    app.kubernetes.io/name: "authentik"
+    app.kubernetes.io/instance: "authentik"
+    app.kubernetes.io/component: "worker"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/part-of: "authentik"
+    app.kubernetes.io/version: "2026.5.6"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "authentik"
+      app.kubernetes.io/instance: "authentik"
+      app.kubernetes.io/component: "worker"
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: "authentik-2026.5.6"
+        app.kubernetes.io/name: "authentik"
+        app.kubernetes.io/instance: "authentik"
+        app.kubernetes.io/component: "worker"
+        app.kubernetes.io/managed-by: "Helm"
+        app.kubernetes.io/part-of: "authentik"
+        app.kubernetes.io/version: "2026.5.6"
+        custom.network/postgresdb: egress
+      annotations:
+        checksum/secret: 5a4f27f1d4d8c7b39bb4bc912d8f7a7b960099a87007062875f98acede6ac9e5
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: worker
+          image: ghcr.io/goauthentik/server:2026.5.6
+          imagePullPolicy: IfNotPresent
+          args:
+            - worker
+          env:
+            - name: AUTHENTIK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: secret_key
+                  name: authentik-secrets
+          envFrom:
+            - secretRef:
+                name: authentik
+          volumeMounts:
+            - mountPath: /mnt/pgcreds
+              name: authentik-pgcreds
+              readOnly: true
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+            - name: metrics
+              containerPort: 9300
+              protocol: TCP
+          livenessProbe:
+            
+            exec:
+              command:
+              - ak
+              - healthcheck
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          readinessProbe:
+            
+            exec:
+              command:
+              - ak
+              - healthcheck
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          startupProbe:
+            
+            exec:
+              command:
+              - ak
+              - healthcheck
+            failureThreshold: 60
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          resources:
+            {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: "authentik"
+                    app.kubernetes.io/instance: "authentik"
+                    app.kubernetes.io/component: "worker"
+                topologyKey: kubernetes.io/hostname
+      volumes:
+        - name: authentik-pgcreds
+          secret:
+            secretName: authentik-pgcreds
+      enableServiceLinks: true
