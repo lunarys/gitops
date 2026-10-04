@@ -1,0 +1,75 @@
+# Source: postgresdb-user-operator/charts/postgresdb-user-operator/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresdb-user-operator
+  labels:
+    control-plane: controller-manager
+    helm.sh/chart: postgresdb-user-operator-0.3.7
+    app.kubernetes.io/name: postgresdb-user-operator
+    app.kubernetes.io/instance: postgresdb-user-operator
+    app.kubernetes.io/version: "0.3.7"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgresdb-user-operator
+      control-plane: controller-manager
+      app.kubernetes.io/name: postgresdb-user-operator
+      app.kubernetes.io/instance: postgresdb-user-operator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: postgresdb-user-operator
+        control-plane: controller-manager
+        app.kubernetes.io/name: postgresdb-user-operator
+        app.kubernetes.io/instance: postgresdb-user-operator
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+    spec:
+      containers:
+      - args:
+        - --metrics-bind-address=:8443
+        - --leader-elect
+        - --health-probe-bind-address=:8081
+        - --default-cluster-selector=app.kubernetes.io/name=postgresdb
+        - --default-cluster-namespace=cloudnative-pg
+        command:
+        - /manager
+        env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: "cluster.local"
+        image: ghcr.io/lunarys/postgresdb-user-operator:0.3.7
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: manager
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: postgresdb-user-operator
+      terminationGracePeriodSeconds: 10
