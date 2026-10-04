@@ -1,0 +1,23 @@
+# Source: crowdsec-web-ui/charts/crowdsec-web-ui/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: crowdsec-web-ui
+  labels:
+    helm.sh/chart: crowdsec-web-ui-4.6.0
+    
+    custom.network/mqtt-client: egress
+    app.kubernetes.io/name: crowdsec-web-ui
+    app.kubernetes.io/instance: crowdsec-web-ui
+    app.kubernetes.io/version: "2026.7.25"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: default-service-endpoint
+      protocol: TCP
+      port: 80
+      targetPort: 3000
+  selector:
+    app.kubernetes.io/name: crowdsec-web-ui
+    app.kubernetes.io/instance: crowdsec-web-ui
