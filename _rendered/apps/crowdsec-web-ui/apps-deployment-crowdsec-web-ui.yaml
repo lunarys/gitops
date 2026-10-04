@@ -1,0 +1,105 @@
+# Source: crowdsec-web-ui/charts/crowdsec-web-ui/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    helm.sh/chart: crowdsec-web-ui-4.6.0
+    
+    custom.network/mqtt-client: egress
+    app.kubernetes.io/name: crowdsec-web-ui
+    app.kubernetes.io/instance: crowdsec-web-ui
+    app.kubernetes.io/version: "2026.7.25"
+    app.kubernetes.io/managed-by: Helm
+  name: crowdsec-web-ui
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: crowdsec-web-ui
+      app.kubernetes.io/instance: crowdsec-web-ui
+  template:
+    metadata:
+      annotations:
+        
+        prometheus.io/scrape: 'false'
+      labels:
+        
+        custom.network/mqtt-client: egress
+        app.kubernetes.io/name: crowdsec-web-ui
+        app.kubernetes.io/instance: crowdsec-web-ui
+    spec:
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: crowdsec-web-ui
+          image: ghcr.io/theduffman85/crowdsec-web-ui:2026.7.25
+          imagePullPolicy: IfNotPresent
+          resources:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+          #readiness & liveness
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          ports:
+            - containerPort: 3000
+              name: default
+              protocol: TCP
+          #config values that comes from the configmap 
+          envFrom:
+          env:
+            # settings from 'env'
+            - name: "CONFIG_INSTANCE_LAPI_AUTH_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  key: web_ui_password
+                  name: crowdsec-secrets
+            - name: "CONFIG_INSTANCE_LAPI_AUTH_TYPE"
+              value: "password"
+            - name: "CONFIG_INSTANCE_LAPI_AUTH_USERNAME"
+              valueFrom:
+                secretKeyRef:
+                  key: web_ui_user
+                  name: crowdsec-secrets
+            - name: "CONFIG_INSTANCE_LAPI_URL"
+              value: "http://crowdsec-service:8080"
+            - name: "CONFIG_UI_TIME_ZONE"
+              value: "Europe/Berlin"
+            - name: "VITE_COMMIT_HASH"
+              value: ""
+            - name: "VITE_VERSION"
+              value: ""
+          volumeMounts:
+            
+            
+            - name: longhorn-data
+              mountPath: /app/data
+              readOnly: false
+      volumes:
+        
+        
+        - name: longhorn-data
+          persistentVolumeClaim:
+            claimName: crowdsec-web-ui-data-pvc
