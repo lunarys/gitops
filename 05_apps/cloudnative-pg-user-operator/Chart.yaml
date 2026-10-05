@@ -6,7 +6,7 @@ version: 0.1.0
 
 dependencies:
   - name: postgresdb-user-operator
-    version: 0.3.7
+    version: 0.3.8
     repository: oci://ghcr.io/lunarys/charts
 
   - name: networkpolicy
