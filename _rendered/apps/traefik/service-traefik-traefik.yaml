@@ -11,7 +11,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     custom.network/lb-pool: static
   annotations:
-    lbipam.cilium.io/ips: 10.0.4.200
+    lbipam.cilium.io/ips: 10.0.4.200,fda0:f54f:5876::4:200
 spec:
   allocateLoadBalancerNodePorts: false
   type: LoadBalancer
