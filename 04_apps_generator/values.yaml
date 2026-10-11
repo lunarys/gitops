@@ -98,6 +98,19 @@ defaultSettings:
       test: true
       prod: true
 
+    # Run the promotion's argocd-update step: sync the app's Application to the
+    # promoted commit and wait for it to report Healthy. Same two shapes as
+    # openPR. Turning it off leaves the sync to Argo CD itself (autoSync, or a
+    # manual sync) -- and costs the health signal: the Stage then references no
+    # Application, so with no `verification` below, "verified" only means the
+    # promotion finished.
+    #
+    # Subordinate to argoSyncEnabled in gitops-values.yaml, the repository-wide
+    # switch: this can only opt an app out, never back in.
+    argoSync:
+      test: true
+      prod: true
+
     # Extra Warehouse excludePaths, relative to the app directory. The generator
     # already excludes markdown at any depth and example/ + examples/; this is
     # for the app-specific ones -- docker/, .old/, resources.disabled/ and the

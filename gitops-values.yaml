@@ -39,6 +39,9 @@ renderedRepo: ""
 # trying renderedRepo against a scratch repo -- a promotion then stops at the
 # open pull request and Argo CD is never touched, let alone told to sync
 # anything from the test repo.
+#
+# Per-app Stages can additionally opt out with kargo.argoSync in the app's
+# settings.yaml (see 04_apps_generator/values.yaml); this switch overrides it.
 argoSyncEnabled: false
 
 # -- Branch the Warehouses watch for source changes.

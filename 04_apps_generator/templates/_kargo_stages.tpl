@@ -149,8 +149,12 @@ spec:
         #
         # argoSyncEnabled is the one exception: false while first trying
         # renderedRepo against a scratch repo, so nothing here ever asks a real
-        # Argo CD to sync from it.
-        {{- if $root.Values.argoSyncEnabled }}
+        # Argo CD to sync from it. Below it, an app can opt out per environment
+        # with kargo.argoSync -- see defaultSettings in values.yaml.
+        #
+        # Compared as a string: include always returns one, and "false" is
+        # truthy.
+        {{- if and $root.Values.argoSyncEnabled (eq (include "apps-generator.argoSync" .) "true") }}
         - uses: argocd-update
           config:
             apps:

@@ -62,6 +62,15 @@
 {{- end }}
 
 {{- /*
+  Whether this app's promotion ends with argocd-update in this environment.
+  Falls back to true: skipping the step is what silently loses the health
+  signal, so that is the answer that has to be asked for.
+*/ -}}
+{{- define "apps-generator.argoSync" -}}
+{{ include "apps-generator.kargoPerEnv" (dict "app" .app "env" .env "key" "argoSync" "fallback" true) }}
+{{- end }}
+
+{{- /*
   Validates the mode/environment pair. Included unconditionally by both
   emitters, outside their mode guards, so it runs whichever render is active.
 
