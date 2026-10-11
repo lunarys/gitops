@@ -15,4 +15,4 @@ traefik:
   service:
     type: LoadBalancer
     annotations:
-      lbipam.cilium.io/ips: "10.0.6.200"
+      lbipam.cilium.io/ips: "10.0.6.200,fda0:f54f:5876::6:200"

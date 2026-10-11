@@ -26,8 +26,6 @@ traefik:
   service:
     labels:
       custom.network/lb-pool: static
-    annotations:
-      lbipam.cilium.io/ips: "10.0.4.200"
     spec: 
       allocateLoadBalancerNodePorts: false
 
