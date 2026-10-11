@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: traefik
     app.kubernetes.io/instance: traefik-traefik
-    helm.sh/chart: traefik-41.1.0
+    helm.sh/chart: traefik-41.7.1
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
