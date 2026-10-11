@@ -4,7 +4,7 @@ apiVersion: v1
 metadata:
   name: teamspeak
   labels:
-    helm.sh/chart: teamspeak-4.6.0
+    helm.sh/chart: teamspeak-5.1.0
     
     custom.network/external-access: ingress
     app.kubernetes.io/name: teamspeak
