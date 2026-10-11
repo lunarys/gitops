@@ -126,10 +126,8 @@ spec:
                   # _argo_application.tpl from the same helper), not
                   # necessarily mainRepo.
                   - repoURL: https://github.com/lunarys/gitops.git
-                    # Quoted deliberately. Every Kargo expression in a step
-                    # config is wrapped in explicit YAML quotes here: an
-                    # unquoted expression containing a ternary reads to a
-                    # lenient YAML parser as complex-mapping-key syntax
-                    # (`? key` / `: value`), so the field silently becomes a
-                    # map and Kargo rejects it as "given: object".
-                    desiredRevision: "${{ outputs['render'].commit }}"
+                    # Unset: Kargo's health check requires an exact match, and
+                    # any other app's render onto the shared stage branch breaks
+                    # it (akuity/kargo#3910). Needs per-app branches or
+                    # updateTargetRevision to come back.
+                    #desiredRevision: "${{ outputs['render'].commit }}"
