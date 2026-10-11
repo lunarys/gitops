@@ -6,7 +6,7 @@ n8n:
 
   image:
     name: docker.n8n.io/n8nio/n8n
-    tag: 2.35.7
+    tag: 2.42.6
 
   service:
     targetPort: 5678
