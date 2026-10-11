@@ -3,6 +3,10 @@ apiVersion: longhorn.io/v1beta2
 kind: RecurringJob
 metadata:
   name: default-backup
+  annotations:
+    # mutator.longhorn.io (failurePolicy: Fail) is served by the longhorn-manager pods, which all restart
+    # at once on upgrades; apply this only after the manager DaemonSet (wave 0) is healthy again
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   cron: "5 4 * * *"  # Daily at 4:05 AM
   task: "backup"
