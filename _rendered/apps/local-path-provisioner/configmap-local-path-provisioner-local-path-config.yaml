@@ -6,9 +6,9 @@ metadata:
   namespace: local-path-provisioner
   labels:
     app.kubernetes.io/name: local-path-provisioner
-    helm.sh/chart: local-path-provisioner-0.0.36
+    helm.sh/chart: local-path-provisioner-0.0.37
     app.kubernetes.io/instance: local-path-provisioner
-    app.kubernetes.io/version: "v0.0.36"
+    app.kubernetes.io/version: "v0.0.37"
     app.kubernetes.io/managed-by: Helm
 data:
   config.json: |-
@@ -60,9 +60,9 @@ data:
       namespace: local-path-provisioner
       labels:
         app.kubernetes.io/name: local-path-provisioner
-        helm.sh/chart: local-path-provisioner-0.0.36
+        helm.sh/chart: local-path-provisioner-0.0.37
         app.kubernetes.io/instance: local-path-provisioner
-        app.kubernetes.io/version: "v0.0.36"
+        app.kubernetes.io/version: "v0.0.37"
         app.kubernetes.io/managed-by: Helm
     spec:
       priorityClassName: system-node-critical
