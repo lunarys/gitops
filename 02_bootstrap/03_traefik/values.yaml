@@ -28,6 +28,7 @@ traefik:
       custom.network/lb-pool: static
     spec: 
       allocateLoadBalancerNodePorts: false
+      ipFamilyPolicy: PreferDualStack
 
   ingressRoute:
     dashboard:
