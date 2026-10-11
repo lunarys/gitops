@@ -6,7 +6,7 @@ version: 0.1.0
 
 dependencies:
   - name: plugin-barman-cloud
-    version: 0.7.1
+    version: 0.8.1
     repository: https://cloudnative-pg.github.io/charts
 
   - name: networkpolicy
