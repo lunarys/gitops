@@ -5,7 +5,7 @@ version: 0.1.0
 
 dependencies:
   - name: kargo
-    version: 1.11.4
+    version: 1.12.3
     repository: oci://ghcr.io/akuity/kargo-charts
 
   - name: networkpolicy
