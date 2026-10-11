@@ -5,7 +5,7 @@ apiVersion: v1
 metadata:
   name: demo-podinfo
   labels:
-    helm.sh/chart: demo-podinfo-4.6.0
+    helm.sh/chart: demo-podinfo-5.1.0
     
     custom.network/external-ingress: ingress
     app.kubernetes.io/name: demo-podinfo
