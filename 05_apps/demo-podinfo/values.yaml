@@ -10,7 +10,7 @@ demo-podinfo:
 
   image:
     name: ghcr.io/stefanprodan/podinfo
-    tag: 6.14.1
+    tag: 6.15.0
 
   service:
     targetPort: 9898
