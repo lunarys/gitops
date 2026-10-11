@@ -9,7 +9,7 @@ metadata:
     custom.network/homeassistant-integrated: egress
     app.kubernetes.io/name: home-assistant
     app.kubernetes.io/instance: home-assistant
-    app.kubernetes.io/version: "2026.7.4"
+    app.kubernetes.io/version: "2026.10.1"
     app.kubernetes.io/managed-by: Helm
     custom.network/lb-pool: static
   annotations:
