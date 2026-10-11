@@ -6,10 +6,10 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.12.0
+    helm.sh/chart: longhorn-1.13.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.12.0
+    app.kubernetes.io/version: v1.13.0
     longhorn-manager: ""
   name: backupvolumes.longhorn.io
 spec:
@@ -121,6 +121,14 @@ spec:
                   the cluster.
                 format: date-time
                 nullable: true
+                type: string
+              linkedCloneSourceSnapshot:
+                description: The source snapshot of the backed up volume, set only
+                  when it was a linked clone.
+                type: string
+              linkedCloneSourceVolume:
+                description: The source volume of the backed up volume, set only when
+                  it was a linked clone.
                 type: string
               messages:
                 additionalProperties:
