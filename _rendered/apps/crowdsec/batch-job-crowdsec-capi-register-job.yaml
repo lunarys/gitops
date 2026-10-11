@@ -35,7 +35,7 @@ spec:
               mountPath: /kubectl-bin
       containers:
         - name: capi-register
-          image: "crowdsecurity/crowdsec:v1.7.8"
+          image: "crowdsecurity/crowdsec:v1.8.1"
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: kubectl-bin
