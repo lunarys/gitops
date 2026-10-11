@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: pgadmin-4.6.0
+    helm.sh/chart: pgadmin-5.1.0
     
     app.kubernetes.io/name: pgadmin
     app.kubernetes.io/instance: pgadmin
@@ -33,6 +33,7 @@ spec:
         runAsUser: 5050
         seccompProfile:
           type: RuntimeDefault
+      automountServiceAccountToken: false
       containers:
         - name: pgadmin
           image: dpage/pgadmin4:9.18.0
