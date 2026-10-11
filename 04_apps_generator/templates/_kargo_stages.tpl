@@ -165,13 +165,11 @@ spec:
                   # _argo_application.tpl from the same helper), not
                   # necessarily mainRepo.
                   - repoURL: {{ include "apps-generator.renderedRepo" $root }}
-                    # Quoted deliberately. Every Kargo expression in a step
-                    # config is wrapped in explicit YAML quotes here: an
-                    # unquoted expression containing a ternary reads to a
-                    # lenient YAML parser as complex-mapping-key syntax
-                    # (`? key` / `: value`), so the field silently becomes a
-                    # map and Kargo rejects it as "given: object".
-                    desiredRevision: "${{ "{{" }} outputs['render'].commit {{ "}}" }}"
+                    # Unset: Kargo's health check requires an exact match, and
+                    # any other app's render onto the shared stage branch breaks
+                    # it (akuity/kargo#3910). Needs per-app branches or
+                    # updateTargetRevision to come back.
+                    #desiredRevision: "${{ "{{" }} outputs['render'].commit {{ "}}" }}"
         {{- end }}
   {{- with dig "kargo" "verification" (dict) $app.settings }}
   # Opt in per app -- see defaultSettings.kargo.verification in values.yaml.

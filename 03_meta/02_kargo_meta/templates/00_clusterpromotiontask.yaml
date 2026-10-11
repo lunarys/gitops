@@ -20,7 +20,8 @@
       may name a different repo than repoURL. The caller's `valuesFiles` var
       arrives already prefixed with ./src, so this layout cannot be changed on
       one side alone;
-    - the `commit` output, which the caller pins its argocd-update to;
+    - the `commit` output, which the caller can pin its argocd-update to
+      (currently unused);
     - the Freight metadata key named after the Stage, which this task writes
       once its commit has landed and the downstream Stage's run of this same
       task reads back through `upstreamStage` -- the one way a promotion can
