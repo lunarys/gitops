@@ -6,9 +6,9 @@ metadata:
   namespace: local-path-provisioner
   labels:
     app.kubernetes.io/name: local-path-provisioner
-    helm.sh/chart: local-path-provisioner-0.0.36
+    helm.sh/chart: local-path-provisioner-0.0.37
     app.kubernetes.io/instance: local-path-provisioner
-    app.kubernetes.io/version: "v0.0.36"
+    app.kubernetes.io/version: "v0.0.37"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -20,9 +20,9 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: local-path-provisioner
-        helm.sh/chart: local-path-provisioner-0.0.36
+        helm.sh/chart: local-path-provisioner-0.0.37
         app.kubernetes.io/instance: local-path-provisioner
-        app.kubernetes.io/version: "v0.0.36"
+        app.kubernetes.io/version: "v0.0.37"
         app.kubernetes.io/managed-by: Helm
     spec:
       serviceAccountName: local-path-provisioner
@@ -33,7 +33,7 @@ spec:
         - name: local-path-provisioner
           securityContext:
             {}
-          image: "docker.io/rancher/local-path-provisioner:v0.0.36"
+          image: "docker.io/rancher/local-path-provisioner:v0.0.37"
           imagePullPolicy: IfNotPresent
           command:
             - local-path-provisioner
@@ -58,8 +58,33 @@ spec:
                   fieldPath: metadata.namespace
             - name: CONFIG_MOUNT_PATH
               value: /etc/config/
+            - name: HEALTH_PORT
+              value: "8080"
           resources:
             {}
+          ports:
+            - name: health
+              containerPort: 8080
+              protocol: TCP
+          startupProbe:
+            failureThreshold: 12
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
         - name: config-volume
           configMap:
