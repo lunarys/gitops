@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: crowdsec-web-ui-4.6.0
+    helm.sh/chart: crowdsec-web-ui-5.1.0
     
     custom.network/mqtt-client: egress
     app.kubernetes.io/name: crowdsec-web-ui
@@ -36,6 +36,7 @@ spec:
         runAsUser: 1000
         seccompProfile:
           type: RuntimeDefault
+      automountServiceAccountToken: false
       containers:
         - name: crowdsec-web-ui
           image: ghcr.io/theduffman85/crowdsec-web-ui:2026.10.3
