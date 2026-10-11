@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/step-ca/.*\.md$
           - 05_apps/step-ca/example/
           - 05_apps/step-ca/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

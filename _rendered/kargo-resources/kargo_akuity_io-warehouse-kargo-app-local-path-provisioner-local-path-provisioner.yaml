@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/local-path-provisioner/.*\.md$
           - 05_apps/local-path-provisioner/example/
           - 05_apps/local-path-provisioner/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

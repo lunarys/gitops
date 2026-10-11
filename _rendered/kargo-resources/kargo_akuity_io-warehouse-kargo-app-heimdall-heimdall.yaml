@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/heimdall/.*\.md$
           - 05_apps/heimdall/example/
           - 05_apps/heimdall/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

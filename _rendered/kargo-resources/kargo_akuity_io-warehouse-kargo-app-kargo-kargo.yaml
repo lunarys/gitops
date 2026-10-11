@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/kargo/.*\.md$
           - 05_apps/kargo/example/
           - 05_apps/kargo/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

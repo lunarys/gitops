@@ -29,4 +29,4 @@ spec:
           - 05_apps/cloudnative-pg-postgresdb/examples/
           - 05_apps/cloudnative-pg-postgresdb/.old/
           - 05_apps/cloudnative-pg-postgresdb/resources.disabled/
-        discoveryLimit: 20
+        discoveryLimit: 8

@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/adguard-home/.*\.md$
           - 05_apps/adguard-home/example/
           - 05_apps/adguard-home/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

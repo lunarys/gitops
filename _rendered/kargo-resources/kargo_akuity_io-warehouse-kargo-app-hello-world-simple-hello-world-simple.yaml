@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/hello-world-simple/.*\.md$
           - 05_apps/hello-world-simple/example/
           - 05_apps/hello-world-simple/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

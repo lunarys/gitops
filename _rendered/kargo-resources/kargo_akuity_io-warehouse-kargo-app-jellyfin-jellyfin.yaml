@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/jellyfin/.*\.md$
           - 05_apps/jellyfin/example/
           - 05_apps/jellyfin/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

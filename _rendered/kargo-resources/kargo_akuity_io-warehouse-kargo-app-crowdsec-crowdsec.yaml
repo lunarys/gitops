@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/crowdsec/.*\.md$
           - 05_apps/crowdsec/example/
           - 05_apps/crowdsec/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

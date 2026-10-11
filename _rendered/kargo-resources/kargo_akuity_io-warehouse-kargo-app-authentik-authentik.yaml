@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/authentik/.*\.md$
           - 05_apps/authentik/example/
           - 05_apps/authentik/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8
