@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: demo-podinfo-4.6.0
+    helm.sh/chart: demo-podinfo-5.1.0
     
     custom.network/external-ingress: ingress
     app.kubernetes.io/name: demo-podinfo
@@ -36,6 +36,7 @@ spec:
         runAsUser: 1000
         seccompProfile:
           type: RuntimeDefault
+      automountServiceAccountToken: false
       containers:
         - name: demo-podinfo
           image: ghcr.io/stefanprodan/podinfo:6.15.0
