@@ -1,0 +1,4 @@
+# argocd-update skipped in promotions for now: Argo CD syncs this app
+# itself (or by hand). See defaultSettings.kargo.argoSync.
+kargo:
+  argoSync: false

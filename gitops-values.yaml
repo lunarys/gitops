@@ -42,7 +42,7 @@ renderedRepo: ""
 #
 # Per-app Stages can additionally opt out with kargo.argoSync in the app's
 # settings.yaml (see 04_apps_generator/values.yaml); this switch overrides it.
-argoSyncEnabled: false
+argoSyncEnabled: true
 
 # -- Branch the Warehouses watch for source changes.
 #
