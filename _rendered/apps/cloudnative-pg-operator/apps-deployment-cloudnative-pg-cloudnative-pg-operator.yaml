@@ -5,10 +5,10 @@ metadata:
   name: cloudnative-pg-operator
   namespace: cloudnative-pg
   labels:
-    helm.sh/chart: cloudnative-pg-0.29.0
+    helm.sh/chart: cloudnative-pg-0.29.1
     app.kubernetes.io/name: cloudnative-pg
     app.kubernetes.io/instance: cloudnative-pg-operator
-    app.kubernetes.io/version: "1.30.0"
+    app.kubernetes.io/version: "1.30.1"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 2
@@ -19,9 +19,9 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/rbac: 042b91261f9dd025d582b98855820dee11f3efa21f4f7a9e86ae7a3aed5f5dbf
-        checksum/config: c9e84d67f2f949ad2bb0eb5dd8eec909f19eb31a000054c8027c1ef7b5a4b324
-        checksum/monitoring-config: d10b4272f4f757dc3459a8c89821554a1ed1fafb059fb0ce78ec3bb504699713
+        checksum/rbac: 4b3430cf49440915b6eab020133487fdfec265de7a082592901f94213b04f087
+        checksum/config: 38279a1afc4d38aeb92dff9d82b2f89eb559675ffd8e61a6d7fc72a5cc092536
+        checksum/monitoring-config: def8a20744937bd83f5501aa9faebd1d3f6e9327173e2f6415369b645583e6f1
       labels:
         app.kubernetes.io/name: cloudnative-pg
         app.kubernetes.io/instance: cloudnative-pg-operator
@@ -37,7 +37,7 @@ spec:
         - /manager
         env:
         - name: OPERATOR_IMAGE_NAME
-          value: "ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0"
+          value: "ghcr.io/cloudnative-pg/cloudnative-pg:1.30.1"
         - name: OPERATOR_NAMESPACE
           valueFrom:
             fieldRef:
@@ -46,7 +46,7 @@ spec:
           value: "cnpg-default-monitoring"
         - name: WATCH_NAMESPACE
           value: "cloudnative-pg"
-        image: "ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0"
+        image: "ghcr.io/cloudnative-pg/cloudnative-pg:1.30.1"
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -99,8 +99,9 @@ spec:
       serviceAccountName: cloudnative-pg-operator
       terminationGracePeriodSeconds: 10
       volumes:
-      - emptyDir: {}
-        name: scratch-data
+      - name: scratch-data
+        emptyDir:
+          {}
       - name: webhook-certificates
         secret:
           defaultMode: 420
