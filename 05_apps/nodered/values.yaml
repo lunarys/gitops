@@ -6,7 +6,7 @@ nodered:
 
   image:
     name: nodered/node-red
-    tag: 4.1.1
+    tag: 4.1.12
     args: ["--settings", "/configmap/settings.js"]  # store settings outside of the volume /data, which would be the default
 
   service:
