@@ -4,7 +4,7 @@ apiVersion: v1
 metadata:
   name: crowdsec-web-ui
   labels:
-    helm.sh/chart: crowdsec-web-ui-4.6.0
+    helm.sh/chart: crowdsec-web-ui-5.1.0
     
     custom.network/mqtt-client: egress
     app.kubernetes.io/name: crowdsec-web-ui
