@@ -7,7 +7,7 @@ metadata:
     
     app.kubernetes.io/name: n8n
     app.kubernetes.io/instance: n8n
-    app.kubernetes.io/version: "2.35.7"
+    app.kubernetes.io/version: "2.42.6"
     app.kubernetes.io/managed-by: Helm
   name: n8n
 spec:
@@ -38,7 +38,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: n8n
-          image: docker.n8n.io/n8nio/n8n:2.35.7
+          image: docker.n8n.io/n8nio/n8n:2.42.6
           imagePullPolicy: IfNotPresent
           resources:
             limits:

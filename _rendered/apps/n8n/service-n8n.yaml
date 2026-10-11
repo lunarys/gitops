@@ -8,7 +8,7 @@ metadata:
     
     app.kubernetes.io/name: n8n
     app.kubernetes.io/instance: n8n
-    app.kubernetes.io/version: "2.35.7"
+    app.kubernetes.io/version: "2.42.6"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
