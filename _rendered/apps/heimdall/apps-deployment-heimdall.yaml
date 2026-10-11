@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: heimdall-4.6.0
+    helm.sh/chart: heimdall-5.1.0
     
     custom.network/heimdall-integrated: egress
     app.kubernetes.io/name: heimdall
@@ -36,6 +36,7 @@ spec:
         runAsUser: 0
         seccompProfile:
           type: RuntimeDefault
+      automountServiceAccountToken: false
       containers:
         - name: heimdall
           image: lscr.io/linuxserver/heimdall:2.8.1

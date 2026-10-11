@@ -4,7 +4,7 @@ apiVersion: v1
 metadata:
   name: heimdall
   labels:
-    helm.sh/chart: heimdall-4.6.0
+    helm.sh/chart: heimdall-5.1.0
     
     custom.network/heimdall-integrated: egress
     app.kubernetes.io/name: heimdall
