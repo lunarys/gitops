@@ -5,10 +5,10 @@ metadata:
   name: kargo-api
   namespace: kargo
   labels:
-    helm.sh/chart: kargo-1.11.4
+    helm.sh/chart: kargo-1.12.3
     app.kubernetes.io/name: kargo
     app.kubernetes.io/instance: kargo
-    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/version: "v1.12.3"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: api
   
@@ -25,10 +25,10 @@ spec:
   template:
     metadata:
       labels:
-        helm.sh/chart: kargo-1.11.4
+        helm.sh/chart: kargo-1.12.3
         app.kubernetes.io/name: kargo
         app.kubernetes.io/instance: kargo
-        app.kubernetes.io/version: "v1.11.4"
+        app.kubernetes.io/version: "v1.12.3"
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: api
       annotations:
@@ -38,7 +38,7 @@ spec:
       serviceAccountName: kargo-api
       containers:
       - name: api
-        image: ghcr.io/akuity/kargo:v1.11.4
+        image: ghcr.io/akuity/kargo:v1.12.3
         imagePullPolicy: IfNotPresent
         command: ["/usr/local/bin/kargo", "api"]
         env:

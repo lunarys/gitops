@@ -5,10 +5,10 @@ metadata:
   name: kargo-controller
   namespace: kargo
   labels:
-    helm.sh/chart: kargo-1.11.4
+    helm.sh/chart: kargo-1.12.3
     app.kubernetes.io/name: kargo
     app.kubernetes.io/instance: kargo
-    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/version: "v1.12.3"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
     
@@ -17,6 +17,7 @@ data:
   API_SERVER_BASE_URL: https://kargo.svc.elda
   LOG_LEVEL: "INFO"
   LOG_FORMAT: "CONSOLE"
+  CREDENTIAL_PROVIDERS_ENABLED: "true"
   KARGO_NAMESPACE: kargo
   SYSTEM_RESOURCES_NAMESPACE: "kargo-system-resources"
   IS_DEFAULT_CONTROLLER: "true"
@@ -25,7 +26,7 @@ data:
   ALLOW_CREDENTIALS_OVER_HTTP: "false"
   GITCLIENT_NAME: "Kargo"
   GITCLIENT_EMAIL: "no-reply@kargo.io"
-  GIT_PUSH_INTEGRATION_POLICY: "AlwaysRebase"
+  GIT_PUSH_INTEGRATION_POLICY: "RebaseOrMerge"
   GITCLIENT_SIGNING_KEY_TYPE: "gpg"
   GITHUB_PUSH_MAX_REVISIONS: "10"
   GITHUB_PUSH_VERIFY_UNTRUSTED_COMMITS: "false"
@@ -40,6 +41,7 @@ data:
   ROLLOUTS_CONTROLLER_INSTANCE_ID: ""
   MAX_CONCURRENT_CONTROL_FLOW_RECONCILES: "4"
   MAX_CONCURRENT_PROMOTION_RECONCILES: "4"
+  MAX_CONCURRENT_PROMOTION_REQUEST_RECONCILES: "4"
   MAX_CONCURRENT_STAGE_RECONCILES: "4"
   MAX_CONCURRENT_WAREHOUSE_RECONCILES: "4"
   MIN_WAREHOUSE_RECONCILIATION_INTERVAL: "5m0s"
