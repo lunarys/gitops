@@ -4,7 +4,7 @@ apiVersion: v1
 metadata:
   name: adguard-home-dns
   labels:
-    helm.sh/chart: adguard-home-4.6.0
+    helm.sh/chart: adguard-home-5.1.0
     
     custom.network/homeassistant-integrated: ingress
     custom.network/heimdall-integrated: ingress

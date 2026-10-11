@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: adguard-home-4.6.0
+    helm.sh/chart: adguard-home-5.1.0
     
     custom.network/homeassistant-integrated: ingress
     custom.network/heimdall-integrated: ingress
@@ -40,6 +40,7 @@ spec:
         runAsUser: 1000
         seccompProfile:
           type: RuntimeDefault
+      automountServiceAccountToken: false
       containers:
         - name: adguard-home
           image: adguard/adguardhome:v0.107.79
