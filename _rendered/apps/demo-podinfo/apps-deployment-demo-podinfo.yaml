@@ -8,7 +8,7 @@ metadata:
     custom.network/external-ingress: ingress
     app.kubernetes.io/name: demo-podinfo
     app.kubernetes.io/instance: demo-podinfo
-    app.kubernetes.io/version: "6.14.1"
+    app.kubernetes.io/version: "6.15.0"
     app.kubernetes.io/managed-by: Helm
   name: demo-podinfo
 spec:
@@ -38,7 +38,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: demo-podinfo
-          image: ghcr.io/stefanprodan/podinfo:6.14.1
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
           imagePullPolicy: IfNotPresent
           resources:
           securityContext:
