@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: n8n-4.6.0
+    helm.sh/chart: n8n-5.1.0
     
     app.kubernetes.io/name: n8n
     app.kubernetes.io/instance: n8n
@@ -36,6 +36,7 @@ spec:
         runAsUser: 1000
         seccompProfile:
           type: RuntimeDefault
+      automountServiceAccountToken: false
       containers:
         - name: n8n
           image: docker.n8n.io/n8nio/n8n:2.42.6
