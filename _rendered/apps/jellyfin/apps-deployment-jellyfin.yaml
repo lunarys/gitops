@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: jellyfin-4.6.0
+    helm.sh/chart: jellyfin-5.1.0
     
     custom.network/jellyfin-tools: ingress
     custom.network/heimdall-integrated: ingress
@@ -38,6 +38,7 @@ spec:
         runAsUser: 1000
         seccompProfile:
           type: RuntimeDefault
+      automountServiceAccountToken: false
       containers:
         - name: jellyfin
           image: ghcr.io/jellyfin/jellyfin:10.11.11
