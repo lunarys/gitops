@@ -8,7 +8,7 @@ metadata:
     
     app.kubernetes.io/name: pgadmin
     app.kubernetes.io/instance: pgadmin
-    app.kubernetes.io/version: "9.15.0"
+    app.kubernetes.io/version: "9.18.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
