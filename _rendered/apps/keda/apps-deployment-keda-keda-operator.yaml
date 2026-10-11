@@ -8,11 +8,11 @@ metadata:
     app: keda-operator
     name: keda-operator
     app.kubernetes.io/name: keda-operator    
-    helm.sh/chart: keda-2.20.1
+    helm.sh/chart: keda-2.21.0
     app.kubernetes.io/component: operator
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: keda-operator
-    app.kubernetes.io/version: 2.20.1
+    app.kubernetes.io/version: 2.21.0
     app.kubernetes.io/instance: keda
 spec:
   revisionHistoryLimit: 10
@@ -26,11 +26,11 @@ spec:
         app: keda-operator
         name: keda-operator
         app.kubernetes.io/name: keda-operator        
-        helm.sh/chart: keda-2.20.1
+        helm.sh/chart: keda-2.21.0
         app.kubernetes.io/component: operator
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/part-of: keda-operator
-        app.kubernetes.io/version: 2.20.1
+        app.kubernetes.io/version: 2.21.0
         app.kubernetes.io/instance: keda
     spec:
       enableServiceLinks: true
@@ -48,7 +48,7 @@ spec:
             readOnlyRootFilesystem: true
             seccompProfile:
               type: RuntimeDefault
-          image: "ghcr.io/kedacore/keda:2.20.1"
+          image: "ghcr.io/kedacore/keda:2.21.0"
           command:
           - "/keda"
           args:
@@ -62,11 +62,17 @@ spec:
           - "--enable-cert-rotation=true"
           - "--cert-secret-name=kedaorg-certs"
           - "--operator-service-name=keda-operator"
+          - "--metrics-service-bind-address=:9666"
           - "--metrics-server-service-name=keda-operator-metrics-apiserver"
           - "--webhooks-service-name=keda-admission-webhooks"
           - "--k8s-cluster-name=kubernetes-default"
           - "--k8s-cluster-domain=cluster.local"
           - "--enable-prometheus-metrics=false"
+          - "--http-max-idle-conns=0"
+          - "--http-max-idle-conns-per-host=1000"
+          - "--http-idle-conn-timeout=90s"
+          - "--service-account-token-mode=enforce-audience"
+          - "--vault-kubernetes-auth-token-file=/var/run/secrets/keda-vault/token"
           imagePullPolicy: Always
           livenessProbe:
             httpGet:
@@ -91,7 +97,13 @@ spec:
             name: metricsservice
             protocol: TCP
           env:
+            - name: KEDA_SERVICE_ACCOUNT_TOKEN_AUDIENCES
+              value: "[{\"audience\":\"vault\"}]"
             - name: WATCH_NAMESPACE
+              value: ""
+            - name: WATCH_LABEL_SELECTOR
+              value: ""
+            - name: WATCH_LABEL_SELECTOR_FOR_TRIGGERAUTH
               value: ""
             - name: POD_NAME
               valueFrom:
@@ -105,6 +117,8 @@ spec:
               value: keda-operator
             - name: KEDA_HTTP_DEFAULT_TIMEOUT
               value: "3000"
+            - name: KEDA_KUBERNETES_API_TIMEOUT
+              value: "5s"
             - name: KEDA_HTTP_MIN_TLS_VERSION
               value: TLS12
             - name: KEDA_HTTP_TLS_CIPHER_LIST
@@ -114,6 +128,9 @@ spec:
             - name: KEDA_SERVICE_TLS_CIPHER_LIST
               value: ""
           volumeMounts:
+          - name: keda-vault-e6f0a1fbb43c8919
+            mountPath: "/var/run/secrets/keda-vault"
+            readOnly: true
           - mountPath: /certs
             name: certificates
             readOnly: true
@@ -125,6 +142,13 @@ spec:
               cpu: 100m
               memory: 100Mi
       volumes:
+      - name: keda-vault-e6f0a1fbb43c8919
+        projected:
+          sources:
+          - serviceAccountToken:
+              path: token
+              audience: "vault"
+              expirationSeconds: 3600
       - name: certificates
         secret:
           defaultMode: 420
