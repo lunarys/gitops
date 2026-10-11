@@ -4,7 +4,7 @@ apiVersion: v1
 metadata:
   name: jellyfin
   labels:
-    helm.sh/chart: jellyfin-4.6.0
+    helm.sh/chart: jellyfin-5.1.0
     
     custom.network/jellyfin-tools: ingress
     custom.network/heimdall-integrated: ingress
