@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: adguard-sync-4.6.0
+    helm.sh/chart: adguard-sync-5.1.0
     
     app.kubernetes.io/name: adguard-sync
     app.kubernetes.io/instance: adguard-sync
@@ -34,6 +34,7 @@ spec:
         runAsUser: 1000
         seccompProfile:
           type: RuntimeDefault
+      automountServiceAccountToken: false
       containers:
         - name: adguard-sync
           image: ghcr.io/bakito/adguardhome-sync:v0.9.4
