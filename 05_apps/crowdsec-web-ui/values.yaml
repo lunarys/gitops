@@ -6,7 +6,7 @@ crowdsec-web-ui:
 
   image:
     name: ghcr.io/theduffman85/crowdsec-web-ui
-    tag: 2026.7.25
+    tag: 2026.10.3
 
   service:
     targetPort: 3000
