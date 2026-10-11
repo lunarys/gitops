@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: traefik
     app.kubernetes.io/instance: traefik-traefik
-    helm.sh/chart: traefik-41.1.0
+    helm.sh/chart: traefik-41.7.1
     app.kubernetes.io/managed-by: Helm
   annotations:
 spec:
@@ -33,7 +33,7 @@ spec:
         app.kubernetes.io/instance: traefik-traefik
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: traefik
-        helm.sh/chart: traefik-41.1.0
+        helm.sh/chart: traefik-41.7.1
     spec:
       automountServiceAccountToken: true
       containers:
@@ -74,7 +74,7 @@ spec:
               fieldPath: metadata.namespace
         - name: USER
           value: traefik
-        image: docker.io/traefik:v3.7.9
+        image: docker.io/traefik:v3.7.14
         imagePullPolicy: IfNotPresent
         lifecycle: null
         livenessProbe:
