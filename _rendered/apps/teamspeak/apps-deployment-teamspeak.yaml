@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: teamspeak-4.6.0
+    helm.sh/chart: teamspeak-5.1.0
     
     custom.network/external-access: ingress
     app.kubernetes.io/name: teamspeak
@@ -36,6 +36,7 @@ spec:
         runAsUser: 9987
         seccompProfile:
           type: RuntimeDefault
+      automountServiceAccountToken: false
       containers:
         - name: teamspeak
           image: docker.io/teamspeak:3.13.8
