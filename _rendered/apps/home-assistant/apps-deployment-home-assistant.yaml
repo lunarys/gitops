@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: home-assistant-4.6.0
+    helm.sh/chart: home-assistant-5.1.0
     
     custom.network/homeassistant-integrated: egress
     app.kubernetes.io/name: home-assistant
@@ -36,6 +36,7 @@ spec:
         runAsNonRoot: false
         seccompProfile:
           type: RuntimeDefault
+      automountServiceAccountToken: false
       containers:
         - name: home-assistant
           image: homeassistant/home-assistant:2026.10.1
