@@ -5,10 +5,10 @@ metadata:
   name: kargo-controller
   namespace: kargo
   labels:
-    helm.sh/chart: kargo-1.11.4
+    helm.sh/chart: kargo-1.12.3
     app.kubernetes.io/name: kargo
     app.kubernetes.io/instance: kargo
-    app.kubernetes.io/version: "v1.11.4"
+    app.kubernetes.io/version: "v1.12.3"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
     
@@ -27,20 +27,20 @@ spec:
   template:
     metadata:
       labels:
-        helm.sh/chart: kargo-1.11.4
+        helm.sh/chart: kargo-1.12.3
         app.kubernetes.io/name: kargo
         app.kubernetes.io/instance: kargo
-        app.kubernetes.io/version: "v1.11.4"
+        app.kubernetes.io/version: "v1.12.3"
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: controller
         
       annotations:
-        configmap/checksum: dc4b2a71666ae6e18f1d5a19b544144edb71d3e3e76bfac30211f861ac22b43e
+        configmap/checksum: 98538e83a93b50c000021473c669a719b8f0a50dfd00875c3350b8684d75d152
     spec:
       serviceAccountName: kargo-controller
       containers:
       - name: controller
-        image: ghcr.io/akuity/kargo:v1.11.4
+        image: ghcr.io/akuity/kargo:v1.12.3
         imagePullPolicy: IfNotPresent
         command: ["/sbin/tini", "--", "/usr/local/bin/kargo"]
         args: ["controller"]
