@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/n8n/.*\.md$
           - 05_apps/n8n/example/
           - 05_apps/n8n/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/teamspeak/.*\.md$
           - 05_apps/teamspeak/example/
           - 05_apps/teamspeak/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

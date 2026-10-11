@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/cloudnative-pg-user-operator/.*\.md$
           - 05_apps/cloudnative-pg-user-operator/example/
           - 05_apps/cloudnative-pg-user-operator/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/adguard-sync/.*\.md$
           - 05_apps/adguard-sync/example/
           - 05_apps/adguard-sync/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/home-assistant/.*\.md$
           - 05_apps/home-assistant/example/
           - 05_apps/home-assistant/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

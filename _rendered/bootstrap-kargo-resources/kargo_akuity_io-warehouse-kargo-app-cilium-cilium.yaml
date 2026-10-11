@@ -27,4 +27,4 @@ spec:
           - regex:^02_bootstrap/00_cilium/.*\.md$
           - 02_bootstrap/00_cilium/example/
           - 02_bootstrap/00_cilium/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

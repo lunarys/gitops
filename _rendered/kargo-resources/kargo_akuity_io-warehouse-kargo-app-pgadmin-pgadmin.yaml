@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/cloudnative-pg-pgadmin/.*\.md$
           - 05_apps/cloudnative-pg-pgadmin/example/
           - 05_apps/cloudnative-pg-pgadmin/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/cloudnative-pg-barman-cloud/.*\.md$
           - 05_apps/cloudnative-pg-barman-cloud/example/
           - 05_apps/cloudnative-pg-barman-cloud/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

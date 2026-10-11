@@ -27,4 +27,4 @@ spec:
           - regex:^02_bootstrap/03_traefik/.*\.md$
           - 02_bootstrap/03_traefik/example/
           - 02_bootstrap/03_traefik/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

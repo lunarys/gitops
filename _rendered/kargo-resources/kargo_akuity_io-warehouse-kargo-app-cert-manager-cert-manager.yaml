@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/cert-manager/.*\.md$
           - 05_apps/cert-manager/example/
           - 05_apps/cert-manager/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/smb-driver/.*\.md$
           - 05_apps/smb-driver/example/
           - 05_apps/smb-driver/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

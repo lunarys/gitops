@@ -27,4 +27,4 @@ spec:
           - regex:^02_bootstrap/01_argocd/.*\.md$
           - 02_bootstrap/01_argocd/example/
           - 02_bootstrap/01_argocd/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8

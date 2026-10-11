@@ -27,4 +27,4 @@ spec:
           - regex:^05_apps/mosquitto/.*\.md$
           - 05_apps/mosquitto/example/
           - 05_apps/mosquitto/examples/
-        discoveryLimit: 20
+        discoveryLimit: 8
