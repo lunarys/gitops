@@ -9,7 +9,7 @@ metadata:
     custom.network/postgresdb: egress
     app.kubernetes.io/name: nodered
     app.kubernetes.io/instance: nodered
-    app.kubernetes.io/version: "4.1.1"
+    app.kubernetes.io/version: "5.0.8"
     app.kubernetes.io/managed-by: Helm
     custom.network/lb-pool: static
   annotations:
