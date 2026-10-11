@@ -8,11 +8,11 @@ metadata:
     app: keda-admission-webhooks
     name: keda-admission-webhooks
     app.kubernetes.io/name: keda-admission-webhooks    
-    helm.sh/chart: keda-2.20.1
+    helm.sh/chart: keda-2.21.0
     app.kubernetes.io/component: operator
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: keda-operator
-    app.kubernetes.io/version: 2.20.1
+    app.kubernetes.io/version: 2.21.0
     app.kubernetes.io/instance: keda
 spec:
   revisionHistoryLimit: 10
@@ -26,11 +26,11 @@ spec:
         app: keda-admission-webhooks
         name: keda-admission-webhooks
         app.kubernetes.io/name: keda-admission-webhooks        
-        helm.sh/chart: keda-2.20.1
+        helm.sh/chart: keda-2.21.0
         app.kubernetes.io/component: operator
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/part-of: keda-operator
-        app.kubernetes.io/version: 2.20.1
+        app.kubernetes.io/version: 2.21.0
         app.kubernetes.io/instance: keda
     spec:
       enableServiceLinks: true
@@ -48,7 +48,7 @@ spec:
             readOnlyRootFilesystem: true
             seccompProfile:
               type: RuntimeDefault
-          image: "ghcr.io/kedacore/keda-admission-webhooks:2.20.1"
+          image: "ghcr.io/kedacore/keda-admission-webhooks:2.21.0"
           command:
           - /keda-admission-webhooks
           args:
