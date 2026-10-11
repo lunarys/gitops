@@ -26,6 +26,9 @@ longhorn:
     resizerReplicaCount: 2
     snapshotterReplicaCount: 2
     kubeletRootDir: "/var/lib/k0s/kubelet"
+    # no cluster-wide Secret read for the CSI controller; encrypted StorageClasses only use node-side secret refs
+    # https://longhorn.io/kb/how-to-migrate-encrypted-volumes-to-node-only-secrets/
+    allowControllerSecretAccess: false
 
   longhornUI:
     replicas: 1
