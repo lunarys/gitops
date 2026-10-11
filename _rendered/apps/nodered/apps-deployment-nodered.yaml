@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: nodered-4.6.0
+    helm.sh/chart: nodered-5.1.0
     
     custom.network/postgresdb: egress
     app.kubernetes.io/name: nodered
@@ -38,6 +38,7 @@ spec:
         runAsUser: 1000
         seccompProfile:
           type: RuntimeDefault
+      automountServiceAccountToken: false
       containers:
         - name: nodered
           image: nodered/node-red:5.0.8

@@ -4,7 +4,7 @@ apiVersion: v1
 metadata:
   name: nodered-integration
   labels:
-    helm.sh/chart: nodered-4.6.0
+    helm.sh/chart: nodered-5.1.0
     
     custom.network/postgresdb: egress
     app.kubernetes.io/name: nodered
