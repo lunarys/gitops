@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: mosquitto-4.6.0
+    helm.sh/chart: mosquitto-5.1.0
     
     custom.network/mqtt-client: ingress
     app.kubernetes.io/name: mosquitto
@@ -36,6 +36,7 @@ spec:
         runAsUser: 1883
         seccompProfile:
           type: RuntimeDefault
+      automountServiceAccountToken: false
       containers:
         - name: mosquitto
           image: eclipse-mosquitto:2.0.22
